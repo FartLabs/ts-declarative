@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { getClassID, setClassID } from "./class.ts";
+import { getClassID, setClassID } from "./decorator.ts";
 
 Deno.test("Get and set class ID", () => {
   class Foo {}

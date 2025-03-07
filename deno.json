@@ -1,0 +1,6 @@
+{
+  "lock": false,
+  "imports": {
+    "@std/fs": "jsr:@std/fs@^1.0.14"
+  }
+}

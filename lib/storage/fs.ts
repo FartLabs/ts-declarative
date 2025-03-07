@@ -11,9 +11,9 @@ export async function readDeclarativeStorageIfExists(specifier: string | URL) {
 
 export async function writeDeclarativeStorage<T>(
   specifier: string | URL,
-  { storage }: DeclarativeStorageInMemory<T>,
+  { data }: DeclarativeStorageInMemory<T>,
 ) {
-  await Deno.writeTextFile(specifier, serializeStorage(storage));
+  await Deno.writeTextFile(specifier, serializeStorage(data));
 }
 
 export function serializeStorage<T>(

@@ -1,18 +1,20 @@
 import { exists } from "@std/fs/exists";
 import { DeclarativeStorageInMemory } from "./in-memory.ts";
 
-export async function readDeclarativeStorageIfExists(specifier: string | URL) {
+export async function readDeclarativeStorageIfExists<T>(
+  specifier: string | URL,
+): Promise<Map<string, T> | undefined> {
   if (!(await exists(specifier))) {
     return;
   }
 
-  return await Deno.readTextFile(specifier);
+  return deserializeStorage(await Deno.readTextFile(specifier));
 }
 
 export async function writeDeclarativeStorage<T>(
   specifier: string | URL,
   { data }: DeclarativeStorageInMemory<T>,
-) {
+): Promise<void> {
   await Deno.writeTextFile(specifier, serializeStorage(data));
 }
 
@@ -23,6 +25,10 @@ export function serializeStorage<T>(
   return stringify(Array.from(storage.entries()));
 }
 
-export function deserializeStorage<T>(storage: string): Map<string, T> {
-  return new Map(JSON.parse(storage));
+export function deserializeStorage<T>(data: string): Map<string, T> {
+  if (data.trim() === "") {
+    return new Map();
+  }
+
+  return new Map(JSON.parse(data));
 }

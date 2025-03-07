@@ -7,13 +7,9 @@ export class DeclarativeStorageInMemory<T> implements DeclarativeStorage<T> {
     this.data.set(id, value);
   }
 
-  public get(id: string, defaultValue?: () => T): T {
-    const value = (id !== undefined ? this.data.get(id) : undefined) ??
-      defaultValue?.();
-    if (value === undefined) {
-      throw new Error(`Annotation ${id} not found`);
-    }
-
-    return value;
+  public get(id: string, defaultValue?: () => T): T | undefined {
+    return (
+      (id !== undefined ? this.data.get(id) : undefined) ?? defaultValue?.()
+    );
   }
 }

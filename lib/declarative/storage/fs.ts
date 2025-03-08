@@ -1,5 +1,5 @@
 import { exists } from "@std/fs/exists";
-import { DeclarativeStorageInMemory } from "./in-memory.ts";
+import type { DeclarativeStorageInMemory } from "./in-memory.ts";
 
 export async function readDeclarativeStorageIfExists<T>(
   specifier: string | URL,

@@ -17,13 +17,13 @@ Deno.test({
     const tempFile = await Deno.makeTempFile();
     await t.step("Write storage", async () => {
       const storage = new DeclarativeStorageInMemory<string>();
-      storage.set("foo", "bar");
+      storage.set("foo", "foo");
       await writeDeclarativeStorage(tempFile, storage);
     });
 
     await t.step("Read storage", async () => {
       const storage = await readDeclarativeStorageIfExists<string>(tempFile);
-      assertEquals(storage, new Map([["foo", "bar"]]));
+      assertEquals(storage, new Map([["foo", "foo"]]));
     });
 
     await Deno.remove(tempFile);

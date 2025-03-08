@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 
-import type { Declarative } from "#/declarative/declarative.ts";
+import type { Declarative } from "#/lib/declarative/declarative.ts";
 
 export type Context = Record<string, any>;
 

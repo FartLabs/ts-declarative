@@ -1,8 +1,8 @@
-import { createDecoratorFactory } from "#/declarative/decorator.ts";
-import { DeclarativeStorageInMemory } from "#/declarative/storage/in-memory.ts";
-import { getClassID } from "#/declarative/declarative.ts";
-import type { Context } from "../context/context.ts";
-import { declarativeContext } from "../context/context.ts";
+import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+import { DeclarativeStorageInMemory } from "#/lib/declarative/storage/in-memory.ts";
+import { getClassID } from "#/lib/declarative/declarative.ts";
+import type { Context } from "#/examples/context/context.ts";
+import { declarativeContext } from "#/examples/context/context.ts";
 
 export interface State {
   context?: Context;

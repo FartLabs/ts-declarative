@@ -1,5 +1,8 @@
 {
   "lock": false,
+  "name": "@fartlabs/ts-declarative",
+  "version": "0.0.1",
+  "exports": "./lib/declarative/mod.ts",
   "imports": {
     "#/": "./lib/",
     "@std/assert": "jsr:@std/assert@^1.0.11",

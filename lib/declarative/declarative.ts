@@ -1,6 +1,16 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { DeclarativeStorage } from "./storage/storage.ts";
+import type { DeclarativeStorage } from "./storage/storage.ts";
+
+export interface DeclarativeOptions<
+  TClass extends Class,
+  TValue extends Record<string, any>,
+> {
+  storage: DeclarativeStorage<TValue>;
+  prefix: string;
+  target: TClass;
+  initialize: () => TValue;
+}
 
 export function declareClass<
   TClass extends Class,
@@ -8,14 +18,14 @@ export function declareClass<
 >(
   { storage, prefix, target, initialize }: DeclarativeOptions<TClass, TValue>,
   ...fns: Declarative<TValue>[]
-) {
+): TClass {
   if (target.name === undefined) {
     throw new Error("Class decorator must have a name.");
   }
 
   const id = `${prefix}${target.name}`;
-  const declarativeMux = declarativeSequence<TValue>(...fns);
-  const value = declarativeMux(storage.get(id, initialize)!, id, target.name);
+  const fn = declarativeSequence<TValue>(...fns);
+  const value = fn(storage.get(id, initialize)!, id, target.name);
   storage.set(id, value);
 
   // Associate the ID with its class.
@@ -34,13 +44,6 @@ export function declarativeSequence<TValue>(
       structuredClone(initialValue),
     );
   };
-}
-
-export interface DeclarativeOptions<TClass, TValue> {
-  storage: DeclarativeStorage<TValue>;
-  prefix: string;
-  target: TClass;
-  initialize: () => TValue;
 }
 
 export type Declarative<TValue> = (

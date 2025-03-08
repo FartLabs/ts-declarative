@@ -20,7 +20,8 @@ export async function writeDeclarativeStorage<T>(
 
 export function serializeStorage<T>(
   storage: Map<string, T>,
-  stringify = (data: Array<[string, T]>) => JSON.stringify(data),
+  stringify: (data: Array<[string, T]>) => string = (data) =>
+    JSON.stringify(data),
 ): string {
   return stringify(Array.from(storage.entries()));
 }

@@ -1,37 +1,32 @@
-// deno-lint-ignore-file no-explicit-any
-
 import { createDecoratorFactory } from "#/declarative/decorator.ts";
 import { DeclarativeStorageInMemory } from "#/declarative/storage/in-memory.ts";
 import { getClassID } from "#/declarative/declarative.ts";
+import type { Context } from "../context/context.ts";
+import { declarativeContext } from "../context/context.ts";
 
-interface State {
+export interface State {
   context?: Context;
 }
 
-type Context = Record<string, any>;
-
-const storage = new DeclarativeStorageInMemory<State>();
-const prefix = `${import.meta.url}#`;
-const context = createDecoratorFactory(
+export const storage = new DeclarativeStorageInMemory<State>();
+export const prefix = `${import.meta.url}#`;
+export const context = createDecoratorFactory(
   {
     storage,
     prefix,
     initialize: (context?: Context): State => ({ context }),
   },
-  (state, _id, _name) => {
-    return {
-      ...state,
-      context: { ...state.context, "@vocab": prefix },
-    };
-  },
+  declarativeContext(prefix),
 );
 
 @context({
-  name: "https://schema.org/Person",
+  name: "https://schema.org/name",
 })
-class Person {
+export class Person {
   public constructor(public name: string) {}
 }
 
-const classID = getClassID(Person);
-console.log(classID, storage.get(classID!));
+if (import.meta.main) {
+  const classID = getClassID(Person);
+  console.log(classID, storage.get(classID!));
+}

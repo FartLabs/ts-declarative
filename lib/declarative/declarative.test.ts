@@ -25,16 +25,15 @@ Deno.test("Declarative declare class operation", async (t) => {
   await t.step("declareClass", () => {
     const storage = new DeclarativeStorageInMemory<Fake>();
     declareClass(
-      { storage, prefix: "fake" },
+      { storage, prefix: "fake#" },
       Foo,
       () => ({ foo: "foo" }),
       (value) => ({ ...value, bar: "bar" }),
     );
 
-    assertEquals(storage.get(getClassID(Foo)!), {
-      foo: "foo",
-      bar: "bar",
-    });
+    const classID = getClassID(Foo);
+    assertEquals(classID, "fake#Foo");
+    assertEquals(storage.get(classID!), { foo: "foo", bar: "bar" });
   });
 });
 

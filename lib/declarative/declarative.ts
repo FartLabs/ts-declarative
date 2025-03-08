@@ -40,7 +40,7 @@ export function declarativeSequence<TValue>(
 
 export interface DeclarativeOptions<TValue> {
   storage: DeclarativeStorage<TValue>;
-  prefix: string; // TODO: Refactor prefix to file path.
+  prefix: string;
 }
 
 export type Declarative<TValue> = (

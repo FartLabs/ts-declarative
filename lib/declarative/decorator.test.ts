@@ -11,14 +11,16 @@ interface Fake {
 Deno.test("Declarative decorator factory", () => {
   const storage = new DeclarativeStorageInMemory<Fake>();
   const declarative = createDecoratorFactory(
-    { storage, prefix: "fake", initialize: (): Fake => ({ foo: "foo" }) },
+    { storage, prefix: "fake#", initialize: (): Fake => ({ foo: "foo" }) },
     (value) => ({ ...value, bar: "bar" }),
   );
 
   @declarative()
   class Foo {}
 
-  assertEquals(storage.get(getClassID(Foo)!), {
+  const id = getClassID(Foo);
+  assertEquals(id, "fake#Foo");
+  assertEquals(storage.get(id!), {
     foo: "foo",
     bar: "bar",
   });

@@ -25,9 +25,12 @@ Deno.test("Declarative declare class operation", async (t) => {
   await t.step("declareClass", () => {
     const storage = new DeclarativeStorageInMemory<Fake>();
     declareClass(
-      { storage, prefix: "fake#" },
-      Foo,
-      () => ({ foo: "foo" }),
+      {
+        storage,
+        prefix: "fake#",
+        target: Foo,
+        initialize: () => ({ foo: "foo" }),
+      },
       (value) => ({ ...value, bar: "bar" }),
     );
 

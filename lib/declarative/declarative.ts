@@ -6,9 +6,7 @@ export function declareClass<
   TClass extends Class,
   TValue extends Record<string, any>,
 >(
-  { storage, prefix }: DeclarativeOptions<TValue>,
-  target: TClass,
-  initialize: () => TValue,
+  { storage, prefix, target, initialize }: DeclarativeOptions<TClass, TValue>,
   ...fns: Declarative<TValue>[]
 ) {
   if (target.name === undefined) {
@@ -38,9 +36,11 @@ export function declarativeSequence<TValue>(
   };
 }
 
-export interface DeclarativeOptions<TValue> {
+export interface DeclarativeOptions<TClass, TValue> {
   storage: DeclarativeStorage<TValue>;
   prefix: string;
+  target: TClass;
+  initialize: () => TValue;
 }
 
 export type Declarative<TValue> = (

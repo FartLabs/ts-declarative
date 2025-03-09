@@ -20,7 +20,7 @@ export const context = createDecoratorFactory(
     initialize: (context?: Context): State => ({ context }),
   },
   await declarativeDenoDoc(import.meta.url.toString(), {
-    importMap: "./deno.json",
+    importMap: new URL("../../deno.json", import.meta.url).toString(),
     includeAll: true,
   }),
   declarativeContext(prefix),
@@ -38,4 +38,43 @@ if (import.meta.main) {
 
   // deno -A examples/getting-started/main.ts
   console.log(classID, storage.get(classID!));
+
+  // file:///C:/Users/ethan/Documents/GitHub/ts-declarative/examples/getting-started/main.ts#Person {
+  //   context: {
+  //     "@vocab": "file:///C:/Users/ethan/Documents/GitHub/ts-declarative/examples/getting-started/main.ts#",
+  //     name: "https://schema.org/name"
+  //   },
+  //   denoDoc: {
+  //     name: "Person",
+  //     isDefault: false,
+  //     location: {
+  //       filename: "file:///C:/Users/ethan/Documents/GitHub/ts-declarative/examples/getting-started/main.ts",
+  //       line: 32,
+  //       col: 0,
+  //       byteIndex: 1055
+  //     },
+  //     declarationKind: "export",
+  //     kind: "class",
+  //     classDef: {
+  //       isAbstract: false,
+  //       constructors: [
+  //         {
+  //           accessibility: "public",
+  //           hasBody: true,
+  //           name: "constructor",
+  //           params: [Array],
+  //           location: [Object]
+  //         }
+  //       ],
+  //       properties: [],
+  //       indexSignatures: [],
+  //       methods: [],
+  //       extends: undefined,
+  //       implements: [],
+  //       typeParams: [],
+  //       superTypeParams: [],
+  //       decorators: [ { name: "context", args: [Array], location: [Object] } ]
+  //     }
+  //   }
+  // }
 }

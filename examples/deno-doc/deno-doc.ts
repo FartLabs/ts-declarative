@@ -12,11 +12,7 @@ export async function declarativeDenoDoc<TState extends StateDenoDoc>(
   entrypoint: string,
   options?: DocOptions,
 ): Promise<Declarative<TState>> {
-  console.log({ entrypoint });
   const docResult = await doc([entrypoint], options);
-  // error: Uncaught (in promise) Error: relative URL without a base
-  // const ret = new Error(getStringFromWasm0(arg0, arg1));
-
   const docNodes = docResult[entrypoint].filter(
     (node) => node.location.filename === entrypoint && node.kind === "class",
   );

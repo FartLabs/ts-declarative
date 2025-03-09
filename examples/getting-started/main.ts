@@ -3,9 +3,12 @@ import { DeclarativeStorageInMemory } from "#/lib/declarative/storage/in-memory.
 import { getClassID } from "#/lib/declarative/declarative.ts";
 import type { Context } from "#/examples/context/context.ts";
 import { declarativeContext } from "#/examples/context/context.ts";
+import type { DocNodeClass } from "#/examples/deno-doc/deno-doc.ts";
+import { declarativeDenoDoc } from "#/examples/deno-doc/deno-doc.ts";
 
 export interface State {
   context?: Context;
+  denoDoc?: DocNodeClass;
 }
 
 export const storage = new DeclarativeStorageInMemory<State>();
@@ -16,6 +19,10 @@ export const context = createDecoratorFactory(
     prefix,
     initialize: (context?: Context): State => ({ context }),
   },
+  await declarativeDenoDoc(import.meta.url.toString(), {
+    importMap: "./deno.json",
+    includeAll: true,
+  }),
   declarativeContext(prefix),
 );
 
@@ -28,5 +35,7 @@ export class Person {
 
 if (import.meta.main) {
   const classID = getClassID(Person);
+
+  // deno -A examples/getting-started/main.ts
   console.log(classID, storage.get(classID!));
 }

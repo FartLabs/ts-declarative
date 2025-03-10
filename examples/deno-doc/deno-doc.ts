@@ -1,11 +1,16 @@
-import type { DocNodeClass, DocOptions } from "@deno/doc";
+import type { DocNode, DocOptions, TsTypeDef } from "@deno/doc";
 import { doc } from "@deno/doc";
 import type { Declarative } from "#/lib/declarative/declarative.ts";
 
-export type { DocNodeClass };
+/**
+ * DenoDoc is a declarative class type from @deno/doc.
+ */
+export interface DenoDoc {
+  properties: Array<[string, TsTypeDef]>;
+}
 
 export interface StateDenoDoc {
-  denoDoc?: DocNodeClass;
+  denoDoc?: DenoDoc;
 }
 
 export async function declarativeDenoDoc<TState extends StateDenoDoc>(
@@ -18,11 +23,24 @@ export async function declarativeDenoDoc<TState extends StateDenoDoc>(
   );
 
   return (state, _id, name) => {
-    const docNode = docNodes.find((node) => node.name === name);
-    if (docNode?.kind !== "class") {
-      throw new Error(`Could not find DocNode for ${name}`);
+    return { ...state, denoDoc: getDenoDoc(docNodes, name) };
+  };
+}
+
+function getDenoDoc(docNodes: DocNode[], name: string): DenoDoc {
+  const docNode = docNodes.find((node) => node.name === name);
+  if (docNode?.kind !== "class") {
+    throw new Error(`Could not find DocNode for ${name}`);
+  }
+
+  const properties: Array<[string, TsTypeDef]> = [];
+  for (const property of docNode.classDef.properties) {
+    if (property.tsType === undefined) {
+      throw new Error(`Could not find tsType for ${property.name}`);
     }
 
-    return { ...state, denoDoc: docNode };
-  };
+    properties.push([property.name, property.tsType]);
+  }
+
+  return { properties };
 }

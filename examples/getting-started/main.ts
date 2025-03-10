@@ -41,53 +41,7 @@ if (import.meta.main) {
   //     "@vocab": "file:///C:/Users/ethan/Documents/GitHub/ts-declarative/examples/getting-started/main.ts#",
   //     name: "https://schema.org/name"
   //   },
-  //   denoDoc: {
-  //     name: "Person",
-  //     isDefault: false,
-  //     location: {
-  //       filename: "file:///C:/Users/ethan/Documents/GitHub/ts-declarative/examples/getting-started/main.ts",
-  //       line: 32,
-  //       col: 0,
-  //       byteIndex: 1253
-  //     },
-  //     ...
-  //   },
-  //   tsMorph: {
-  //     decorators: [
-  //       {
-  //         kind: 7,
-  //         name: "context",
-  //         arguments: [ '{\n  name: "https://schema.org/name",\n}' ],
-  //         typeArguments: []
-  //       }
-  //     ],
-  //     typeParameters: [],
-  //     docs: [],
-  //     isAbstract: false,
-  //     implements: [],
-  //     name: "Person",
-  //     isExported: true,
-  //     isDefaultExport: false,
-  //     hasDeclareKeyword: false,
-  //     kind: 2,
-  //     ctors: [
-  //       {
-  //         statements: [],
-  //         parameters: [ [Object] ],
-  //         returnType: undefined,
-  //         typeParameters: [],
-  //         docs: [],
-  //         scope: "public",
-  //         kind: 5,
-  //         overloads: []
-  //       }
-  //     ],
-  //     staticBlocks: [],
-  //     methods: [],
-  //     properties: [],
-  //     extends: undefined,
-  //     getAccessors: [],
-  //     setAccessors: []
-  //   }
+  //   denoDoc: { properties: [] },
+  //   tsMorph: { properties: [] }
   // }
 }

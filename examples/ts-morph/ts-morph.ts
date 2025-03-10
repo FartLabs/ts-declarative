@@ -1,11 +1,16 @@
-import type { ClassDeclarationStructure, ProjectOptions } from "ts-morph";
+import type { ProjectOptions, SourceFile } from "ts-morph";
 import { Project } from "ts-morph";
 import type { Declarative } from "#/lib/declarative/declarative.ts";
 
-export type { ClassDeclarationStructure };
+/**
+ * TsMorph is a declarative class type from ts-morph.
+ */
+export interface TsMorph {
+  properties: Array<[string, string]>;
+}
 
 export interface StateTsMorph {
-  tsMorph?: ClassDeclarationStructure;
+  tsMorph?: TsMorph;
 }
 
 export async function declarativeTsMorph<TState extends StateTsMorph>(
@@ -20,11 +25,20 @@ export async function declarativeTsMorph<TState extends StateTsMorph>(
   );
 
   return (state, _id, name) => {
-    const structure = sourceFile.getClass(name)?.getStructure();
-    if (structure === undefined) {
-      throw new Error(`Could not find structure for ${name}`);
-    }
+    return { ...state, tsMorph: getTsMorph(sourceFile, name) };
+  };
+}
 
-    return { ...state, tsMorph: structure };
+function getTsMorph(sourceFile: SourceFile, name: string): TsMorph {
+  const classDeclaration = sourceFile.getClass(name);
+  const propertyDeclarations = classDeclaration?.getProperties();
+  if (propertyDeclarations === undefined) {
+    throw new Error(`Could not find property declarations for ${name}`);
+  }
+
+  return {
+    properties: propertyDeclarations.map((property) => {
+      return [property.getName(), property.getType().getText()];
+    }),
   };
 }

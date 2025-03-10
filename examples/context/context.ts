@@ -1,11 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
 
 import type { Declarative } from "#/lib/declarative/declarative.ts";
-import type { StateDenoDoc } from "#/examples/deno-doc/deno-doc.ts";
 
 export type Context = Record<string, any>;
 
-export interface StateContext extends StateDenoDoc {
+export interface StateContext {
   context?: Context;
 }
 
@@ -17,7 +16,7 @@ export function declarativeContext<TState extends StateContext>(
       ...state,
       context: {
         "@vocab": prefix,
-        // TODO: Derive context from DenoDoc properties.
+        // TODO: Derive context from properties.
         ...state.context,
       },
     };

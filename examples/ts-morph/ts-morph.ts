@@ -6,7 +6,13 @@ import type { Declarative } from "#/lib/declarative/declarative.ts";
  * TsMorph is a declarative class type from ts-morph.
  */
 export interface TsMorph {
-  properties: Array<[string, string]>;
+  properties: TsMorphProperty[];
+}
+
+export interface TsMorphProperty {
+  name: string;
+  type: string;
+  paramIndex?: number;
 }
 
 export interface StateTsMorph {
@@ -31,14 +37,32 @@ export async function declarativeTsMorph<TState extends StateTsMorph>(
 
 function getTsMorph(sourceFile: SourceFile, name: string): TsMorph {
   const classDeclaration = sourceFile.getClass(name);
-  const propertyDeclarations = classDeclaration?.getProperties();
-  if (propertyDeclarations === undefined) {
-    throw new Error(`Could not find property declarations for ${name}`);
-  }
+  const propertyDeclarations = classDeclaration?.getProperties() ?? [];
+  const constructorParameterDeclarations =
+    classDeclaration?.getConstructors().at(-1)?.getParameters() ?? [];
 
   return {
-    properties: propertyDeclarations.map((property) => {
-      return [property.getName(), property.getType().getText()];
-    }),
+    properties: [
+      ...propertyDeclarations.map((property): TsMorphProperty => {
+        return {
+          name: property.getName(),
+          type: property.getType().getText(),
+        };
+      }),
+      ...constructorParameterDeclarations.reduce<TsMorphProperty[]>(
+        (acc, parameter, i) => {
+          if (parameter.getScope() === "public") {
+            acc.push({
+              name: parameter.getName(),
+              type: parameter.getType().getText(),
+              paramIndex: i,
+            });
+          }
+
+          return acc;
+        },
+        [],
+      ),
+    ],
   };
 }

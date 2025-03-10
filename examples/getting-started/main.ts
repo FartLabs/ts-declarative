@@ -36,12 +36,20 @@ export class Person {
 if (import.meta.main) {
   const classID = getClassID(Person);
   console.log(classID, storage.get(classID!));
+  // Output:
   // file:///C:/Users/ethan/Documents/GitHub/ts-declarative/examples/getting-started/main.ts#Person {
   //   context: {
   //     "@vocab": "file:///C:/Users/ethan/Documents/GitHub/ts-declarative/examples/getting-started/main.ts#",
   //     name: "https://schema.org/name"
   //   },
-  //   denoDoc: { properties: [] },
-  //   tsMorph: { properties: [] }
+  //   denoDoc: {
+  //     properties: [
+  //       {
+  //         paramIndex: 0,
+  //         type: { repr: "string", kind: "keyword", keyword: "string" }
+  //       }
+  //     ]
+  //   },
+  //   tsMorph: { properties: [ { name: "name", type: "string", paramIndex: 0 } ] }
   // }
 }

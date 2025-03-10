@@ -6,7 +6,22 @@ import type { Declarative } from "#/lib/declarative/declarative.ts";
  * DenoDoc is a declarative class type from @deno/doc.
  */
 export interface DenoDoc {
-  properties: Array<[string, TsTypeDef]>;
+  properties: DenoDocProperty[];
+}
+
+export interface DenoDocProperty {
+  type: TsTypeDef;
+
+  /**
+   * name is the name of the property.
+   */
+  name?: string;
+
+  /**
+   * paramIndex is the index of the parameter in the implementation
+   * constructor signature. Undefined if not a constructor parameter.
+   */
+  paramIndex?: number;
 }
 
 export interface StateDenoDoc {
@@ -33,13 +48,28 @@ function getDenoDoc(docNodes: DocNode[], name: string): DenoDoc {
     throw new Error(`Could not find DocNode for ${name}`);
   }
 
-  const properties: Array<[string, TsTypeDef]> = [];
+  const properties: DenoDocProperty[] = [];
   for (const property of docNode.classDef.properties) {
     if (property.tsType === undefined) {
-      throw new Error(`Could not find tsType for ${property.name}`);
+      throw new Error(`Could not find tsType for property ${property.name}`);
     }
 
-    properties.push([property.name, property.tsType]);
+    properties.push({ name: property.name, type: property.tsType });
+  }
+
+  // Get parameters from implementation constructor.
+  const parameters = docNode.classDef.constructors.at(-1)?.params ?? [];
+  for (let i = 0; i < parameters.length; i++) {
+    const parameter = parameters[i];
+    if (parameter.tsType === undefined) {
+      throw new Error(`Could not find tsType for parameter index ${i}`);
+    }
+
+    if (parameter.accessibility !== "public") {
+      continue;
+    }
+
+    properties.push({ paramIndex: i, type: parameter.tsType });
   }
 
   return { properties };

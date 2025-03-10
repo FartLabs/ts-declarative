@@ -36,7 +36,6 @@ export class Person {
 if (import.meta.main) {
   const classID = getClassID(Person);
   console.log(classID, storage.get(classID!));
-
   // file:///C:/Users/ethan/Documents/GitHub/ts-declarative/examples/getting-started/main.ts#Person {
   //   context: {
   //     "@vocab": "file:///C:/Users/ethan/Documents/GitHub/ts-declarative/examples/getting-started/main.ts#",

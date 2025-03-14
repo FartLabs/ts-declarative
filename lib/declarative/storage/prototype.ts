@@ -6,7 +6,8 @@ import type { DeclarativeStorage } from "./storage.ts";
  * on the class prototype.
  */
 export class DeclarativeStoragePrototype<TClass extends Class, TValue>
-  implements DeclarativeStorage<TValue> {
+  implements DeclarativeStorage<TValue>
+{
   public constructor(public target: TClass) {}
 
   public set(id: string, value: TValue): void {

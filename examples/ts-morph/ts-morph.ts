@@ -10,6 +10,8 @@ export interface TsMorph {
 }
 
 export interface TsMorphProperty {
+  // TODO: Add documentation.
+  // TODO: Add which class the inherited properties associate with respectively.
   name: string;
   type: string;
   paramIndex?: number;

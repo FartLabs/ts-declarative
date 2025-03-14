@@ -3,12 +3,12 @@ import { DeclarativeStorageInMemory } from "#/lib/declarative/storage/in-memory.
 import { getClassID } from "#/lib/declarative/declarative.ts";
 import type { Context, StateContext } from "#/examples/context/context.ts";
 import { declarativeContext } from "#/examples/context/context.ts";
-import type { StateDenoDoc } from "#/examples/deno-doc/deno-doc.ts";
-import { declarativeDenoDoc } from "#/examples/deno-doc/deno-doc.ts";
 import type { StateTsMorph } from "#/examples/ts-morph/ts-morph.ts";
 import { declarativeTsMorph } from "#/examples/ts-morph/ts-morph.ts";
+import type { StateJSONSchema } from "#/examples/json-schema/json-schema.ts";
+import { declarativeJSONSchema } from "#/examples/json-schema/json-schema.ts";
 
-export interface State extends StateContext, StateDenoDoc, StateTsMorph {}
+export interface State extends StateContext, StateTsMorph, StateJSONSchema {}
 
 export const storage = new DeclarativeStorageInMemory<State>();
 export const prefix = `${import.meta.url}#`;
@@ -18,11 +18,8 @@ export const context = createDecoratorFactory(
     prefix,
     initialize: (context?: Context): State => ({ context }),
   },
-  await declarativeDenoDoc(import.meta.url, {
-    importMap: new URL("../../deno.json", import.meta.url).toString(),
-    includeAll: true,
-  }),
   await declarativeTsMorph(new URL(import.meta.url)),
+  declarativeJSONSchema(),
   declarativeContext(prefix),
 );
 
@@ -35,21 +32,32 @@ export class Person {
 
 if (import.meta.main) {
   const classID = getClassID(Person);
-  console.log(classID, storage.get(classID!));
+  console.log(classID, JSON.stringify(storage.get(classID!), null, 2));
   // Output:
   // file:///C:/Users/ethan/Documents/GitHub/ts-declarative/examples/getting-started/main.ts#Person {
-  //   context: {
+  //   "context": {
   //     "@vocab": "file:///C:/Users/ethan/Documents/GitHub/ts-declarative/examples/getting-started/main.ts#",
-  //     name: "https://schema.org/name"
+  //     "name": "https://schema.org/name"
   //   },
-  //   denoDoc: {
-  //     properties: [
+  //   "tsMorph": {
+  //     "properties": [
   //       {
-  //         paramIndex: 0,
-  //         type: { repr: "string", kind: "keyword", keyword: "string" }
+  //         "name": "name",
+  //         "type": "string",
+  //         "paramIndex": 0
   //       }
   //     ]
   //   },
-  //   tsMorph: { properties: [ { name: "name", type: "string", paramIndex: 0 } ] }
+  //   "jsonSchema": {
+  //     "type": "object",
+  //     "properties": {
+  //       "name": {
+  //         "type": "string"
+  //       }
+  //     },
+  //     "required": [
+  //       "name"
+  //     ]
+  //   }
   // }
 }

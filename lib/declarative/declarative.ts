@@ -47,6 +47,7 @@ export function declarativeSequence<TValue>(
 }
 
 export type Declarative<TValue> = (
+  // TODO: data: {...
   value: TValue,
   id: string,
   name: string,

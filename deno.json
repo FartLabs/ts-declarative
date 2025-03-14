@@ -13,6 +13,7 @@
   },
   "tasks": {
     "example": "deno -A examples/getting-started/main.ts",
+    "check": "deno check examples/getting-started/main.ts",
     "outdated": "deno outdated --update --latest",
     "test": "deno test --allow-all"
   }

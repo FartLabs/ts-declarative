@@ -25,7 +25,7 @@ export function declareClass<TClass extends Class, TValue>(
 
   const id = `${prefix}${target.name}`;
   const fn = declarativeSequence<TValue>(...fns);
-  const value = fn(storage.get(id, initialize)!, id, target.name);
+  const value = fn(storage.get(id, initialize)!, target.name);
   storage.set(id, value);
 
   // Associate the ID with its class.
@@ -38,20 +38,15 @@ export function declareClass<TClass extends Class, TValue>(
 export function declarativeSequence<TValue>(
   ...declaratives: Declarative<TValue>[]
 ): Declarative<TValue> {
-  return (initialValue: TValue, id: string, name: string) => {
+  return (initialValue: TValue, name: string) => {
     return declaratives.reduce(
-      (acc, fn) => fn(acc, id, name),
+      (acc, fn) => fn(acc, name),
       structuredClone(initialValue),
     );
   };
 }
 
-export type Declarative<TValue> = (
-  // TODO: data: {...
-  value: TValue,
-  id: string,
-  name: string,
-) => TValue;
+export type Declarative<TValue> = (value: TValue, name: string) => TValue;
 
 export type Class = new (...args: any[]) => any;
 
@@ -61,18 +56,18 @@ export type Class = new (...args: any[]) => any;
  * runtime is not more than O(1) per class.
  */
 export function setClassID(value: Class, id: string): void {
-  value.prototype[classID] = id;
+  value.prototype[idKey] = id;
 }
 
 /**
  * getClassID returns the ID of a class.
  */
 export function getClassID(value: Class, suffix?: string): string | undefined {
-  if (!Object.hasOwn(value.prototype, classID)) {
+  if (!Object.hasOwn(value.prototype, idKey)) {
     return;
   }
 
-  return value.prototype[classID] + (suffix ?? "");
+  return value.prototype[idKey] + (suffix ?? "");
 }
 
-export const classID = "~declarative";
+export const idKey = "~id";

@@ -11,7 +11,7 @@ export interface StateContext {
 export function declarativeContext<TState extends StateContext>(
   prefix: string,
 ): Declarative<TState> {
-  return (state, _id, _name) => {
+  return (state, _name) => {
     return {
       ...state,
       context: {

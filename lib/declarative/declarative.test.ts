@@ -46,7 +46,7 @@ Deno.test("declarativeSequence", () => {
     bar: "bar",
   }));
 
-  assertEquals(declarative({ foo: "foo" }, "id", "name"), {
+  assertEquals(declarative({ foo: "foo" }, "name"), {
     foo: "foo",
     bar: "bar",
   });

@@ -32,7 +32,7 @@ export async function declarativeTsMorph<TState extends StateTsMorph>(
     { overwrite: true },
   );
 
-  return (state, _id, name) => {
+  return (state, name) => {
     return { ...state, tsMorph: getTsMorph(sourceFile, name) };
   };
 }

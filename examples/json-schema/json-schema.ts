@@ -10,7 +10,7 @@ export interface StateJSONSchema extends StateTsMorph {
 export function declarativeJSONSchema<
   TState extends StateJSONSchema,
 >(): Declarative<TState> {
-  return (state, _id, _name) => {
+  return (state, _name) => {
     return { ...state, jsonSchema: compile(state) };
   };
 }

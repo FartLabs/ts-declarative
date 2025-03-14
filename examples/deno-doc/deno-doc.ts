@@ -37,7 +37,7 @@ export async function declarativeDenoDoc<TState extends StateDenoDoc>(
     (node) => node.location.filename === entrypoint && node.kind === "class",
   );
 
-  return (state, _id, name) => {
+  return (state, name) => {
     return { ...state, denoDoc: getDenoDoc(docNodes, name) };
   };
 }

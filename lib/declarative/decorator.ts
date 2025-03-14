@@ -3,17 +3,12 @@
 import type { Class, Declarative, DeclarativeOptions } from "./declarative.ts";
 import { declareClass } from "./declarative.ts";
 
-export interface DecoratorFactoryOptions<
-  TValue extends Record<string, any>,
-  TArgs extends any[],
-> extends Omit<DeclarativeOptions<Class, TValue>, "target" | "initialize"> {
+export interface DecoratorFactoryOptions<TValue, TArgs extends any[]>
+  extends Omit<DeclarativeOptions<Class, TValue>, "target" | "initialize"> {
   initialize: (...args: TArgs) => TValue;
 }
 
-export function createDecoratorFactory<
-  TValue extends Record<string, any>,
-  TArgs extends any[],
->(
+export function createDecoratorFactory<TValue, TArgs extends any[]>(
   options: DecoratorFactoryOptions<TValue, TArgs>,
   ...fns: Declarative<TValue>[]
 ): (...args: TArgs) => (target: Class) => Class {

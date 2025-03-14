@@ -1,22 +1,22 @@
 // deno-lint-ignore-file no-explicit-any
 
 import type { DeclarativeStorage } from "./storage/storage.ts";
+import { DeclarativeStoragePrototype } from "./storage/prototype.ts";
 
-export interface DeclarativeOptions<
-  TClass extends Class,
-  TValue extends Record<string, any>,
-> {
-  storage: DeclarativeStorage<TValue>;
+export interface DeclarativeOptions<TClass extends Class, TValue> {
   prefix: string;
   target: TClass;
   initialize: () => TValue;
+  storage?: DeclarativeStorage<TValue>;
 }
 
-export function declareClass<
-  TClass extends Class,
-  TValue extends Record<string, any>,
->(
-  { storage, prefix, target, initialize }: DeclarativeOptions<TClass, TValue>,
+export function declareClass<TClass extends Class, TValue>(
+  {
+    prefix,
+    target,
+    initialize,
+    storage = new DeclarativeStoragePrototype(target),
+  }: DeclarativeOptions<TClass, TValue>,
   ...fns: Declarative<TValue>[]
 ): TClass {
   if (target.name === undefined) {

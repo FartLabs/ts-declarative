@@ -29,7 +29,7 @@ Deno.test("Declarative declare class operation", async (t) => {
         storage,
         prefix: "fake#",
         target: Foo,
-        initialize: () => ({ foo: "foo" }),
+        initialize: (): Fake => ({ foo: "foo" }),
       },
       (value) => ({ ...value, bar: "bar" }),
     );

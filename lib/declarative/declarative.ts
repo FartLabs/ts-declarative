@@ -11,14 +11,17 @@ export interface DeclarativeOptions<TClass extends Class, TValue> {
 }
 
 export function declareClass<TClass extends Class, TValue>(
-  {
-    prefix,
-    target,
-    initialize,
-    storage = new DeclarativeStoragePrototype(target),
-  }: DeclarativeOptions<TClass, TValue>,
+  optionsOrClass: DeclarativeOptions<TClass, TValue> | TClass,
   ...fns: Declarative<TValue>[]
 ): TClass {
+  const {
+    target,
+    prefix,
+    initialize,
+    storage = new DeclarativeStoragePrototype<TValue>(target),
+  } = typeof optionsOrClass === "object"
+    ? optionsOrClass
+    : { target: optionsOrClass };
   if (target.name === undefined) {
     throw new Error("Class decorator must have a name.");
   }

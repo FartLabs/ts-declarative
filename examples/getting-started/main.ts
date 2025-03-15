@@ -4,34 +4,21 @@ import {
   getPrototypeID,
   getPrototypeValue,
 } from "#/lib/declarative/declarative.ts";
+import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { Context, StateContext } from "#/examples/context/context.ts";
 import type { StateTsMorph } from "#/examples/ts-morph/ts-morph.ts";
 import { declarativeTsMorph } from "#/examples/ts-morph/ts-morph.ts";
 import type { StateJSONSchema } from "#/examples/json-schema/json-schema.ts";
 import { declarativeJSONSchema } from "#/examples/json-schema/json-schema.ts";
-import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
 export interface State extends StateTsMorph, StateJSONSchema, StateContext {}
 
-export async function setup(specifier: string) {
+export async function createSetup(specifier: string) {
   const tsMorph = await declarativeTsMorph(new URL(specifier));
   const jsonSchema = declarativeJSONSchema();
   return {
-    updatePrototypeValue: <TClass extends Class>(target: TClass) => {
-      declareClass<TClass, State>(
-        {
-          target,
-          initialize: (context?: Context): State => {
-            const value = getPrototypeValue<StateContext>(target);
-            return {
-              ...value,
-              context: { ...value?.context, ...context },
-            };
-          },
-        },
-        tsMorph,
-        jsonSchema,
-      );
+    setup: <TClass extends Class>(target: TClass) => {
+      return declareClass<TClass, State>(target, tsMorph, jsonSchema);
     },
   };
 }
@@ -59,8 +46,8 @@ if (import.meta.main) {
   //   }
   // }
 
-  const { updatePrototypeValue } = await setup(import.meta.url);
-  updatePrototypeValue(Person);
+  const { setup } = await createSetup(import.meta.url);
+  setup(Person);
   console.log(
     getPrototypeID(Person),
     JSON.stringify(getPrototypeValue(Person), null, 2),

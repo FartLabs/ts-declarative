@@ -1,0 +1,18 @@
+export const snapshot = {};
+
+snapshot[`transform example foo-bar-baz.ts 1`] = `
+"class Foo {
+    foo: string;
+}
+
+class FooBar {
+}
+
+export class FooBarBaz {
+    baz: string;
+}
+
+class Bar {
+}
+"
+`;

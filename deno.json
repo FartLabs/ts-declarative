@@ -9,12 +9,14 @@
     "@sinclair/typemap": "npm:@sinclair/typemap@^0.8.19",
     "@std/assert": "jsr:@std/assert@^1.0.11",
     "@std/fs": "jsr:@std/fs@^1.0.14",
+    "@std/testing": "jsr:@std/testing@^1.0.9",
     "ts-morph": "npm:ts-morph@^25.0.1"
   },
   "tasks": {
     "example": "deno -A examples/getting-started/main.ts",
     "check": "deno check examples/getting-started/main.ts",
     "outdated": "deno outdated --update --latest",
-    "test": "deno test --allow-all"
+    "test": "deno test --allow-all",
+    "test:update": "deno task test -- --update"
   }
 }

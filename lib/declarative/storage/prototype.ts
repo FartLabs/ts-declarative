@@ -18,12 +18,3 @@ export class DeclarativeStoragePrototype<TClass extends Class, TValue>
     return this.target.prototype[valueKey] ?? defaultValue?.();
   }
 }
-
-/**
- * fromPrototype returns the value stored on the class prototype.
- */
-export function fromPrototype<TClass extends Class, TValue>(
-  target: TClass,
-): TValue | undefined {
-  return target.prototype[valueKey];
-}

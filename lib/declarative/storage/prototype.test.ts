@@ -1,5 +1,6 @@
 import { assertEquals } from "@std/assert";
-import { DeclarativeStoragePrototype, fromPrototype } from "./prototype.ts";
+import { getBaseValue } from "#/lib/declarative/declarative.ts";
+import { DeclarativeStoragePrototype } from "./prototype.ts";
 
 class Foo {}
 
@@ -18,5 +19,5 @@ Deno.test("DeclarativeStoragePrototype", () => {
 
 Deno.test("fromPrototype gets the value by class ID", () => {
   storage.set("_", "foo");
-  assertEquals(fromPrototype<typeof Foo, string>(Foo), "foo");
+  assertEquals(getBaseValue<typeof Foo, string>(Foo), "foo");
 });

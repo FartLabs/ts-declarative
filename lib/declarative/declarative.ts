@@ -76,6 +76,26 @@ export function getClassID(value: Class, suffix?: string): string | undefined {
 export const idKey = "~id";
 
 /**
+ * setBaseValue sets the base value of a class.
+ */
+export function setBaseValue<TClass extends Class, TValue>(
+  target: TClass,
+  value: TValue,
+): void {
+  target.prototype[valueKey] = value;
+}
+
+/**
+ * getBaseValue returns the base value of a class.
+ */
+export function getBaseValue<TClass extends Class, TValue>(
+  target: TClass,
+  defaultValue?: () => TValue,
+): TValue | undefined {
+  return target.prototype[valueKey] ?? defaultValue?.();
+}
+
+/**
  * valueKey is the property name applied to the class prototype to store the
  * base value.
  */

@@ -6,9 +6,9 @@ import type { DeclarativeStorage } from "./storage.ts";
  * DeclarativeStoragePrototype is a declarative storage for classes, stored
  * on the class prototype.
  */
-export class DeclarativeStoragePrototype<TClass extends Class, TValue>
+export class DeclarativeStoragePrototype<TValue>
   implements DeclarativeStorage<TValue> {
-  public constructor(public target: TClass) {}
+  public constructor(public target: Class) {}
 
   public set(_id: string, value: TValue): void {
     this.target.prototype[valueKey] = value;

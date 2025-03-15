@@ -4,9 +4,9 @@ import type { DeclarativeStorage } from "./storage/storage.ts";
 import { DeclarativeStoragePrototype } from "./storage/prototype.ts";
 
 export interface DeclarativeOptions<TClass extends Class, TValue> {
-  prefix: string;
   target: TClass;
-  initialize: () => TValue;
+  prefix?: string;
+  initialize?: () => TValue;
   storage?: DeclarativeStorage<TValue>;
 }
 
@@ -23,13 +23,13 @@ export function declareClass<TClass extends Class, TValue>(
     throw new Error("Class decorator must have a name.");
   }
 
-  const id = `${prefix}${target.name}`;
+  const id = `${prefix ?? ""}${target.name}`;
   const fn = declarativeSequence<TValue>(...fns);
   const value = fn(storage.get(id, initialize)!, target.name);
   storage.set(id, value);
 
   // Associate the ID with its class.
-  setClassID(target, id);
+  setPrototypeID(target, id);
 
   // For classes, we need to return the constructor.
   return target;
@@ -51,18 +51,19 @@ export type Declarative<TValue> = (value: TValue, name: string) => TValue;
 export type Class = new (...args: any[]) => any;
 
 /**
- * setClassID sets the ID of a class. This operation is O(1) as each class has one
- * unique ID. Assigning a single string property to the prototype of each class at
- * runtime is not more than O(1) per class.
+ * setPrototypeID associates an ID with the prototype of a class.
  */
-export function setClassID(value: Class, id: string): void {
+export function setPrototypeID(value: Class, id: string): void {
   value.prototype[idKey] = id;
 }
 
 /**
- * getClassID returns the ID of a class.
+ * getPrototypeID returns the ID associated with the prototype of a class.
  */
-export function getClassID(value: Class, suffix?: string): string | undefined {
+export function getPrototypeID(
+  value: Class,
+  suffix?: string,
+): string | undefined {
   if (!Object.hasOwn(value.prototype, idKey)) {
     return;
   }
@@ -76,20 +77,18 @@ export function getClassID(value: Class, suffix?: string): string | undefined {
 export const idKey = "~id";
 
 /**
- * setBaseValue sets the base value of a class.
+ * setPrototypeValue associates a value with the prototype of a class.
  */
-export function setBaseValue<TClass extends Class, TValue>(
-  target: TClass,
-  value: TValue,
-): void {
+export function setPrototypeValue<TValue>(target: Class, value: TValue): void {
   target.prototype[valueKey] = value;
 }
 
 /**
- * getBaseValue returns the base value of a class.
+ * getPrototypeValue returns the value associated with the prototype of a
+ * class.
  */
-export function getBaseValue<TClass extends Class, TValue>(
-  target: TClass,
+export function getPrototypeValue<TValue>(
+  target: Class,
   defaultValue?: () => TValue,
 ): TValue | undefined {
   return target.prototype[valueKey] ?? defaultValue?.();

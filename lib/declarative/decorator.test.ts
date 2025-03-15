@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { DeclarativeStorageInMemory } from "./storage/in-memory.ts";
-import { getClassID } from "./declarative.ts";
+import { getPrototypeID } from "./declarative.ts";
 import { createDecoratorFactory } from "./decorator.ts";
 
 interface Fake {
@@ -18,7 +18,7 @@ Deno.test("Declarative decorator factory", () => {
   @declarative()
   class Foo {}
 
-  const id = getClassID(Foo);
+  const id = getPrototypeID(Foo);
   assertEquals(id, "fake#Foo");
   assertEquals(storage.get(id!), {
     foo: "foo",

@@ -3,12 +3,12 @@ import { DeclarativeStorageInMemory } from "./storage/in-memory.ts";
 import {
   declarativeSequence,
   declareClass,
-  getBaseValue,
-  getClassID,
-  setClassID,
+  getPrototypeID,
+  getPrototypeValue,
+  setPrototypeID,
 } from "./declarative.ts";
 
-interface Fake {
+interface FooBar {
   foo?: string;
   bar?: string;
 }
@@ -20,24 +20,24 @@ Deno.test("Two-part declare class operation", async (t) => {
     declareClass({
       target: Foo,
       prefix: "fake#",
-      initialize: (): Fake => ({ foo: "foo" }),
+      initialize: (): FooBar => ({ foo: "foo" }),
     });
-    assertEquals(getBaseValue<typeof Foo, Fake>(Foo), { foo: "foo" });
+    assertEquals(getPrototypeValue<FooBar>(Foo), { foo: "foo" });
   });
 
   await t.step("Part 2 extends base value with initializer", () => {
-    const storage = new DeclarativeStorageInMemory<Fake>();
+    const storage = new DeclarativeStorageInMemory<FooBar>();
     declareClass({
       target: Foo,
       prefix: "fake#",
-      initialize: (): Fake => ({
-        ...getBaseValue<typeof Foo, Fake>(Foo),
+      initialize: (): FooBar => ({
+        ...getPrototypeValue<FooBar>(Foo),
         bar: "bar",
       }),
       storage,
     });
 
-    const classID = getClassID(Foo);
+    const classID = getPrototypeID(Foo);
     assertEquals(classID, "fake#Foo");
     assertEquals(storage.get(classID!), { foo: "foo", bar: "bar" });
   });
@@ -47,32 +47,32 @@ Deno.test("Declarative declare class operation", async (t) => {
   class Foo {}
 
   await t.step("Get and set class ID", () => {
-    assertEquals(getClassID(Foo), undefined);
+    assertEquals(getPrototypeID(Foo), undefined);
 
-    setClassID(Foo, "foo");
-    assertEquals(getClassID(Foo), "foo");
+    setPrototypeID(Foo, "foo");
+    assertEquals(getPrototypeID(Foo), "foo");
   });
 
   await t.step("declareClass", () => {
-    const storage = new DeclarativeStorageInMemory<Fake>();
+    const storage = new DeclarativeStorageInMemory<FooBar>();
     declareClass(
       {
         storage,
         prefix: "fake#",
         target: Foo,
-        initialize: (): Fake => ({ foo: "foo" }),
+        initialize: (): FooBar => ({ foo: "foo" }),
       },
       (value) => ({ ...value, bar: "bar" }),
     );
 
-    const classID = getClassID(Foo);
+    const classID = getPrototypeID(Foo);
     assertEquals(classID, "fake#Foo");
     assertEquals(storage.get(classID!), { foo: "foo", bar: "bar" });
   });
 });
 
 Deno.test("declarativeSequence", () => {
-  const declarative = declarativeSequence<Fake>((value) => ({
+  const declarative = declarativeSequence<FooBar>((value) => ({
     ...value,
     bar: "bar",
   }));
@@ -86,6 +86,6 @@ Deno.test("declarativeSequence", () => {
 Deno.test("Set and get base value of class", () => {
   class Foo {}
 
-  setClassID(Foo, "foo");
-  assertEquals(getClassID(Foo), "foo");
+  setPrototypeID(Foo, "foo");
+  assertEquals(getPrototypeID(Foo), "foo");
 });

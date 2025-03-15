@@ -70,4 +70,13 @@ export function getClassID(value: Class, suffix?: string): string | undefined {
   return value.prototype[idKey] + (suffix ?? "");
 }
 
+/**
+ * idKey is the property name applied to the class prototype to store its ID.
+ */
 export const idKey = "~id";
+
+/**
+ * valueKey is the property name applied to the class prototype to store the
+ * base value.
+ */
+export const valueKey = "~value";

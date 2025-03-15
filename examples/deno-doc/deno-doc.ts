@@ -45,7 +45,7 @@ export async function declarativeDenoDoc<TState extends StateDenoDoc>(
 function getDenoDoc(docNodes: DocNode[], name: string): DenoDoc {
   const docNode = docNodes.find((node) => node.name === name);
   if (docNode?.kind !== "class") {
-    throw new Error(`Could not find DocNode for ${name}`);
+    throw new Error(`Could not find DocNodeClass for ${name}`);
   }
 
   const properties: DenoDocProperty[] = [];

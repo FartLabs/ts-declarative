@@ -68,10 +68,18 @@ export function fromInterfaceDeclaration(
     name: interfaceStructure.name,
     typeParameters: interfaceStructure.typeParameters,
     properties: [
-      ...(declaration.getExtends().flatMap((_node) => {
-        // TODO: Find properties of resulting type.
-        return [];
-      }) ?? []),
+      ...declaration.getHeritageClauses().flatMap((clause) => {
+        return clause
+          .getTypeNodes()
+          .flatMap((typeNode): PropertyDeclarationStructure => {
+            // TODO: Fix.
+            console.log(typeNode.getText());
+            return {
+              kind: StructureKind.Property,
+              name: "",
+            };
+          });
+      }),
       ...(interfaceStructure.properties?.map(
         (property): PropertyDeclarationStructure => {
           return {

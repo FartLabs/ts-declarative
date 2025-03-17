@@ -1,8 +1,9 @@
-import { StructureKind } from "ts-morph";
+import { StructureKind, ts } from "ts-morph";
 import type {
   ClassDeclaration,
   ClassDeclarationStructure,
   InterfaceDeclaration,
+  Node,
   PropertyDeclarationStructure,
   SourceFile,
   Symbol,
@@ -63,6 +64,7 @@ export function fromInterfaceDeclaration(
   fn?: (structure: ClassDeclarationStructure) => ClassDeclarationStructure,
 ): ClassDeclarationStructure {
   const interfaceStructure = declaration.getStructure();
+  const properties = analyzeProperties(typeChecker, declaration);
   const classStructure: ClassDeclarationStructure = {
     kind: StructureKind.Class,
     docs: interfaceStructure.docs,
@@ -70,7 +72,7 @@ export function fromInterfaceDeclaration(
     isDefaultExport: interfaceStructure.isDefaultExport,
     name: interfaceStructure.name,
     typeParameters: interfaceStructure.typeParameters,
-    properties: propertyDeclarationsFrom(typeChecker, declaration),
+    properties: properties.map((p) => p.structure),
   };
 
   return fn ? fn(classStructure) : classStructure;
@@ -82,6 +84,7 @@ export function fromTypeAliasDeclaration(
   fn?: (structure: ClassDeclarationStructure) => ClassDeclarationStructure,
 ): ClassDeclarationStructure {
   const typeAliasStructure = declaration.getStructure();
+  const properties = analyzeProperties(typeChecker, declaration);
   const classStructure: ClassDeclarationStructure = {
     kind: StructureKind.Class,
     docs: typeAliasStructure.docs,
@@ -89,37 +92,62 @@ export function fromTypeAliasDeclaration(
     isDefaultExport: typeAliasStructure.isDefaultExport,
     name: typeAliasStructure.name,
     typeParameters: typeAliasStructure.typeParameters,
-    properties: propertyDeclarationsFrom(typeChecker, declaration),
+    properties: properties.map((p) => p.structure),
   };
 
   return fn ? fn(classStructure) : classStructure;
 }
 
 /**
- * propertyDeclarationsFrom generates a list of property declarations from a
+ * analyzeProperties generates a list of property declarations from a
  * type alias or interface.
  */
-export function propertyDeclarationsFrom(
+export function analyzeProperties(
   typeChecker: TypeChecker,
   declaration: InterfaceDeclaration | TypeAliasDeclaration,
-): PropertyDeclarationStructure[] {
+) {
   const checkResult = typeChecker.getPropertiesOfType(
     typeChecker.getTypeAtLocation(declaration),
   );
 
-  return checkResult.map((symbol) => {
-    return propertyDeclarationStructureFromSymbol(declaration, symbol);
+  return checkResult.map((propertySymbol) => {
+    return analyzeProperty(typeChecker, declaration, propertySymbol);
   });
 }
 
-export function propertyDeclarationStructureFromSymbol(
+export function analyzeProperty(
+  _typeChecker: TypeChecker,
   declaration: TypeAliasDeclaration | InterfaceDeclaration,
-  symbol: Symbol,
-): PropertyDeclarationStructure {
+  propertySymbol: Symbol,
+): PropertyAnalysis {
+  const propertyTypeSymbol = propertySymbol.getTypeAtLocation(declaration);
+  const immediateDeclaration = propertySymbol
+    .getDeclarations()
+    .find((d) => ts.isPropertyDeclaration(d.compilerNode));
+  if (immediateDeclaration === undefined) {
+    // TODO: Find the referenced declaration, the original interface that declares this property.
+    console.log({ referencedDeclaration: "?" });
+  }
+
+  console.log({
+    property: propertySymbol.getName(),
+    // Parent type only exists on original interface :/
+    parentType: immediateDeclaration?.getText(),
+    type: propertyTypeSymbol.getText(),
+  });
+
   return {
-    // TODO: Return all declaration info, e.g. JSDoc comments.
-    kind: StructureKind.Property,
-    name: symbol.getName(),
-    type: symbol.getTypeAtLocation(declaration).getText(),
+    structure: {
+      // TODO: Return all declaration info, e.g. JSDoc comments.
+      kind: StructureKind.Property,
+      name: propertySymbol.getName(),
+      type: propertyTypeSymbol.getText(),
+    },
+    source: immediateDeclaration!,
   };
+}
+
+export interface PropertyAnalysis {
+  structure: PropertyDeclarationStructure;
+  source: Node<ts.Node>;
 }

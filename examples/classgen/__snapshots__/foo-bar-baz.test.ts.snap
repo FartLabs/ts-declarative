@@ -6,13 +6,18 @@ snapshot[`transform example foo-bar-baz.ts 1`] = `
 }
 
 class FooBar {
+    foo: string;
+    bar: number;
 }
 
 export class FooBarBaz {
-    baz: string;
+    baz: boolean;
+    foo: string;
+    bar: number;
 }
 
 class Bar {
+    bar: number;
 }
 "
 `;

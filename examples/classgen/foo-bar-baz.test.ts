@@ -6,8 +6,7 @@ const fileFooBarBaz = "./examples/classgen/foo-bar-baz.ts";
 
 Deno.test("transform example foo-bar-baz.ts", async (t) => {
   const project = new Project();
-  const typeChecker = project.getTypeChecker();
   const sourceFile = project.addSourceFileAtPath(fileFooBarBaz);
-  transform(typeChecker, sourceFile);
+  transform(sourceFile);
   await assertSnapshot(t, sourceFile.getText());
 });

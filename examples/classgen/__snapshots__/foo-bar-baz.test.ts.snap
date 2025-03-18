@@ -23,27 +23,27 @@ class Bar {
 `;
 
 snapshot[`transform example foo-bar-baz.ts with decorators 1`] = `
-"@context(holyShit)
+'@context({ "foo": "Foo/foo" })
 class Foo {
     foo: string;
 }
 
-@context(holyShit)
+@context({ "foo": "Foo/foo", "bar": "Bar/bar" })
 class FooBar {
     foo: string;
     bar: number;
 }
 
-@context(holyShit)
+@context({ "baz": "FooBarBaz/baz", "foo": "Foo/foo", "bar": "Bar/bar" })
 export class FooBarBaz {
     baz: boolean;
     foo: string;
     bar: number;
 }
 
-@context(holyShit)
+@context({ "bar": "Bar/bar" })
 class Bar {
     bar: number;
 }
-"
+'
 `;

@@ -1,6 +1,6 @@
 import { assertSnapshot } from "@std/testing/snapshot";
 import { Project } from "ts-morph";
-import { transform } from "./classgen.ts";
+import { transform, withContextDecorator } from "./classgen.ts";
 
 const fileFooBarBaz = "./examples/classgen/foo-bar-baz.ts";
 
@@ -17,24 +17,9 @@ Deno.test("transform example foo-bar-baz.ts with decorators", async (t) => {
   transform({
     project,
     map: (structure, sourceDeclarations) => {
-      return {
-        ...structure,
-        decorators: [
-          ...(structure?.decorators ?? []),
-          {
-            name: "context",
-            arguments: [
-              `{ ${
-                Array.from(sourceDeclarations.entries(), ([key, value]) => {
-                  // TODO: Get name of value node, which is a type alias, class, or interface declaration.
-                  return `${key}: \`${value.getText()}\``;
-                }).join(", ")
-              } }`,
-            ],
-          },
-        ],
-      };
+      return withContextDecorator(structure, sourceDeclarations);
     },
   });
+
   await assertSnapshot(t, sourceFile.getText());
 });

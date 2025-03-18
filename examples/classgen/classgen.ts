@@ -19,13 +19,18 @@ export interface TransformOptions {
 }
 
 export type FilterDeclaration = (
-  declaration: ClassDeclaration | InterfaceDeclaration | TypeAliasDeclaration,
+  sourceDeclaration: SourceDeclaration,
 ) => boolean;
 
 export type MapDeclaration = (
   structure: ClassDeclarationStructure,
   sourceDeclarations: Map<string, Node>,
 ) => ClassDeclarationStructure;
+
+export type SourceDeclaration =
+  | ClassDeclaration
+  | InterfaceDeclaration
+  | TypeAliasDeclaration;
 
 /**
  * transform transforms each applicable TypeScript type into an equivalent
@@ -36,12 +41,10 @@ export function transform({
   filter,
   map = (structure) => structure,
 }: TransformOptions): void {
-  const originalDeclarations = new Set<
-    ClassDeclaration | InterfaceDeclaration | TypeAliasDeclaration
-  >();
+  const originalDeclarations = new Set<SourceDeclaration>();
   for (
     const {
-      originalDeclaration,
+      sourceDeclaration: originalDeclaration,
       structure,
       sourceDeclarations,
     } of fromProject(project, filter)
@@ -57,12 +60,9 @@ export function transform({
 
 export interface ClassgenDeclarationResult {
   /**
-   * originalDeclaration is the source declaration for the given structure.
+   * sourceDeclaration is the source declaration for the given structure.
    */
-  originalDeclaration:
-    | ClassDeclaration
-    | InterfaceDeclaration
-    | TypeAliasDeclaration;
+  sourceDeclaration: SourceDeclaration;
 
   /**
    * structure is the equivalent TypeScript class declaration structure
@@ -133,7 +133,7 @@ export function fromClassDeclaration(
   classDeclaration: ClassDeclaration,
 ): ClassgenDeclarationResult {
   return {
-    originalDeclaration: classDeclaration,
+    sourceDeclaration: classDeclaration,
     structure: classDeclaration.getStructure(),
     sourceDeclarations: new Map([]),
   };
@@ -149,7 +149,7 @@ export function fromInterfaceDeclaration(
       getClassgenPropertyDeclaration(checker, interfaceDeclaration.getType()),
     );
   return {
-    originalDeclaration: interfaceDeclaration,
+    sourceDeclaration: interfaceDeclaration,
     structure: {
       kind: StructureKind.Class,
       docs: interfaceStructure.docs,
@@ -173,7 +173,7 @@ export function fromTypeAliasDeclaration(
       getClassgenPropertyDeclaration(checker, typeAliasDeclaration.getType()),
     );
   return {
-    originalDeclaration: typeAliasDeclaration,
+    sourceDeclaration: typeAliasDeclaration,
     structure: {
       kind: StructureKind.Class,
       docs: typeAliasStructure.docs,
@@ -240,4 +240,75 @@ function getClassgenPropertyDeclaration(
         },
       };
     });
+}
+
+/**
+ * withContextDecorator adds a context decorator to the class declaration
+ * structure based on the source declarations.
+ */
+export function withContextDecorator(
+  structure: ClassDeclarationStructure,
+  sourceDeclarations: Map<string, Node>,
+) {
+  return Object.assign({}, structure, {
+    decorators: [
+      ...(structure?.decorators ?? []),
+      {
+        name: "context",
+        arguments: [renderContext(contextFrom(sourceDeclarations))],
+      },
+    ],
+  });
+}
+
+export function renderContext(entries: Array<[string, string]>): string {
+  if (entries.length === 0) {
+    return "";
+  }
+
+  return `{ ${
+    entries
+      .map(([key, value]) => `"${key}": "${value}"`)
+      .join(", ")
+  } }`;
+}
+
+export function contextFrom(
+  sourceDeclarations: Map<string, Node>,
+): Array<[string, string]> {
+  return (
+    Array.from(sourceDeclarations)
+      // TODO: Skip if the keys is defined locally in the declaration. WIP:
+      // .filter(([key, sourceDeclaration]) => {
+      //   if (sourceDeclaration.isKind(SyntaxKind.ClassDeclaration)) {
+      //     return sourceDeclaration.getProperty(key) !== undefined;
+      //   }
+      //   if (sourceDeclaration.isKind(SyntaxKind.TypeAliasDeclaration)) {
+      //     return sourceDeclaration.getType().getProperty(key) !== undefined;
+      //   }
+      //   if (sourceDeclaration.isKind(SyntaxKind.InterfaceDeclaration)) {
+      //     return sourceDeclaration.getProperty(key) !== undefined;
+      //   }
+      //
+      //   throw new Error(`Could not determine type for ${key}`);
+      // })
+      .map(([key, value]): [string, string] => {
+        if (
+          !value.isKind(SyntaxKind.InterfaceDeclaration) &&
+          !value.isKind(SyntaxKind.TypeAliasDeclaration) &&
+          !value.isKind(SyntaxKind.ClassDeclaration)
+        ) {
+          throw new Error(
+            `Could not find interface, type alias, or class declaration for ${key}`,
+          );
+        }
+
+        const declarationName = value.compilerNode.name?.getText();
+        if (declarationName === undefined) {
+          throw new Error(`Could not find name for ${key}`);
+        }
+
+        return [key, `${declarationName}/${key}`];
+      })
+  );
 }

@@ -16,39 +16,41 @@ import type {
  * transform transforms each applicable TypeScript type into an equivalent
  * TypeScript class declaration. This replacement happens in-place.
  */
-export function transform(
-  project: Project,
-  _fn?: (
-    structure: ClassDeclarationStructure,
-    declarations: Map<
-      string,
-      ClassDeclaration | InterfaceDeclaration | TypeAliasDeclaration
-    >,
-  ) => ClassDeclarationStructure,
-) {
-  const _changes = fromProject(project);
-  // TODO: Replace the source declarations with the new ones.
+export function transform(project: Project): void {
+  for (const { originalDeclaration, structure } of fromProject(project)) {
+    const sourceFile = originalDeclaration.getSourceFile();
+    originalDeclaration.remove();
+    sourceFile.addClass(structure);
+  }
 }
 
-export interface ClassgenDeclaration {
+export interface ClassgenDeclarationResult {
+  /**
+   * originalDeclaration is the source declaration for the given structure.
+   */
+  originalDeclaration:
+    | ClassDeclaration
+    | InterfaceDeclaration
+    | TypeAliasDeclaration;
+
   /**
    * structure is the equivalent TypeScript class declaration structure
-   * generated from the given source file.
+   * generated from the given source declaration.
    */
   structure: ClassDeclarationStructure;
 
   /**
-   * declarations are the source declarations for the given structure's
+   * sourceDeclarations are the source declarations for the given structure's
    * properties.
    */
-  declarations: Map<string, Node>; // ClassDeclaration | InterfaceDeclaration | TypeAliasDeclaration
+  sourceDeclarations: Map<string, Node>;
 }
 
 /**
  * fromProject generates equivalent TypeScript class declaration structures
  * from the given project.
  */
-export function fromProject(project: Project): ClassgenDeclaration[] {
+export function fromProject(project: Project): ClassgenDeclarationResult[] {
   return project.getSourceFiles().flatMap((sourceFile) => {
     return fromSourceFile(sourceFile);
   });
@@ -58,45 +60,49 @@ export function fromProject(project: Project): ClassgenDeclaration[] {
  * fromSourceFile generates equivalent TypeScript class declaration structures
  * from the given source file.
  */
-export function fromSourceFile(sourceFile: SourceFile): ClassgenDeclaration[] {
+export function fromSourceFile(
+  sourceFile: SourceFile,
+): ClassgenDeclarationResult[] {
   // TODO: Consider migrating to transform API.
   // https://ts-morph.com/manipulation/transforms
-  const results: ClassgenDeclaration[] = [];
-  const typeChecker = sourceFile.getProject().getTypeChecker();
+  const results: ClassgenDeclarationResult[] = [];
+  const checker = sourceFile.getProject().getTypeChecker();
   sourceFile.getClasses().forEach((classDeclaration) => {
     results.push(fromClassDeclaration(classDeclaration));
+  });
 
-    sourceFile.getInterfaces().forEach((interfaceDeclaration) => {
-      results.push(fromInterfaceDeclaration(typeChecker, interfaceDeclaration));
-    });
+  sourceFile.getInterfaces().forEach((interfaceDeclaration) => {
+    results.push(fromInterfaceDeclaration(checker, interfaceDeclaration));
+  });
 
-    sourceFile.getTypeAliases().forEach((typeAliasDeclaration) => {
-      results.push(fromTypeAliasDeclaration(typeChecker, typeAliasDeclaration));
-    });
+  sourceFile.getTypeAliases().forEach((typeAliasDeclaration) => {
+    results.push(fromTypeAliasDeclaration(checker, typeAliasDeclaration));
   });
 
   return results;
 }
 
-function map<T>(value: T, fn?: (value: T) => T): T {
-  return fn ? fn(value) : value;
-}
-
 export function fromClassDeclaration(
-  declaration: ClassDeclaration,
-): ClassgenDeclaration {
-  return { structure: declaration.getStructure(), declarations: new Map([]) };
+  classDeclaration: ClassDeclaration,
+): ClassgenDeclarationResult {
+  return {
+    originalDeclaration: classDeclaration,
+    structure: classDeclaration.getStructure(),
+    sourceDeclarations: new Map([]),
+  };
 }
 
 export function fromInterfaceDeclaration(
-  typeChecker: TypeChecker,
-  declaration: InterfaceDeclaration,
-): ClassgenDeclaration {
-  const interfaceStructure = declaration.getStructure();
-  const { properties, declarations } = separateClassgenPropertyDeclaration(
-    getClassgenPropertyDeclaration(typeChecker, declaration.getType()),
-  );
+  checker: TypeChecker,
+  interfaceDeclaration: InterfaceDeclaration,
+): ClassgenDeclarationResult {
+  const interfaceStructure = interfaceDeclaration.getStructure();
+  const { properties, sourceDeclarations: declarations } =
+    separateClassgenPropertyDeclaration(
+      getClassgenPropertyDeclaration(checker, interfaceDeclaration.getType()),
+    );
   return {
+    originalDeclaration: interfaceDeclaration,
     structure: {
       kind: StructureKind.Class,
       docs: interfaceStructure.docs,
@@ -106,19 +112,21 @@ export function fromInterfaceDeclaration(
       typeParameters: interfaceStructure.typeParameters,
       properties,
     },
-    declarations,
+    sourceDeclarations: declarations,
   };
 }
 
 export function fromTypeAliasDeclaration(
-  typeChecker: TypeChecker,
-  declaration: TypeAliasDeclaration,
-): ClassgenDeclaration {
-  const typeAliasStructure = declaration.getStructure();
-  const { properties, declarations } = separateClassgenPropertyDeclaration(
-    getClassgenPropertyDeclaration(typeChecker, declaration.getType()),
-  );
+  checker: TypeChecker,
+  typeAliasDeclaration: TypeAliasDeclaration,
+): ClassgenDeclarationResult {
+  const typeAliasStructure = typeAliasDeclaration.getStructure();
+  const { properties, sourceDeclarations: declarations } =
+    separateClassgenPropertyDeclaration(
+      getClassgenPropertyDeclaration(checker, typeAliasDeclaration.getType()),
+    );
   return {
+    originalDeclaration: typeAliasDeclaration,
     structure: {
       kind: StructureKind.Class,
       docs: typeAliasStructure.docs,
@@ -128,7 +136,7 @@ export function fromTypeAliasDeclaration(
       typeParameters: typeAliasStructure.typeParameters,
       properties,
     },
-    declarations,
+    sourceDeclarations: declarations,
   };
 }
 
@@ -137,32 +145,32 @@ function separateClassgenPropertyDeclaration(
 ) {
   return data.reduce<{
     properties: PropertyDeclarationStructure[];
-    declarations: Map<string, Node>;
+    sourceDeclarations: Map<string, Node>;
   }>(
-    (acc, { structure, declaration }) => {
-      acc.properties.push(structure);
-      acc.declarations.set(structure.name, declaration);
+    (acc, { propertyStructure, sourceDeclaration }) => {
+      acc.properties.push(propertyStructure);
+      acc.sourceDeclarations.set(propertyStructure.name, sourceDeclaration);
       return acc;
     },
-    { properties: [], declarations: new Map() },
+    { properties: [], sourceDeclarations: new Map() },
   );
 }
 
 export interface ClassgenPropertyDeclaration {
-  structure: PropertyDeclarationStructure;
-  declaration: Node;
+  propertyStructure: PropertyDeclarationStructure;
+  sourceDeclaration: Node;
 }
 
 function getClassgenPropertyDeclaration(
-  typeChecker: TypeChecker,
+  checker: TypeChecker,
   declaration: Type,
 ): ClassgenPropertyDeclaration[] {
-  return typeChecker
+  return checker
     .getPropertiesOfType(declaration)
     .map((property): ClassgenPropertyDeclaration => {
       const propertyDeclarations = property.getDeclarations();
       if (propertyDeclarations.length !== 1) {
-        throw new Error("Property must have exactly one declaration.");
+        throw new Error("Property expected to have 1 declaration");
       }
 
       const currentDeclaration = propertyDeclarations.at(0);
@@ -171,14 +179,14 @@ function getClassgenPropertyDeclaration(
       }
 
       return {
-        declaration: currentDeclaration.getFirstAncestorOrThrow(
+        sourceDeclaration: currentDeclaration.getFirstAncestorOrThrow(
           (node) =>
             node.getKind() === SyntaxKind.TypeAliasDeclaration ||
             node.getKind() === SyntaxKind.InterfaceDeclaration ||
             node.getKind() === SyntaxKind.ClassDeclaration,
         ),
         // TODO: Complete property structure from source declaration e.g. JSDoc comments.
-        structure: {
+        propertyStructure: {
           kind: StructureKind.Property,
           name: property.getName(),
           type: property.getTypeAtLocation(currentDeclaration).getText(),

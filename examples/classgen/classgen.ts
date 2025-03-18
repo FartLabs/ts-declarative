@@ -18,54 +18,49 @@ import type {
 export function transform(
   typeChecker: TypeChecker,
   sourceFile: SourceFile,
-  fn?: (structure: ClassDeclarationStructure) => ClassDeclarationStructure,
+  fn?: (
+    structure: ClassDeclarationStructure,
+    // TODO: Map property name to the names of the class that owns its original declaration.
+  ) => ClassDeclarationStructure,
 ): void {
   sourceFile.getClasses().forEach((classDeclaration) => {
-    const structure = fromClassDeclaration(classDeclaration, fn);
+    const structure = fromClassDeclaration(classDeclaration);
     classDeclaration.remove();
-    sourceFile.addClass(structure);
+    sourceFile.addClass(fn ? fn(structure) : structure);
   });
 
   sourceFile.getInterfaces().forEach((interfaceDeclaration) => {
     const structure = fromInterfaceDeclaration(
       typeChecker,
       interfaceDeclaration,
-      fn,
     );
     interfaceDeclaration.remove();
-    sourceFile.addClass(structure);
+    sourceFile.addClass(fn ? fn(structure) : structure);
   });
 
   sourceFile.getTypeAliases().forEach((typeAliasDeclaration) => {
     const structure = fromTypeAliasDeclaration(
       typeChecker,
       typeAliasDeclaration,
-      fn,
     );
     typeAliasDeclaration.remove();
-    sourceFile.addClass(structure);
+    sourceFile.addClass(fn ? fn(structure) : structure);
   });
 }
 
 export function fromClassDeclaration(
   declaration: ClassDeclaration,
-  fn?: (
-    structure: ClassDeclarationStructure,
-    // TODO: Map property name to the names of the class that owns its original declaration.
-  ) => ClassDeclarationStructure,
 ): ClassDeclarationStructure {
-  const structure = declaration.getStructure();
-  return fn ? fn(structure) : structure;
+  return declaration.getStructure();
 }
 
 export function fromInterfaceDeclaration(
   typeChecker: TypeChecker,
   declaration: InterfaceDeclaration,
-  fn?: (structure: ClassDeclarationStructure) => ClassDeclarationStructure,
 ): ClassDeclarationStructure {
   const interfaceStructure = declaration.getStructure();
   const properties = analyzeProperties(typeChecker, declaration);
-  const classStructure: ClassDeclarationStructure = {
+  return {
     kind: StructureKind.Class,
     docs: interfaceStructure.docs,
     isExported: interfaceStructure.isExported,
@@ -74,18 +69,15 @@ export function fromInterfaceDeclaration(
     typeParameters: interfaceStructure.typeParameters,
     properties: properties.map((p) => p.structure),
   };
-
-  return fn ? fn(classStructure) : classStructure;
 }
 
 export function fromTypeAliasDeclaration(
   typeChecker: TypeChecker,
   declaration: TypeAliasDeclaration,
-  fn?: (structure: ClassDeclarationStructure) => ClassDeclarationStructure,
 ): ClassDeclarationStructure {
   const typeAliasStructure = declaration.getStructure();
   const properties = analyzeProperties(typeChecker, declaration);
-  const classStructure: ClassDeclarationStructure = {
+  return {
     kind: StructureKind.Class,
     docs: typeAliasStructure.docs,
     isExported: typeAliasStructure.isExported,
@@ -94,8 +86,6 @@ export function fromTypeAliasDeclaration(
     typeParameters: typeAliasStructure.typeParameters,
     properties: properties.map((p) => p.structure),
   };
-
-  return fn ? fn(classStructure) : classStructure;
 }
 
 /**
@@ -116,26 +106,17 @@ export function analyzeProperties(
 }
 
 export function analyzeProperty(
-  _typeChecker: TypeChecker,
+  typeChecker: TypeChecker,
   declaration: TypeAliasDeclaration | InterfaceDeclaration,
   propertySymbol: Symbol,
 ): PropertyAnalysis {
   const propertyTypeSymbol = propertySymbol.getTypeAtLocation(declaration);
-  const immediateDeclaration = propertySymbol
-    .getDeclarations()
-    .find((d) => ts.isPropertyDeclaration(d.compilerNode));
-  if (immediateDeclaration === undefined) {
-    // TODO: Find the referenced declaration, the original interface that declares this property.
-    console.log({ referencedDeclaration: "?" });
-  }
-
+  const source = findSymbolSource(typeChecker, declaration, propertySymbol);
   console.log({
-    property: propertySymbol.getName(),
-    // Parent type only exists on original interface :/
-    parentType: immediateDeclaration?.getText(),
-    type: propertyTypeSymbol.getText(),
+    propertySymbol: propertySymbol.getName(),
+    propertyTypeSymbol: propertyTypeSymbol.getText(),
+    source,
   });
-
   return {
     structure: {
       // TODO: Return all declaration info, e.g. JSDoc comments.
@@ -143,11 +124,35 @@ export function analyzeProperty(
       name: propertySymbol.getName(),
       type: propertyTypeSymbol.getText(),
     },
-    source: immediateDeclaration!,
+    source,
   };
+}
+
+// The more abstract/general the name of the functions,
+// the more unhappy I am.
+
+export function findSymbolSource(
+  typeChecker: TypeChecker,
+  declaration: TypeAliasDeclaration | InterfaceDeclaration,
+  symbol: Symbol,
+): Node<ts.Node> | undefined {
+  // Get parent of symbol recursively.
+  for (const parent of symbol.getDeclarations()) {
+    if (
+      ts.isTypeAliasDeclaration(parent.compilerNode) ||
+      ts.isInterfaceDeclaration(parent.compilerNode) ||
+      ts.isClassDeclaration(parent.compilerNode)
+    ) {
+      return parent;
+    }
+  }
+
+  // if (ts.isInterfaceDeclaration(declaration)) {
+  //   return declaration;
+  // }
 }
 
 export interface PropertyAnalysis {
   structure: PropertyDeclarationStructure;
-  source: Node<ts.Node>;
+  source?: Node<ts.Node>;
 }

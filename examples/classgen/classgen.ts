@@ -16,11 +16,23 @@ import type {
  * transform transforms each applicable TypeScript type into an equivalent
  * TypeScript class declaration. This replacement happens in-place.
  */
-export function transform(project: Project): void {
-  for (const { originalDeclaration, structure } of fromProject(project)) {
+export function transform(
+  project: Project,
+  fn?: (
+    structure: ClassDeclarationStructure,
+    sourceDeclarations: Map<string, Node>,
+  ) => ClassDeclarationStructure,
+): void {
+  for (
+    const {
+      originalDeclaration,
+      structure,
+      sourceDeclarations,
+    } of fromProject(project)
+  ) {
     const sourceFile = originalDeclaration.getSourceFile();
     originalDeclaration.remove();
-    sourceFile.addClass(structure);
+    sourceFile.addClass(fn ? fn(structure, sourceDeclarations) : structure);
   }
 }
 

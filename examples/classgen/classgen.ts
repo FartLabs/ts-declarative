@@ -12,27 +12,40 @@ import type {
   TypeChecker,
 } from "ts-morph";
 
+export interface TransformOptions {
+  project: Project;
+  filter?: FilterDeclaration;
+  map?: MapDeclaration;
+}
+
+export type FilterDeclaration = (
+  declaration: ClassDeclaration | InterfaceDeclaration | TypeAliasDeclaration,
+) => boolean;
+
+export type MapDeclaration = (
+  structure: ClassDeclarationStructure,
+  sourceDeclarations: Map<string, Node>,
+) => ClassDeclarationStructure;
+
 /**
  * transform transforms each applicable TypeScript type into an equivalent
  * TypeScript class declaration. This replacement happens in-place.
  */
-export function transform(
-  project: Project,
-  fn?: (
-    structure: ClassDeclarationStructure,
-    sourceDeclarations: Map<string, Node>,
-  ) => ClassDeclarationStructure,
-): void {
+export function transform({
+  project,
+  filter,
+  map = (structure) => structure,
+}: TransformOptions): void {
   for (
     const {
       originalDeclaration,
       structure,
       sourceDeclarations,
-    } of fromProject(project)
+    } of fromProject(project, filter)
   ) {
     const sourceFile = originalDeclaration.getSourceFile();
     originalDeclaration.remove();
-    sourceFile.addClass(fn ? fn(structure, sourceDeclarations) : structure);
+    sourceFile.addClass(map(structure, sourceDeclarations));
   }
 }
 
@@ -62,9 +75,12 @@ export interface ClassgenDeclarationResult {
  * fromProject generates equivalent TypeScript class declaration structures
  * from the given project.
  */
-export function fromProject(project: Project): ClassgenDeclarationResult[] {
+export function fromProject(
+  project: Project,
+  filter?: FilterDeclaration,
+): ClassgenDeclarationResult[] {
   return project.getSourceFiles().flatMap((sourceFile) => {
-    return fromSourceFile(sourceFile);
+    return fromSourceFile(sourceFile, filter);
   });
 }
 
@@ -74,20 +90,33 @@ export function fromProject(project: Project): ClassgenDeclarationResult[] {
  */
 export function fromSourceFile(
   sourceFile: SourceFile,
+  filter: FilterDeclaration = () => true,
 ): ClassgenDeclarationResult[] {
   // TODO: Consider migrating to transform API.
   // https://ts-morph.com/manipulation/transforms
   const results: ClassgenDeclarationResult[] = [];
   const checker = sourceFile.getProject().getTypeChecker();
   sourceFile.getClasses().forEach((classDeclaration) => {
+    if (!filter(classDeclaration)) {
+      return;
+    }
+
     results.push(fromClassDeclaration(classDeclaration));
   });
 
   sourceFile.getInterfaces().forEach((interfaceDeclaration) => {
+    if (!filter(interfaceDeclaration)) {
+      return;
+    }
+
     results.push(fromInterfaceDeclaration(checker, interfaceDeclaration));
   });
 
   sourceFile.getTypeAliases().forEach((typeAliasDeclaration) => {
+    if (!filter(typeAliasDeclaration)) {
+      return;
+    }
+
     results.push(fromTypeAliasDeclaration(checker, typeAliasDeclaration));
   });
 

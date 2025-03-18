@@ -13,7 +13,6 @@ import type {
 } from "ts-morph";
 
 export interface TransformOptions {
-  project: Project;
   filter?: FilterDeclaration;
   map?: MapDeclaration;
 }
@@ -36,22 +35,19 @@ export type SourceDeclaration =
  * transform transforms each applicable TypeScript type into an equivalent
  * TypeScript class declaration. This replacement happens in-place.
  */
-export function transform({
-  project,
-  filter,
-  map = (structure) => structure,
-}: TransformOptions): void {
+export function transform(project: Project, options?: TransformOptions): void {
+  const mapStructure = options?.map ?? ((s) => s);
   const originalDeclarations = new Set<SourceDeclaration>();
   for (
     const {
       sourceDeclaration: originalDeclaration,
       structure,
       sourceDeclarations,
-    } of fromProject(project, filter)
+    } of fromProject(project, options?.filter)
   ) {
     originalDeclarations.add(originalDeclaration);
     const sourceFile = originalDeclaration.getSourceFile();
-    const mappedStructure = map(structure, sourceDeclarations);
+    const mappedStructure = mapStructure(structure, sourceDeclarations);
     sourceFile.addClass(mappedStructure);
   }
 
@@ -249,13 +245,14 @@ function getClassgenPropertyDeclaration(
 export function withContextDecorator(
   structure: ClassDeclarationStructure,
   sourceDeclarations: Map<string, Node>,
+  prefix?: string,
 ) {
   return Object.assign({}, structure, {
     decorators: [
       ...(structure?.decorators ?? []),
       {
         name: "context",
-        arguments: [renderContext(contextFrom(sourceDeclarations))],
+        arguments: [renderContext(contextFrom(sourceDeclarations, prefix))],
       },
     ],
   });
@@ -269,12 +266,13 @@ export function renderContext(entries: Array<[string, string]>): string {
   return `{ ${
     entries
       .map(([key, value]) => `"${key}": "${value}"`)
-      .join(", ")
+      .join(",\n")
   } }`;
 }
 
 export function contextFrom(
   sourceDeclarations: Map<string, Node>,
+  prefix?: string,
 ): Array<[string, string]> {
   return (
     Array.from(sourceDeclarations)
@@ -308,7 +306,7 @@ export function contextFrom(
           throw new Error(`Could not find name for ${key}`);
         }
 
-        return [key, `${declarationName}/${key}`];
+        return [key, `${prefix ?? ""}${declarationName}/${key}`];
       })
   );
 }

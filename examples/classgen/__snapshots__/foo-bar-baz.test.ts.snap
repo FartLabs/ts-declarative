@@ -23,25 +23,32 @@ class Bar {
 `;
 
 snapshot[`transform example foo-bar-baz.ts with decorators 1`] = `
-'@context({ "foo": "Foo/foo" })
+'@context({ "foo": "./examples/classgen/foo-bar-baz.ts#Foo/foo" })
 class Foo {
     foo: string;
 }
 
-@context({ "foo": "Foo/foo", "bar": "Bar/bar" })
+@context({
+    "foo": "./examples/classgen/foo-bar-baz.ts#Foo/foo",
+    "bar": "./examples/classgen/foo-bar-baz.ts#Bar/bar"
+})
 class FooBar {
     foo: string;
     bar: number;
 }
 
-@context({ "baz": "FooBarBaz/baz", "foo": "Foo/foo", "bar": "Bar/bar" })
+@context({
+    "baz": "./examples/classgen/foo-bar-baz.ts#FooBarBaz/baz",
+    "foo": "./examples/classgen/foo-bar-baz.ts#Foo/foo",
+    "bar": "./examples/classgen/foo-bar-baz.ts#Bar/bar"
+})
 export class FooBarBaz {
     baz: boolean;
     foo: string;
     bar: number;
 }
 
-@context({ "bar": "Bar/bar" })
+@context({ "bar": "./examples/classgen/foo-bar-baz.ts#Bar/bar" })
 class Bar {
     bar: number;
 }

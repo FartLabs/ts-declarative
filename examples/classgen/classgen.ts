@@ -36,6 +36,9 @@ export function transform({
   filter,
   map = (structure) => structure,
 }: TransformOptions): void {
+  const originalDeclarations = new Set<
+    ClassDeclaration | InterfaceDeclaration | TypeAliasDeclaration
+  >();
   for (
     const {
       originalDeclaration,
@@ -43,10 +46,13 @@ export function transform({
       sourceDeclarations,
     } of fromProject(project, filter)
   ) {
+    originalDeclarations.add(originalDeclaration);
     const sourceFile = originalDeclaration.getSourceFile();
-    originalDeclaration.remove();
-    sourceFile.addClass(map(structure, sourceDeclarations));
+    const mappedStructure = map(structure, sourceDeclarations);
+    sourceFile.addClass(mappedStructure);
   }
+
+  originalDeclarations.forEach((declaration) => declaration.remove());
 }
 
 export interface ClassgenDeclarationResult {

@@ -21,3 +21,29 @@ class Bar {
 }
 "
 `;
+
+snapshot[`transform example foo-bar-baz.ts with decorators 1`] = `
+"@context(holyShit)
+class Foo {
+    foo: string;
+}
+
+@context(holyShit)
+class FooBar {
+    foo: string;
+    bar: number;
+}
+
+@context(holyShit)
+export class FooBarBaz {
+    baz: boolean;
+    foo: string;
+    bar: number;
+}
+
+@context(holyShit)
+class Bar {
+    bar: number;
+}
+"
+`;

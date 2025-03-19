@@ -276,20 +276,7 @@ export function contextFrom(
 ): Array<[string, string]> {
   return (
     Array.from(sourceDeclarations)
-      // TODO: Skip if the keys is defined locally in the declaration. WIP:
-      // .filter(([key, sourceDeclaration]) => {
-      //   if (sourceDeclaration.isKind(SyntaxKind.ClassDeclaration)) {
-      //     return sourceDeclaration.getProperty(key) !== undefined;
-      //   }
-      //   if (sourceDeclaration.isKind(SyntaxKind.TypeAliasDeclaration)) {
-      //     return sourceDeclaration.getType().getProperty(key) !== undefined;
-      //   }
-      //   if (sourceDeclaration.isKind(SyntaxKind.InterfaceDeclaration)) {
-      //     return sourceDeclaration.getProperty(key) !== undefined;
-      //   }
-      //
-      //   throw new Error(`Could not determine type for ${key}`);
-      // })
+      // TODO: Skip if the keys is defined locally in the declaration.
       .map(([key, value]): [string, string] => {
         if (
           !value.isKind(SyntaxKind.InterfaceDeclaration) &&

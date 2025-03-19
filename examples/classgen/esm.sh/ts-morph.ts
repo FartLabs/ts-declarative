@@ -1,15 +1,18 @@
 import type { Project } from "ts-morph";
-import type { ModuleGraphJson } from "@deno/graph";
+import type { ModuleGraphJson, ModuleJson } from "@deno/graph";
 import { createGraph } from "@deno/graph";
 import { fetchGraph, readGraph } from "./graph.ts";
+import { makeEsmShURL } from "./url.ts";
+import { parseModuleSpecifier } from "./parse-module-specifier.ts";
 
-export async function addEsmSh(
-  project: Project,
+export async function walkEsmSh(
   specifier: string,
+  fn: (node: ModuleJson, sourceCode: string) => void | Promise<void>,
 ): Promise<void> {
-  const graph = await createGraph(specifier);
+  const esmShURL = makeEsmShURL(parseModuleSpecifier(specifier));
+  const graph = await createGraph(esmShURL.toString());
   for await (const [node, sourceCode] of fetchGraph(graph)) {
-    project.createSourceFile(node.specifier, sourceCode);
+    await fn(node, sourceCode);
   }
 }
 

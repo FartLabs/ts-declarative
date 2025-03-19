@@ -41,26 +41,34 @@ export function renderContext(entries: Array<[string, string]>): string {
  * contextFrom generates the context from the source declarations.
  */
 export function contextFrom(
-  sourceDeclarations: Map<string, Node>,
+  sourceDeclarations: Map<string, Node[]>,
   prefix?: string,
   id: MakePropertyID = defaultMakePropertyID,
 ): Array<[string, string]> {
   return (
     Array.from(sourceDeclarations)
       // TODO: Skip if the keys is defined locally in the declaration.
-      .map(([key, value]): [string, string] => {
-        if (!isSourceDeclaration(value)) {
+      .map(([key, nodes]): [string, string] => {
+        if (nodes.length !== 1) {
+          const allNodes = new Set(nodes);
+          if (allNodes.size !== 1) {
+            throw new Error(`Could not find unique declaration for ${key}`);
+          }
+        }
+
+        const node = nodes.at(0)!;
+        if (!isSourceDeclaration(node)) {
           throw new Error(
             `Could not find interface, type alias, or class declaration for ${key}`,
           );
         }
 
-        const declarationName = value.compilerNode.name?.getText();
+        const declarationName = node.compilerNode.name?.getText();
         if (declarationName === undefined) {
           throw new Error(`Could not find name for ${key}`);
         }
 
-        const filePath = value.getSourceFile().getFilePath();
+        const filePath = node.getSourceFile().getFilePath();
         return [key, id(key, declarationName, filePath, prefix)];
       })
   );

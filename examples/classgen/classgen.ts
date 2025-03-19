@@ -7,7 +7,6 @@ import type {
   Project,
   PropertyDeclarationStructure,
   SourceFile,
-  Type,
   TypeAliasDeclaration,
   TypeChecker,
 } from "ts-morph";
@@ -95,7 +94,7 @@ export interface ClassgenDeclarationResult {
    * sourceDeclarations are the source declarations for the given structure's
    * properties.
    */
-  sourceDeclarations: Map<string, Node>;
+  sourceDeclarations: Map<string, Node[]>;
 }
 
 /**
@@ -153,9 +152,15 @@ export function fromSourceFile(
 export function fromClassDeclaration(
   classDeclaration: ClassDeclaration,
 ): ClassgenDeclarationResult {
+  const { sourceDeclarations } = separateClassgenPropertyDeclaration(
+    getClassgenPropertyDeclaration(
+      classDeclaration.getProject().getTypeChecker(),
+      classDeclaration,
+    ),
+  );
   return {
     sourceDeclaration: classDeclaration,
-    sourceDeclarations: new Map([]),
+    sourceDeclarations,
     structure: classDeclaration.getStructure(),
   };
 }
@@ -167,7 +172,7 @@ export function fromInterfaceDeclaration(
   const interfaceStructure = interfaceDeclaration.getStructure();
   const { properties, sourceDeclarations } =
     separateClassgenPropertyDeclaration(
-      getClassgenPropertyDeclaration(checker, interfaceDeclaration.getType()),
+      getClassgenPropertyDeclaration(checker, interfaceDeclaration),
     );
   return {
     sourceDeclaration: interfaceDeclaration,
@@ -191,7 +196,7 @@ export function fromTypeAliasDeclaration(
   const typeAliasStructure = typeAliasDeclaration.getStructure();
   const { properties, sourceDeclarations } =
     separateClassgenPropertyDeclaration(
-      getClassgenPropertyDeclaration(checker, typeAliasDeclaration.getType()),
+      getClassgenPropertyDeclaration(checker, typeAliasDeclaration),
     );
   return {
     sourceDeclaration: typeAliasDeclaration,
@@ -213,11 +218,11 @@ function separateClassgenPropertyDeclaration(
 ) {
   return data.reduce<{
     properties: PropertyDeclarationStructure[];
-    sourceDeclarations: Map<string, Node>;
+    sourceDeclarations: Map<string, Node[]>;
   }>(
-    (acc, { propertyStructure, sourceDeclaration }) => {
+    (acc, { propertyStructure, sourceDeclarations }) => {
       acc.properties.push(propertyStructure);
-      acc.sourceDeclarations.set(propertyStructure.name, sourceDeclaration);
+      acc.sourceDeclarations.set(propertyStructure.name, sourceDeclarations);
       return acc;
     },
     { properties: [], sourceDeclarations: new Map() },
@@ -230,38 +235,30 @@ function separateClassgenPropertyDeclaration(
  */
 export interface ClassgenPropertyDeclaration {
   propertyStructure: PropertyDeclarationStructure;
-  sourceDeclaration: Node;
+  sourceDeclarations: Node[];
 }
 
 function getClassgenPropertyDeclaration(
   checker: TypeChecker,
-  declaration: Type,
+  declaration: Node,
 ): ClassgenPropertyDeclaration[] {
   return checker
-    .getPropertiesOfType(declaration)
+    .getPropertiesOfType(declaration.getType())
     .map((property): ClassgenPropertyDeclaration => {
-      const propertyDeclarations = property.getDeclarations();
-      if (propertyDeclarations.length !== 1) {
-        throw new Error("Property expected to have 1 declaration");
-      }
-
-      const currentDeclaration = propertyDeclarations.at(0);
-      if (currentDeclaration === undefined) {
-        throw new Error(`Could not find declaration for ${property.getName()}`);
-      }
-
-      const sourceDeclaration = currentDeclaration.getFirstAncestorOrThrow(
-        (node) => {
-          return isSourceDeclaration(node);
-        },
-      );
+      const sourceDeclarations = property.getDeclarations().map((node) => {
+        return node.getFirstAncestorOrThrow(
+          (node) => {
+            return isSourceDeclaration(node);
+          },
+        );
+      });
       return {
-        sourceDeclaration,
+        sourceDeclarations,
         // TODO: Complete property structure from source declaration e.g. JSDoc comments.
         propertyStructure: {
           kind: StructureKind.Property,
           name: property.getName(),
-          type: property.getTypeAtLocation(currentDeclaration).getText(),
+          type: property.getTypeAtLocation(declaration).getText(),
         },
       };
     });

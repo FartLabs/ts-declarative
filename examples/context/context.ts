@@ -9,9 +9,9 @@ export interface StateContext {
 }
 
 export function declarativeContext<TState extends StateContext>(
-  prefix: string,
+  prefix?: string,
 ): Declarative<TState> {
-  return (state, _name) => {
+  return (state) => {
     return {
       ...state,
       context: {

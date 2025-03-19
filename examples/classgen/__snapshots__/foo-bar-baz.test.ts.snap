@@ -23,14 +23,14 @@ class Bar {
 `;
 
 snapshot[`transform example foo-bar-baz.ts with decorators 1`] = `
-'@context({ "foo": "./examples/classgen/foo-bar-baz.ts#Foo/foo" })
+'@context({ "foo": "https://github.com/FartLabs/ts-declarative/blob/main/examples/classgen/foo-bar-baz.ts#Foo.foo" })
 class Foo {
     foo: string;
 }
 
 @context({
-    "foo": "./examples/classgen/foo-bar-baz.ts#Foo/foo",
-    "bar": "./examples/classgen/foo-bar-baz.ts#Bar/bar"
+    "foo": "https://github.com/FartLabs/ts-declarative/blob/main/examples/classgen/foo-bar-baz.ts#Foo.foo",
+    "bar": "https://github.com/FartLabs/ts-declarative/blob/main/examples/classgen/foo-bar-baz.ts#Bar.bar"
 })
 class FooBar {
     foo: string;
@@ -38,9 +38,9 @@ class FooBar {
 }
 
 @context({
-    "baz": "./examples/classgen/foo-bar-baz.ts#FooBarBaz/baz",
-    "foo": "./examples/classgen/foo-bar-baz.ts#Foo/foo",
-    "bar": "./examples/classgen/foo-bar-baz.ts#Bar/bar"
+    "baz": "https://github.com/FartLabs/ts-declarative/blob/main/examples/classgen/foo-bar-baz.ts#FooBarBaz.baz",
+    "foo": "https://github.com/FartLabs/ts-declarative/blob/main/examples/classgen/foo-bar-baz.ts#Foo.foo",
+    "bar": "https://github.com/FartLabs/ts-declarative/blob/main/examples/classgen/foo-bar-baz.ts#Bar.bar"
 })
 export class FooBarBaz {
     baz: boolean;
@@ -48,7 +48,7 @@ export class FooBarBaz {
     bar: number;
 }
 
-@context({ "bar": "./examples/classgen/foo-bar-baz.ts#Bar/bar" })
+@context({ "bar": "https://github.com/FartLabs/ts-declarative/blob/main/examples/classgen/foo-bar-baz.ts#Bar.bar" })
 class Bar {
     bar: number;
 }

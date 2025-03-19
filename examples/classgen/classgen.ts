@@ -12,19 +12,31 @@ import type {
   TypeChecker,
 } from "ts-morph";
 
-export interface TransformOptions {
-  filter?: FilterDeclaration;
-  map?: MapDeclaration;
-}
-
+/**
+ * FilterDeclaration is a function that determines if a class declaration should
+ * be included in transformation process.
+ */
 export type FilterDeclaration = (
-  sourceDeclaration: SourceDeclaration,
+  sourceDeclaration: SourceDeclaration
 ) => boolean;
 
+/**
+ * MapDeclaration is a function that transforms a class declaration structure.
+ */
 export type MapDeclaration = (
-  structure: ClassDeclarationStructure,
-  sourceDeclarations: Map<string, Node>,
+  info: ClassgenDeclarationResult
 ) => ClassDeclarationStructure;
+
+/**
+ * MakePropertyID makes an ID string from a property name, declaration name,
+ * and file path.
+ */
+export type MakePropertyID = (
+  propertyName: string,
+  declarationName: string,
+  filePath?: string,
+  prefix?: string
+) => string;
 
 export type SourceDeclaration =
   | ClassDeclaration
@@ -35,25 +47,36 @@ export type SourceDeclaration =
  * transform transforms each applicable TypeScript type into an equivalent
  * TypeScript class declaration. This replacement happens in-place.
  */
-export function transform(project: Project, options?: TransformOptions): void {
-  const mapStructure = options?.map ?? ((s) => s);
-  const originalDeclarations = new Set<SourceDeclaration>();
-  for (
-    const {
-      sourceDeclaration: originalDeclaration,
+export function transform(
+  project: Project,
+  map: MapDeclaration = ({ structure }) => structure,
+  filter?: FilterDeclaration
+): void {
+  const sourceDeclarationsSet = new Set<SourceDeclaration>();
+  for (const {
+    structure,
+    sourceDeclaration,
+    sourceDeclarations,
+  } of fromProject(project, filter)) {
+    sourceDeclarationsSet.add(sourceDeclaration);
+    const sourceFile = sourceDeclaration.getSourceFile();
+    const mappedStructure = map({
       structure,
+      sourceDeclaration,
       sourceDeclarations,
-    } of fromProject(project, options?.filter)
-  ) {
-    originalDeclarations.add(originalDeclaration);
-    const sourceFile = originalDeclaration.getSourceFile();
-    const mappedStructure = mapStructure(structure, sourceDeclarations);
+    });
     sourceFile.addClass(mappedStructure);
+    sourceFile.formatText();
   }
 
-  originalDeclarations.forEach((declaration) => declaration.remove());
+  sourceDeclarationsSet.forEach((declaration) => {
+    declaration.remove();
+  });
 }
 
+/**
+ * ClassgenDeclarationResult is a result of a classgen transformation.
+ */
 export interface ClassgenDeclarationResult {
   /**
    * sourceDeclaration is the source declaration for the given structure.
@@ -79,7 +102,7 @@ export interface ClassgenDeclarationResult {
  */
 export function fromProject(
   project: Project,
-  filter?: FilterDeclaration,
+  filter?: FilterDeclaration
 ): ClassgenDeclarationResult[] {
   return project.getSourceFiles().flatMap((sourceFile) => {
     return fromSourceFile(sourceFile, filter);
@@ -92,7 +115,7 @@ export function fromProject(
  */
 export function fromSourceFile(
   sourceFile: SourceFile,
-  filter: FilterDeclaration = () => true,
+  filter: FilterDeclaration = () => true
 ): ClassgenDeclarationResult[] {
   // TODO: Consider migrating to transform API.
   // https://ts-morph.com/manipulation/transforms
@@ -126,7 +149,7 @@ export function fromSourceFile(
 }
 
 export function fromClassDeclaration(
-  classDeclaration: ClassDeclaration,
+  classDeclaration: ClassDeclaration
 ): ClassgenDeclarationResult {
   return {
     sourceDeclaration: classDeclaration,
@@ -137,12 +160,12 @@ export function fromClassDeclaration(
 
 export function fromInterfaceDeclaration(
   checker: TypeChecker,
-  interfaceDeclaration: InterfaceDeclaration,
+  interfaceDeclaration: InterfaceDeclaration
 ): ClassgenDeclarationResult {
   const interfaceStructure = interfaceDeclaration.getStructure();
   const { properties, sourceDeclarations: declarations } =
     separateClassgenPropertyDeclaration(
-      getClassgenPropertyDeclaration(checker, interfaceDeclaration.getType()),
+      getClassgenPropertyDeclaration(checker, interfaceDeclaration.getType())
     );
   return {
     sourceDeclaration: interfaceDeclaration,
@@ -161,12 +184,12 @@ export function fromInterfaceDeclaration(
 
 export function fromTypeAliasDeclaration(
   checker: TypeChecker,
-  typeAliasDeclaration: TypeAliasDeclaration,
+  typeAliasDeclaration: TypeAliasDeclaration
 ): ClassgenDeclarationResult {
   const typeAliasStructure = typeAliasDeclaration.getStructure();
   const { properties, sourceDeclarations: declarations } =
     separateClassgenPropertyDeclaration(
-      getClassgenPropertyDeclaration(checker, typeAliasDeclaration.getType()),
+      getClassgenPropertyDeclaration(checker, typeAliasDeclaration.getType())
     );
   return {
     sourceDeclaration: typeAliasDeclaration,
@@ -183,8 +206,24 @@ export function fromTypeAliasDeclaration(
   };
 }
 
+/**
+ * defaultMakePropertyID returns a default implementation of MakePropertyID.
+ */
+export const defaultMakePropertyID: MakePropertyID = (
+  propertyName,
+  declarationName,
+  filePath,
+  prefix
+) => {
+  return (
+    (prefix ?? "") +
+    (filePath !== undefined ? `${filePath}#` : "") +
+    `${declarationName}.${propertyName}`
+  );
+};
+
 function separateClassgenPropertyDeclaration(
-  data: ClassgenPropertyDeclaration[],
+  data: ClassgenPropertyDeclaration[]
 ) {
   return data.reduce<{
     properties: PropertyDeclarationStructure[];
@@ -195,10 +234,14 @@ function separateClassgenPropertyDeclaration(
       acc.sourceDeclarations.set(propertyStructure.name, sourceDeclaration);
       return acc;
     },
-    { properties: [], sourceDeclarations: new Map() },
+    { properties: [], sourceDeclarations: new Map() }
   );
 }
 
+/**
+ * ClassgenPropertyDeclaration is a class that represents a property
+ * declaration and its source declaration.
+ */
 export interface ClassgenPropertyDeclaration {
   propertyStructure: PropertyDeclarationStructure;
   sourceDeclaration: Node;
@@ -206,7 +249,7 @@ export interface ClassgenPropertyDeclaration {
 
 function getClassgenPropertyDeclaration(
   checker: TypeChecker,
-  declaration: Type,
+  declaration: Type
 ): ClassgenPropertyDeclaration[] {
   return checker
     .getPropertiesOfType(declaration)
@@ -221,13 +264,13 @@ function getClassgenPropertyDeclaration(
         throw new Error(`Could not find declaration for ${property.getName()}`);
       }
 
+      const sourceDeclaration = currentDeclaration.getFirstAncestorOrThrow(
+        (node) => {
+          return isSourceDeclaration(node);
+        }
+      );
       return {
-        sourceDeclaration: currentDeclaration.getFirstAncestorOrThrow(
-          (node) =>
-            node.getKind() === SyntaxKind.TypeAliasDeclaration ||
-            node.getKind() === SyntaxKind.InterfaceDeclaration ||
-            node.getKind() === SyntaxKind.ClassDeclaration,
-        ),
+        sourceDeclaration,
         // TODO: Complete property structure from source declaration e.g. JSDoc comments.
         propertyStructure: {
           kind: StructureKind.Property,
@@ -239,52 +282,61 @@ function getClassgenPropertyDeclaration(
 }
 
 /**
- * withContextDecorator adds a context decorator to the class declaration
- * structure based on the source declarations.
+ * withAddContextDecorator adds a context decorator to the class
+ * declaration structure based on the source declarations.
  */
-export function withContextDecorator(
-  structure: ClassDeclarationStructure,
-  sourceDeclarations: Map<string, Node>,
+export function withAddContextDecorator(
+  { structure, sourceDeclarations }: ClassgenDeclarationResult,
   prefix?: string,
+  id: MakePropertyID = defaultMakePropertyID
 ) {
   return Object.assign({}, structure, {
     decorators: [
       ...(structure?.decorators ?? []),
       {
         name: "context",
-        arguments: [renderContext(contextFrom(sourceDeclarations, prefix))],
+        arguments: [renderContext(contextFrom(sourceDeclarations, prefix, id))],
       },
     ],
   });
 }
 
+export function isSourceDeclaration(node: Node): node is SourceDeclaration {
+  return (
+    node.isKind(SyntaxKind.ClassDeclaration) ||
+    node.isKind(SyntaxKind.InterfaceDeclaration) ||
+    node.isKind(SyntaxKind.TypeAliasDeclaration)
+  );
+}
+
+/**
+ * renderContext returns a string representation of the context object.
+ */
 export function renderContext(entries: Array<[string, string]>): string {
   if (entries.length === 0) {
     return "";
   }
 
-  return `{ ${
-    entries
-      .map(([key, value]) => `"${key}": "${value}"`)
-      .join(",\n")
-  } }`;
+  return `{ ${entries
+    .map(([key, value]) => `"${key}": "${value}"`)
+    .join(",\n")} }`;
 }
 
+/**
+ * contextFrom generates the context from the source declarations.
+ */
 export function contextFrom(
   sourceDeclarations: Map<string, Node>,
   prefix?: string,
+  id: MakePropertyID = defaultMakePropertyID
 ): Array<[string, string]> {
   return (
     Array.from(sourceDeclarations)
       // TODO: Skip if the keys is defined locally in the declaration.
       .map(([key, value]): [string, string] => {
-        if (
-          !value.isKind(SyntaxKind.InterfaceDeclaration) &&
-          !value.isKind(SyntaxKind.TypeAliasDeclaration) &&
-          !value.isKind(SyntaxKind.ClassDeclaration)
-        ) {
+        if (!isSourceDeclaration(value)) {
           throw new Error(
-            `Could not find interface, type alias, or class declaration for ${key}`,
+            `Could not find interface, type alias, or class declaration for ${key}`
           );
         }
 
@@ -293,7 +345,8 @@ export function contextFrom(
           throw new Error(`Could not find name for ${key}`);
         }
 
-        return [key, `${prefix ?? ""}${declarationName}/${key}`];
+        const filePath = value.getSourceFile().getFilePath();
+        return [key, id(key, declarationName, filePath, prefix)];
       })
   );
 }

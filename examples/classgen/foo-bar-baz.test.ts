@@ -1,9 +1,7 @@
 import { assertSnapshot } from "@std/testing/snapshot";
 import { Project } from "ts-morph";
-import {
-  transform,
-  withAddContextDecorator,
-} from "./classgen.ts";
+import { transform } from "./classgen.ts";
+import { withAddContextDecorator } from "./context.ts";
 
 const prefix = "https://github.com/FartLabs/ts-declarative/blob/main";
 const relativePath = "./examples/classgen/foo-bar-baz.ts";

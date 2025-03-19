@@ -155,8 +155,8 @@ export function fromClassDeclaration(
 ): ClassgenDeclarationResult {
   return {
     sourceDeclaration: classDeclaration,
-    structure: classDeclaration.getStructure(),
     sourceDeclarations: new Map([]),
+    structure: classDeclaration.getStructure(),
   };
 }
 
@@ -165,12 +165,13 @@ export function fromInterfaceDeclaration(
   interfaceDeclaration: InterfaceDeclaration,
 ): ClassgenDeclarationResult {
   const interfaceStructure = interfaceDeclaration.getStructure();
-  const { properties, sourceDeclarations: declarations } =
+  const { properties, sourceDeclarations } =
     separateClassgenPropertyDeclaration(
       getClassgenPropertyDeclaration(checker, interfaceDeclaration.getType()),
     );
   return {
     sourceDeclaration: interfaceDeclaration,
+    sourceDeclarations,
     structure: {
       kind: StructureKind.Class,
       docs: interfaceStructure.docs,
@@ -180,7 +181,6 @@ export function fromInterfaceDeclaration(
       typeParameters: interfaceStructure.typeParameters,
       properties,
     },
-    sourceDeclarations: declarations,
   };
 }
 
@@ -189,12 +189,13 @@ export function fromTypeAliasDeclaration(
   typeAliasDeclaration: TypeAliasDeclaration,
 ): ClassgenDeclarationResult {
   const typeAliasStructure = typeAliasDeclaration.getStructure();
-  const { properties, sourceDeclarations: declarations } =
+  const { properties, sourceDeclarations } =
     separateClassgenPropertyDeclaration(
       getClassgenPropertyDeclaration(checker, typeAliasDeclaration.getType()),
     );
   return {
     sourceDeclaration: typeAliasDeclaration,
+    sourceDeclarations,
     structure: {
       kind: StructureKind.Class,
       docs: typeAliasStructure.docs,
@@ -204,7 +205,6 @@ export function fromTypeAliasDeclaration(
       typeParameters: typeAliasStructure.typeParameters,
       properties,
     },
-    sourceDeclarations: declarations,
   };
 }
 

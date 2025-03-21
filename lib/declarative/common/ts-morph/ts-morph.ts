@@ -1,6 +1,7 @@
 import type { ProjectOptions, SourceFile } from "ts-morph";
 import { Project } from "ts-morph";
 import type { Declarative } from "#/lib/declarative/declarative.ts";
+import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
 /**
  * TsMorph is a declarative class type from ts-morph.
@@ -10,16 +11,22 @@ export interface TsMorph {
 }
 
 export interface TsMorphProperty {
-  // TODO: Add documentation.
-  // TODO: Add which class the inherited properties associate with respectively.
   name: string;
   type: string;
   paramIndex?: number;
+  // TODO: Add documentation.
+  // TODO: Add which class the inherited properties associate with respectively.
 }
 
 export interface ValueTsMorph {
   tsMorph?: TsMorph;
 }
+
+export const tsMorph = createDecoratorFactory({
+  initialize: async (entrypoint: URL | string, options?: ProjectOptions) => {
+    return [await declarativeTsMorph(entrypoint, options)];
+  },
+});
 
 export async function declarativeTsMorph<TValue extends ValueTsMorph>(
   entrypoint: URL | string,
@@ -33,9 +40,31 @@ export async function declarativeTsMorph<TValue extends ValueTsMorph>(
   );
 
   return (value, name) => {
-    return { ...value, tsMorph: getTsMorph(sourceFile, name) };
+    return { ...value, tsMorph: getTsMorph(sourceFile, name) } as TValue;
   };
 }
+
+// shit
+
+export interface ValueType {
+  type?: string[];
+}
+
+export const type = createDecoratorFactory({
+  initialize: (...type: Array<string | string[]>) => {
+    return [declarativeType(...type)];
+  },
+});
+
+export function declarativeType<TValue extends ValueType>(
+  ...type: Array<string | string[]>
+): Declarative<TValue> {
+  return <TValue extends ValueType>(value: TValue | undefined): TValue => {
+    return { ...value, type: type.flat() } as TValue;
+  };
+}
+
+// shit
 
 function getTsMorph(sourceFile: SourceFile, name: string): TsMorph {
   const classDeclaration = sourceFile.getClass(name);

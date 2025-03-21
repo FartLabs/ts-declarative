@@ -4,7 +4,7 @@ import { context } from "./context.ts";
 
 const exampleContext = "http://example.com/";
 
-@context(exampleContext)
+@(await context(exampleContext))
 class Example {}
 
 Deno.test("Decorator context decorates value", () => {

@@ -11,6 +11,10 @@ export function declarativeJSONSchema<
   TValue extends ValueJSONSchema,
 >(): Declarative<TValue> {
   return (value) => {
+    if (value === undefined) {
+      return;
+    }
+
     return { ...value, jsonSchema: compile(value) };
   };
 }
@@ -21,7 +25,7 @@ export function compile({ tsMorph }: ValueTsMorph) {
 
 export function serialize({ tsMorph }: ValueTsMorph): string {
   if (tsMorph === undefined || tsMorph?.properties.length === 0) {
-    return `{}`;
+    return "{}";
   }
 
   return `{ ${

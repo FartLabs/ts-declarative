@@ -9,39 +9,44 @@ interface Fake {
   baz?: string;
 }
 
-Deno.test("Declarative decorator factory", () => {
+Deno.test("Declarative decorator factory", async () => {
   const storage = new DeclarativeStorageInMemory<Fake>();
-  const declarative = createDecoratorFactory(
-    { storage, prefix: "example#", initialize: (): Fake => ({ foo: "foo" }) },
-    (value) => ({ ...value, bar: "bar" }),
-  );
+  const declarative = createDecoratorFactory({
+    storage,
+    prefix: "example#",
+    initialize: () => {
+      return [(value) => ({ ...value, bar: "bar" })];
+    },
+  });
 
-  @declarative()
+  @(await declarative())
   class Foo {}
 
   const id = getPrototypeID(Foo);
   assertEquals(id, "example#Foo");
   assertEquals(storage.get(id!), {
-    foo: "foo",
     bar: "bar",
   });
 });
 
-Deno.test("Declarative decorator factory chaining", () => {
-  const fooBar = createDecoratorFactory(
-    {
-      prefix: "example#",
-      initialize: (value: Fake | undefined) => ({ ...value, foo: "foo" }),
+Deno.test("Declarative decorator factory chaining", async () => {
+  const fooBar = createDecoratorFactory({
+    prefix: "example#",
+    initialize: () => {
+      return [
+        (value: Fake | undefined) => ({ ...value, foo: "foo", bar: "bar" }),
+      ];
     },
-    (value) => ({ ...value, bar: "bar" }),
-  );
-  const baz = createDecoratorFactory(
-    { prefix: "example#", initialize: (value?: Fake) => value },
-    (value) => ({ ...value, baz: "baz" }),
-  );
+  });
+  const baz = createDecoratorFactory({
+    prefix: "example#",
+    initialize: () => {
+      return [(value: Fake | undefined) => ({ ...value, baz: "baz" })];
+    },
+  });
 
-  @baz()
-  @fooBar()
+  @(await baz())
+  @(await fooBar())
   class Example0 {}
 
   assertEquals(getPrototypeID(Example0), "example#Example0");
@@ -51,8 +56,8 @@ Deno.test("Declarative decorator factory chaining", () => {
     baz: "baz",
   });
 
-  @fooBar()
-  @baz()
+  @(await fooBar())
+  @(await baz())
   class Example1 {}
 
   assertEquals(getPrototypeID(Example1), "example#Example1");

@@ -8,31 +8,16 @@ export interface ValueContext {
   context?: Context;
 }
 
+export const context = await createDecoratorFactory({
+  initialize: (context?: Context) => {
+    return [declarativeContext(context)];
+  },
+});
+
 export function declarativeContext<TValue extends ValueContext>(
-  prefix?: string,
+  context?: Context,
 ): Declarative<TValue> {
   return <TValue extends ValueContext>(value: TValue | undefined): TValue => {
-    if (typeof value?.context === "string") {
-      return value;
-    }
-
-    const context: Context = { ...value?.context };
-    if (prefix !== undefined) {
-      context["@vocab"] = prefix;
-    }
-
     return { ...value, context } as TValue;
   };
 }
-
-export const context = createDecoratorFactory(
-  {
-    initialize: (
-      value: ValueContext | undefined,
-      context?: Context,
-    ): ValueContext => {
-      return { ...value, context };
-    },
-  },
-  declarativeContext(),
-);

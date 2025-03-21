@@ -30,5 +30,3 @@ if (import.meta.main) {
   //   }
   // ]
 }
-
-// TODO: Add tests for all declaratives.

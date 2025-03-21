@@ -1,11 +1,14 @@
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
-export interface StateType {
+export interface ValueType {
   type?: string[];
 }
 
 export const type = createDecoratorFactory({
-  initialize: (...type: Array<string | string[]>): StateType => {
-    return { type: type.flat() };
+  initialize: (
+    value: ValueType | undefined,
+    ...type: Array<string | string[]>
+  ): ValueType => {
+    return { ...value, type: type.flat() };
   },
 });

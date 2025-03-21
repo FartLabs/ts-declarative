@@ -1,6 +1,10 @@
 // @deno-types="@types/jsonld"
 import jsonld from "jsonld";
-import { context, docOf } from "#/lib/declarative/common/linked-data/mod.ts";
+import {
+  context,
+  docOf,
+  type,
+} from "#/lib/declarative/common/linked-data/mod.ts";
 
 @context("https://schema.org/")
 export class Person {
@@ -8,7 +12,7 @@ export class Person {
 }
 
 @context("https://schema.org/")
-// @type("Person") // TODO: Chain decorators.
+@type("Person")
 export class AliasedPerson {
   public constructor(public name: string) {}
 }
@@ -26,3 +30,5 @@ if (import.meta.main) {
   //   }
   // ]
 }
+
+// TODO: Add tests for all declaratives.

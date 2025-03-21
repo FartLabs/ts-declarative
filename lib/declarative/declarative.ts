@@ -6,30 +6,29 @@ import { DeclarativeStoragePrototype } from "./storage/prototype.ts";
 export interface DeclarativeOptions<TClass extends Class, TValue> {
   target: TClass;
   prefix?: string;
-  initialize?: () => TValue;
   storage?: DeclarativeStorage<TValue>;
+  defaultValue?: () => TValue;
 }
 
 export function declareClass<TClass extends Class, TValue>(
-  optionsOrClass: DeclarativeOptions<TClass, TValue> | TClass,
+  optionsOrClass: TClass | DeclarativeOptions<TClass, TValue>,
   ...fns: Declarative<TValue>[]
 ): TClass {
-  const {
-    target,
-    prefix,
-    initialize,
-    storage = new DeclarativeStoragePrototype<TValue>(target),
-  } = typeof optionsOrClass === "object"
-    ? optionsOrClass
-    : { target: optionsOrClass };
+  const { target, prefix, defaultValue, storage } = getOptions(optionsOrClass);
   if (target.name === undefined) {
     throw new Error("Class decorator must have a name.");
   }
 
+  if (storage === undefined) {
+    throw new Error("Class decorator must have a storage.");
+  }
+
   const id = `${prefix ?? ""}${target.name}`;
   const fn = declarativeSequence<TValue>(...fns);
-  const value = fn(storage.get(id, initialize)!, target.name);
-  storage.set(id, value);
+  const value = fn(storage.get(id, defaultValue), target.name);
+  if (value !== undefined) {
+    storage.set(id, value);
+  }
 
   // Associate the ID with its class.
   setPrototypeID(target, id);
@@ -38,10 +37,20 @@ export function declareClass<TClass extends Class, TValue>(
   return target;
 }
 
+export function getOptions<TClass extends Class, TValue>(
+  optionsOrClass: TClass | DeclarativeOptions<TClass, TValue>,
+): DeclarativeOptions<TClass, TValue> {
+  const options = typeof optionsOrClass === "object"
+    ? optionsOrClass
+    : { target: optionsOrClass };
+  options.storage ??= new DeclarativeStoragePrototype(options.target);
+  return options;
+}
+
 export function declarativeSequence<TValue>(
   ...declaratives: Declarative<TValue>[]
 ): Declarative<TValue> {
-  return (initialValue: TValue, name: string) => {
+  return (initialValue: TValue | undefined, name: string) => {
     return declaratives.reduce(
       (acc, fn) => fn(acc, name),
       structuredClone(initialValue),
@@ -49,7 +58,10 @@ export function declarativeSequence<TValue>(
   };
 }
 
-export type Declarative<TValue> = (value: TValue, name: string) => TValue;
+export type Declarative<TValue> = (
+  value: TValue | undefined,
+  name: string,
+) => TValue | undefined;
 
 export type Class = new (...args: any[]) => any;
 

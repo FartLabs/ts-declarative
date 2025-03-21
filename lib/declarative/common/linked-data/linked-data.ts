@@ -1,22 +1,22 @@
 import type { Class } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
-import type { StateType } from "./type.ts";
-import type { StateContext } from "./context.ts";
+import type { ValueType } from "./type.ts";
+import type { ValueContext } from "./context.ts";
 
-export interface StateLinkedData extends StateType, StateContext {}
+export interface ValueLinkedData extends ValueType, ValueContext {}
 
 export function docOf<T>(instance: T): Record<string, unknown> {
   const { constructor } = instance as { constructor: Class };
-  const state = getPrototypeValue<StateLinkedData>(constructor);
+  const value = getPrototypeValue<ValueLinkedData>(constructor);
   const doc: Record<string, unknown> = Object.assign({}, instance);
-  if (state === undefined) {
+  if (value === undefined) {
     return doc;
   }
 
-  if (state.context !== undefined) {
-    Object.assign(doc, { "@context": state.context });
+  if (value.context !== undefined) {
+    Object.assign(doc, { "@context": value.context });
   }
 
-  Object.assign(doc, { "@type": state.type ?? constructor.name });
+  Object.assign(doc, { "@type": value.type ?? constructor.name });
   return doc;
 }

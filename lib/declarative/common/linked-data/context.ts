@@ -4,31 +4,34 @@ import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 // deno-lint-ignore no-explicit-any
 export type Context = string | Record<string, any>;
 
-export interface StateContext {
+export interface ValueContext {
   context?: Context;
 }
 
-export function declarativeContext<TState extends StateContext>(
+export function declarativeContext<TValue extends ValueContext>(
   prefix?: string,
-): Declarative<TState> {
-  return (state) => {
-    if (typeof state?.context === "string") {
-      return state;
+): Declarative<TValue> {
+  return <TValue extends ValueContext>(value: TValue | undefined): TValue => {
+    if (typeof value?.context === "string") {
+      return value;
     }
 
-    const context = { ...state?.context };
+    const context: Context = { ...value?.context };
     if (prefix !== undefined) {
       context["@vocab"] = prefix;
     }
 
-    return { ...state, context };
+    return { ...value, context } as TValue;
   };
 }
 
 export const context = createDecoratorFactory(
   {
-    initialize: (context?: Context): StateContext => {
-      return { context };
+    initialize: (
+      value: ValueContext | undefined,
+      context?: Context,
+    ): ValueContext => {
+      return { ...value, context };
     },
   },
   declarativeContext(),

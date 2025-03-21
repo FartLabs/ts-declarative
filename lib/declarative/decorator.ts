@@ -4,9 +4,11 @@ import type { Class, Declarative, DeclarativeOptions } from "./declarative.ts";
 import { declareClass } from "./declarative.ts";
 
 export interface DecoratorFactoryOptions<TValue, TArgs extends any[]>
-  extends Omit<DeclarativeOptions<Class, TValue>, "target" | "initialize"> {
-  // TODO: initialize: (args: TArgs, value: TValue) => TValue;
-  initialize: (...args: TArgs) => TValue;
+  extends Omit<DeclarativeOptions<Class, TValue>, "target"> {
+  initialize?: (
+    value: TValue | undefined,
+    ...args: TArgs
+  ) => TValue | undefined;
 }
 
 export function createDecoratorFactory<TValue, TArgs extends any[]>(
@@ -14,17 +16,14 @@ export function createDecoratorFactory<TValue, TArgs extends any[]>(
   ...fns: Declarative<TValue>[]
 ): (...args: TArgs) => (target: Class) => Class {
   return function (...args: TArgs) {
+    if (options.initialize !== undefined) {
+      fns.unshift((value: TValue | undefined) => {
+        return options.initialize!(value, ...args);
+      });
+    }
+
     return function <TClass extends Class>(target: TClass) {
-      return declareClass<TClass, TValue>(
-        {
-          ...options,
-          target,
-          initialize: () => {
-            return options.initialize(...args);
-          },
-        },
-        ...fns,
-      );
+      return declareClass<TClass, TValue>({ ...options, target }, ...fns);
     };
   };
 }

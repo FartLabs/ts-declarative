@@ -19,8 +19,8 @@ Deno.test("Two-part declare class operation", async (t) => {
   await t.step("Part 1 sets base value", () => {
     declareClass({
       target: Foo,
-      prefix: "fake#",
-      initialize: (): FooBar => ({ foo: "foo" }),
+      prefix: "example#",
+      defaultValue: (): FooBar => ({ foo: "foo" }),
     });
     assertEquals(getPrototypeValue<FooBar>(Foo), { foo: "foo" });
   });
@@ -29,8 +29,8 @@ Deno.test("Two-part declare class operation", async (t) => {
     const storage = new DeclarativeStorageInMemory<FooBar>();
     declareClass({
       target: Foo,
-      prefix: "fake#",
-      initialize: (): FooBar => ({
+      prefix: "example#",
+      defaultValue: (): FooBar => ({
         ...getPrototypeValue<FooBar>(Foo),
         bar: "bar",
       }),
@@ -38,7 +38,7 @@ Deno.test("Two-part declare class operation", async (t) => {
     });
 
     const classID = getPrototypeID(Foo);
-    assertEquals(classID, "fake#Foo");
+    assertEquals(classID, "example#Foo");
     assertEquals(storage.get(classID!), { foo: "foo", bar: "bar" });
   });
 });
@@ -58,15 +58,15 @@ Deno.test("Declarative declare class operation", async (t) => {
     declareClass(
       {
         storage,
-        prefix: "fake#",
+        prefix: "example#",
         target: Foo,
-        initialize: (): FooBar => ({ foo: "foo" }),
+        defaultValue: (): FooBar => ({ foo: "foo" }),
       },
       (value) => ({ ...value, bar: "bar" }),
     );
 
     const classID = getPrototypeID(Foo);
-    assertEquals(classID, "fake#Foo");
+    assertEquals(classID, "example#Foo");
     assertEquals(storage.get(classID!), { foo: "foo", bar: "bar" });
   });
 });

@@ -12,7 +12,7 @@ interface Fake {
 Deno.test("Declarative decorator factory", () => {
   const storage = new DeclarativeStorageInMemory<Fake>();
   const declarative = createDecoratorFactory(
-    { storage, prefix: "fake#", initialize: (): Fake => ({ foo: "foo" }) },
+    { storage, prefix: "example#", initialize: (): Fake => ({ foo: "foo" }) },
     (value) => ({ ...value, bar: "bar" }),
   );
 
@@ -20,21 +20,23 @@ Deno.test("Declarative decorator factory", () => {
   class Foo {}
 
   const id = getPrototypeID(Foo);
-  assertEquals(id, "fake#Foo");
+  assertEquals(id, "example#Foo");
   assertEquals(storage.get(id!), {
     foo: "foo",
     bar: "bar",
   });
 });
 
-// TODO: Test-driven development. Make the test pass.
 Deno.test("Declarative decorator factory chaining", () => {
   const fooBar = createDecoratorFactory(
-    { prefix: "ex#", initialize: (): Fake => ({ foo: "foo" }) },
+    {
+      prefix: "example#",
+      initialize: (value: Fake | undefined) => ({ ...value, foo: "foo" }),
+    },
     (value) => ({ ...value, bar: "bar" }),
   );
   const baz = createDecoratorFactory(
-    { prefix: "ex#", initialize: (): Fake => ({}) },
+    { prefix: "example#", initialize: (value?: Fake) => value },
     (value) => ({ ...value, baz: "baz" }),
   );
 
@@ -42,7 +44,7 @@ Deno.test("Declarative decorator factory chaining", () => {
   @fooBar()
   class Example0 {}
 
-  assertEquals(getPrototypeID(Example0), "ex#Example0");
+  assertEquals(getPrototypeID(Example0), "example#Example0");
   assertEquals(getPrototypeValue<Fake>(Example0), {
     foo: "foo",
     bar: "bar",
@@ -53,7 +55,7 @@ Deno.test("Declarative decorator factory chaining", () => {
   @baz()
   class Example1 {}
 
-  assertEquals(getPrototypeID(Example1), "ex#Example1");
+  assertEquals(getPrototypeID(Example1), "example#Example1");
   assertEquals(getPrototypeValue<Fake>(Example1), {
     foo: "foo",
     bar: "bar",

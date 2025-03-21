@@ -17,14 +17,14 @@ export interface TsMorphProperty {
   paramIndex?: number;
 }
 
-export interface StateTsMorph {
+export interface ValueTsMorph {
   tsMorph?: TsMorph;
 }
 
-export async function declarativeTsMorph<TState extends StateTsMorph>(
+export async function declarativeTsMorph<TValue extends ValueTsMorph>(
   entrypoint: URL | string,
   options?: ProjectOptions,
-): Promise<Declarative<TState>> {
+): Promise<Declarative<TValue>> {
   const project = new Project({ useInMemoryFileSystem: true, ...options });
   const sourceFile = project.createSourceFile(
     entrypoint.toString(),
@@ -32,8 +32,8 @@ export async function declarativeTsMorph<TState extends StateTsMorph>(
     { overwrite: true },
   );
 
-  return (state, name) => {
-    return { ...state, tsMorph: getTsMorph(sourceFile, name) };
+  return (value, name) => {
+    return { ...value, tsMorph: getTsMorph(sourceFile, name) };
   };
 }
 

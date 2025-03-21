@@ -5,6 +5,7 @@ import { declareClass } from "./declarative.ts";
 
 export interface DecoratorFactoryOptions<TValue, TArgs extends any[]>
   extends Omit<DeclarativeOptions<Class, TValue>, "target" | "initialize"> {
+  // TODO: initialize: (args: TArgs, value: TValue) => TValue;
   initialize: (...args: TArgs) => TValue;
 }
 

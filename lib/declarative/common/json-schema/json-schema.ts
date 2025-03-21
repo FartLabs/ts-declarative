@@ -1,6 +1,6 @@
 import { TypeBoxFromSyntax } from "@sinclair/typemap";
 import type { Declarative } from "#/lib/declarative/declarative.ts";
-import type { StateTsMorph } from "#/examples/ts-morph/ts-morph.ts";
+import type { StateTsMorph } from "../../lib/declarative/common/ts-morph/ts-morph.ts";
 
 export interface StateJSONSchema extends StateTsMorph {
   // deno-lint-ignore no-explicit-any

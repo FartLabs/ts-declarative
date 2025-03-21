@@ -16,8 +16,7 @@ export class AliasedPerson {
 // deno -A examples/getting-started/main.ts
 if (import.meta.main) {
   const ash = new Person("Ash Ketchum");
-  const docAsh = docOf(ash);
-  const expandedAsh = await jsonld.expand(docAsh);
+  const expandedAsh = await jsonld.expand(docOf(ash));
   console.log(expandedAsh);
   // Output:
   // [

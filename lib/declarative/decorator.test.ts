@@ -9,7 +9,7 @@ interface Fake {
   baz?: string;
 }
 
-Deno.test("Declarative decorator factory", async () => {
+Deno.test("Declarative decorator factory", () => {
   const storage = new DeclarativeStorageInMemory<Fake>();
   const declarative = createDecoratorFactory({
     storage,
@@ -19,7 +19,7 @@ Deno.test("Declarative decorator factory", async () => {
     },
   });
 
-  @(await declarative())
+  @declarative()
   class Foo {}
 
   const id = getPrototypeID(Foo);
@@ -29,7 +29,7 @@ Deno.test("Declarative decorator factory", async () => {
   });
 });
 
-Deno.test("Declarative decorator factory chaining", async () => {
+Deno.test("Declarative decorator factory chaining", () => {
   const fooBar = createDecoratorFactory({
     prefix: "example#",
     initialize: () => {
@@ -45,8 +45,8 @@ Deno.test("Declarative decorator factory chaining", async () => {
     },
   });
 
-  @(await baz())
-  @(await fooBar())
+  @baz()
+  @fooBar()
   class Example0 {}
 
   assertEquals(getPrototypeID(Example0), "example#Example0");
@@ -56,8 +56,8 @@ Deno.test("Declarative decorator factory chaining", async () => {
     baz: "baz",
   });
 
-  @(await fooBar())
-  @(await baz())
+  @fooBar()
+  @baz()
   class Example1 {}
 
   assertEquals(getPrototypeID(Example1), "example#Example1");

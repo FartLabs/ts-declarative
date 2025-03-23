@@ -6,8 +6,8 @@ import { docOf } from "./linked-data.ts";
 const exampleContext = "http://example.com/";
 const exampleType = "MyPerson";
 
-@(await context(exampleContext))
-@(await type(exampleType))
+@context(exampleContext)
+@type(exampleType)
 class Person {
   public constructor(public name: string) {}
 }

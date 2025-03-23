@@ -24,6 +24,7 @@ export function declareClass<TClass extends Class, TValue>(
   }
 
   const id = `${prefix ?? ""}${target.name}`;
+
   const fn = declarativeSequence<TValue>(...fns);
   const value = fn(storage.get(id, defaultValue), target.name);
   if (value !== undefined) {

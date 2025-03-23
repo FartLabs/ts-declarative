@@ -1,8 +1,16 @@
 import { assertEquals } from "@std/assert";
+import { Project } from "ts-morph";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
-import { tsMorph } from "./ts-morph.ts";
+import { tsMorphDecoratorFactory } from "./ts-morph.ts";
 
-@(await tsMorph(new URL(import.meta.url)))
+const project = new Project({ useInMemoryFileSystem: true });
+project.createSourceFile(
+  import.meta.url,
+  await Deno.readTextFile(new URL(import.meta.url)),
+);
+const tsMorph = tsMorphDecoratorFactory(project);
+
+@tsMorph(import.meta.url)
 class Person {
   public constructor(public name: string) {}
 }

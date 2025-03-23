@@ -5,7 +5,7 @@ export interface ValueType {
   type?: string[];
 }
 
-export const type = await createDecoratorFactory({
+export const type = createDecoratorFactory({
   initialize: (...type: Array<string | string[]>) => {
     return [declarativeType(...type)];
   },

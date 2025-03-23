@@ -4,7 +4,7 @@ import { type } from "./type.ts";
 
 const exampleType = "MyExample";
 
-@(await type(exampleType))
+@type(exampleType)
 class Example {}
 
 Deno.test("Decorator type decorates value", () => {

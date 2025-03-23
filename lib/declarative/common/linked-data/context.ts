@@ -8,7 +8,7 @@ export interface ValueContext {
   context?: Context;
 }
 
-export const context = await createDecoratorFactory({
+export const context = createDecoratorFactory({
   initialize: (context?: Context) => {
     return [declarativeContext(context)];
   },

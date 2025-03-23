@@ -1,5 +1,4 @@
-import type { ProjectOptions, SourceFile } from "ts-morph";
-import { Project } from "ts-morph";
+import type { Project, SourceFile } from "ts-morph";
 import type { Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
@@ -22,23 +21,18 @@ export interface ValueTsMorph {
   tsMorph?: TsMorph;
 }
 
-export const tsMorph = createDecoratorFactory({
-  initialize: async (entrypoint: URL | string, options?: ProjectOptions) => {
-    return [await declarativeTsMorph(entrypoint, options)];
-  },
-});
+export function tsMorphDecoratorFactory(project: Project) {
+  return createDecoratorFactory({
+    initialize: (entrypoint: URL | string) => {
+      const sourceFile = project.getSourceFileOrThrow(entrypoint.toString());
+      return [declarativeTsMorph(sourceFile)];
+    },
+  });
+}
 
-export async function declarativeTsMorph<TValue extends ValueTsMorph>(
-  entrypoint: URL | string,
-  options?: ProjectOptions,
-): Promise<Declarative<TValue>> {
-  const project = new Project({ useInMemoryFileSystem: true, ...options });
-  const sourceFile = project.createSourceFile(
-    entrypoint.toString(),
-    await Deno.readTextFile(entrypoint),
-    { overwrite: true },
-  );
-
+export function declarativeTsMorph<TValue extends ValueTsMorph>(
+  sourceFile: SourceFile,
+): Declarative<TValue> {
   return (value, name) => {
     return { ...value, tsMorph: getTsMorph(sourceFile, name) } as TValue;
   };

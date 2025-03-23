@@ -1,6 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { Project } from "ts-morph";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
+import type { ValueTsMorph } from "./ts-morph.ts";
 import { tsMorphDecoratorFactory } from "./ts-morph.ts";
 
 const project = new Project({ useInMemoryFileSystem: true });
@@ -16,9 +17,7 @@ class Person {
 }
 
 Deno.test("tsMorph decorates value", () => {
-  assertEquals(getPrototypeValue(Person), {
-    tsMorph: {
-      properties: [{ name: "name", type: "string", paramIndex: 0 }],
-    },
+  assertEquals(getPrototypeValue<ValueTsMorph>(Person)?.tsMorph, {
+    properties: [{ name: "name", type: "string", paramIndex: 0 }],
   });
 });

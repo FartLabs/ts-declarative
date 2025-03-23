@@ -1,10 +1,24 @@
 import { TypeBoxFromSyntax } from "@sinclair/typemap";
-import type { Declarative } from "#/lib/declarative/declarative.ts";
+import type { Project } from "ts-morph";
+import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import type { ValueTsMorph } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
+import { declarativeTsMorph } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
+import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
 export interface ValueJSONSchema extends ValueTsMorph {
   // deno-lint-ignore no-explicit-any
   jsonSchema?: any;
+}
+
+export function jsonSchemaDecoratorFactory(
+  project: Project,
+): (specifier: string | URL) => (target: Class) => Class {
+  return createDecoratorFactory({
+    initialize: (specifier: URL | string) => {
+      const sourceFile = project.getSourceFileOrThrow(specifier.toString());
+      return [declarativeTsMorph(sourceFile), declarativeJSONSchema()];
+    },
+  });
 }
 
 export function declarativeJSONSchema<
@@ -19,7 +33,8 @@ export function declarativeJSONSchema<
   };
 }
 
-export function compile({ tsMorph }: ValueTsMorph) {
+// deno-lint-ignore no-explicit-any
+export function compile({ tsMorph }: ValueTsMorph): any {
   return TypeBoxFromSyntax({}, serialize({ tsMorph }));
 }
 

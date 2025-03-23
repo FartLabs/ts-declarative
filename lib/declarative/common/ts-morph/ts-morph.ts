@@ -1,5 +1,5 @@
 import type { Project, SourceFile } from "ts-morph";
-import type { Declarative } from "#/lib/declarative/declarative.ts";
+import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
 /**
@@ -21,10 +21,12 @@ export interface ValueTsMorph {
   tsMorph?: TsMorph;
 }
 
-export function tsMorphDecoratorFactory(project: Project) {
+export function tsMorphDecoratorFactory(
+  project: Project,
+): (specifier: string | URL) => (target: Class) => Class {
   return createDecoratorFactory({
-    initialize: (entrypoint: URL | string) => {
-      const sourceFile = project.getSourceFileOrThrow(entrypoint.toString());
+    initialize: (specifier: URL | string) => {
+      const sourceFile = project.getSourceFileOrThrow(specifier.toString());
       return [declarativeTsMorph(sourceFile)];
     },
   });
@@ -38,13 +40,13 @@ export function declarativeTsMorph<TValue extends ValueTsMorph>(
   };
 }
 
-// shit
-
 export interface ValueType {
   type?: string[];
 }
 
-export const type = createDecoratorFactory({
+export const type: (
+  ...args: Array<string | string[]>
+) => (target: Class) => Class = createDecoratorFactory({
   initialize: (...type: Array<string | string[]>) => {
     return [declarativeType(...type)];
   },

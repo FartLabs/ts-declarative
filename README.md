@@ -41,6 +41,42 @@ SPARQL protocol. This library can be used to build linked data applications,
 such as those described in
 [Thinking with Knowledge Graphs: Enhancing LLM Reasoning Through Structured Data](https://arxiv.org/html/2412.10654v1).
 
+## Example
+
+The following example shows how to use this library to declare a class and its
+annotations.
+
+```ts
+@context("http://schema.org/")
+@jsonSchema()
+export class Person {
+  public constructor(public name: string) {}
+}
+
+// deno task example
+if (import.meta.main) {
+  const ash = new Person("Ash Ketchum");
+  const expandedAsh = await jsonld.expand(docOf(ash));
+  console.log(expandedAsh);
+  // Output:
+  // [
+  //   {
+  //     "@type": [ "http://schema.org/Person" ],
+  //     "http://schema.org/name": [ { "@value": "Ash Ketchum" } ]
+  //   }
+  // ]
+
+  const ajv = new Ajv();
+  const validate = ajv.compile(
+    getPrototypeValue<ValueJSONSchema>(Person)?.jsonSchema,
+  );
+  const isValid = validate(ash);
+  console.log(isValid);
+  // Output:
+  // true
+}
+```
+
 ## Contribute
 
 Run `deno fmt` to format the code.

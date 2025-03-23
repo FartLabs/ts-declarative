@@ -1,6 +1,6 @@
 {
   "lock": false,
-  "name": "@fartlabs/ts-declarative",
+  "name": "@fartlabs/declarative",
   "version": "0.0.1",
   "exports": {
     ".": "./lib/declarative/mod.ts",

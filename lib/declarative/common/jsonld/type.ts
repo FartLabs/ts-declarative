@@ -1,11 +1,13 @@
-import type { Declarative } from "#/lib/declarative/declarative.ts";
+import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
 export interface ValueType {
   type?: string[];
 }
 
-export const type = createDecoratorFactory({
+export const type: (
+  ...args: Array<string | string[]>
+) => (target: Class) => Class = createDecoratorFactory({
   initialize: (...type: Array<string | string[]>) => {
     return [declarativeType(...type)];
   },

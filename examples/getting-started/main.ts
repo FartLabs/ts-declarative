@@ -1,23 +1,20 @@
 // @deno-types="@types/jsonld"
 import jsonld from "jsonld";
-import {
-  context,
-  docOf,
-  type,
-} from "#/lib/declarative/common/linked-data/mod.ts";
+import { Ajv } from "ajv";
+import { context, docOf } from "#/lib/declarative/common/jsonld/mod.ts";
+export type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/mod.ts";
+import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-schema/mod.ts";
+import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 
-@context("https://schema.org/")
+const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
+
+@context("http://schema.org/")
+@jsonSchema()
 export class Person {
   public constructor(public name: string) {}
 }
 
-@context("https://schema.org/")
-@type("Person")
-export class AliasedPerson {
-  public constructor(public name: string) {}
-}
-
-// deno -A examples/getting-started/main.ts
+// deno task example
 if (import.meta.main) {
   const ash = new Person("Ash Ketchum");
   const expandedAsh = await jsonld.expand(docOf(ash));
@@ -29,4 +26,13 @@ if (import.meta.main) {
   //     "http://schema.org/name": [ { "@value": "Ash Ketchum" } ]
   //   }
   // ]
+
+  const ajv = new Ajv();
+  const validate = ajv.compile(
+    getPrototypeValue<ValueJSONSchema>(Person)?.jsonSchema,
+  );
+  const isValid = validate(ash);
+  console.log(isValid);
+  // Output:
+  // true
 }

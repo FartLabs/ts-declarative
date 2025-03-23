@@ -2,7 +2,12 @@
   "lock": false,
   "name": "@fartlabs/ts-declarative",
   "version": "0.0.1",
-  "exports": "./lib/declarative/mod.ts",
+  "exports": {
+    ".": "./lib/declarative/mod.ts",
+    "./common/ts-morph": "./lib/declarative/common/ts-morph/mod.ts",
+    "./common/json-schema": "./lib/declarative/common/json-schema/mod.ts",
+    "./common/jsonld": "./lib/declarative/common/jsonld/mod.ts"
+  },
   "imports": {
     "#/": "./",
     "@deno/doc": "jsr:@deno/doc@^0.169.0",
@@ -12,6 +17,7 @@
     "@std/fs": "jsr:@std/fs@^1.0.14",
     "@std/testing": "jsr:@std/testing@^1.0.9",
     "@types/jsonld": "npm:@types/jsonld@^1.5.15",
+    "ajv": "npm:ajv@^8.17.1",
     "jsonld": "npm:jsonld@^8.3.3",
     "ts-morph": "npm:ts-morph@^25.0.1"
   },
@@ -20,6 +26,7 @@
     "check": "deno check examples/getting-started/main.ts",
     "outdated": "deno outdated --update --latest",
     "test": "deno test --allow-all",
-    "test:update": "deno task test -- --update"
+    "test:update": "deno task test -- --update",
+    "publish:dry": "deno publish --dry-run --allow-dirty"
   }
 }

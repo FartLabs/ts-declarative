@@ -1,4 +1,4 @@
-import type { Declarative } from "#/lib/declarative/declarative.ts";
+import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
 // deno-lint-ignore no-explicit-any
@@ -8,7 +8,9 @@ export interface ValueContext {
   context?: Context;
 }
 
-export const context = createDecoratorFactory({
+export const context: (
+  context?: Context | undefined,
+) => (target: Class) => Class = createDecoratorFactory({
   initialize: (context?: Context) => {
     return [declarativeContext(context)];
   },

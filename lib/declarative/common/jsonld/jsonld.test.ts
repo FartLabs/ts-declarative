@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { context } from "./context.ts";
 import { type } from "./type.ts";
-import { docOf } from "./linked-data.ts";
+import { docOf } from "./jsonld.ts";
 
 const exampleContext = "http://example.com/";
 const exampleType = "MyPerson";

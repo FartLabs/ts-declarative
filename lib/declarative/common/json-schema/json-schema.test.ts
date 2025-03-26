@@ -1,4 +1,5 @@
 import { assertEquals } from "@std/assert";
+import { Ajv } from "ajv";
 import { Project } from "ts-morph";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import type { ValueJSONSchema } from "./json-schema.ts";
@@ -21,4 +22,23 @@ Deno.test("jsonSchema from decorator factory decorates value", () => {
   assertEquals(personSchema.properties.name.type, "string");
   assertEquals(personSchema.required, ["name"]);
   assertEquals(personSchema.type, "object");
+});
+
+Deno.test("Ajv validates instance", () => {
+  const ajv = new Ajv();
+  const validate = ajv.compile(
+    getPrototypeValue<ValueJSONSchema>(Person)?.jsonSchema,
+  );
+
+  const ash = new Person("Ash Ketchum");
+  const isValid0 = validate(ash);
+  assertEquals(isValid0, true);
+  assertEquals(validate.errors, null);
+
+  const invalidPerson = new Person(0 as unknown as string);
+  const isValid1 = validate(invalidPerson);
+  assertEquals(isValid1, false);
+  assertEquals(validate.errors?.length, 1);
+  assertEquals(validate.errors?.at(0)?.keyword, "type");
+  assertEquals(validate.errors?.at(0)?.message, "must be string");
 });

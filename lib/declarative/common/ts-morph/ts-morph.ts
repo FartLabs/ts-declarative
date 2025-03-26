@@ -60,8 +60,6 @@ export function declarativeType<TValue extends ValueType>(
   };
 }
 
-// shit
-
 function getTsMorph(sourceFile: SourceFile, name: string): TsMorph {
   const classDeclaration = sourceFile.getClass(name);
   const propertyDeclarations = classDeclaration?.getProperties() ?? [];

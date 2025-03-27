@@ -1,7 +1,7 @@
 import { QueryEngine } from "@comunica/query-sparql-link-traversal";
 
 // TODO: Assert the given set of triples is compliant with the given data source.
-// export function assertCompliant(){}
+// export async function assertCompliant() {}
 
 // deno -A lib/declarative/common/jsonld/compliant.ts
 if (import.meta.main) {
@@ -14,10 +14,14 @@ if (import.meta.main) {
 PREFIX schema: <http://schema.org/>
 
 ASK {
-  # TODO: Check conformance of properties in schema:Person.
+  schema:birthDate schema:domainIncludes schema:Person .
 }
 `,
-    { lenient: true },
+    {
+      sources: [
+        "https://schema.org/version/latest/schemaorg-current-https.jsonld",
+      ],
+    },
   );
 
   console.log({ result });

@@ -14,6 +14,7 @@ export function jsonSchemaDecoratorFactory(
   project: Project,
 ): (specifier: string | URL) => (target: Class) => Class {
   return createDecoratorFactory({
+    // TODO: Add another argument to apply custom schema generation.
     initialize: (specifier: URL | string) => {
       const sourceFile = project.getSourceFileOrThrow(specifier.toString());
       return [declarativeTsMorph(sourceFile), declarativeJSONSchema()];

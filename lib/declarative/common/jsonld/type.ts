@@ -2,6 +2,7 @@ import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
 export interface ValueType {
+  // TODO: Change to one type only for simplification.
   type?: string[];
 }
 

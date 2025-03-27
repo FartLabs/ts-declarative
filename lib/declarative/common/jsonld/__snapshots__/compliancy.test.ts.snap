@@ -1,0 +1,7 @@
+export const snapshot = {};
+
+snapshot[`makeCompliancyQuery makes query 1`] = `
+"ASK {
+<https://schema.org/name> <https://schema.org/domainIncludes> <https://schema.org/Person> .
+}"
+`;

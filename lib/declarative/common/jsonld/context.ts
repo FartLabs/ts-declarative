@@ -4,6 +4,7 @@ import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 // deno-lint-ignore no-explicit-any
 export type Context = string | Record<string, any>;
 
+// TODO: Replace context with prefix.
 export interface ValueContext {
   context?: Context;
 }

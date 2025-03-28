@@ -20,7 +20,6 @@
     "@types/jsonld": "npm:@types/jsonld@^1.5.15",
     "ajv": "npm:ajv@^8.17.1",
     "jsonld": "npm:jsonld@^8.3.3",
-    "n3": "npm:n3@^1.24.2",
     "ts-morph": "npm:ts-morph@^25.0.1"
   },
   "tasks": {

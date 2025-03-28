@@ -27,7 +27,6 @@ export function docOf<T>(instance: T): Record<string, unknown> {
     Object.assign(doc, { "@context": value.context });
   }
 
-  console.log({ value });
   Object.assign(doc, { "@type": value.type ?? constructor.name });
   return doc;
 }

@@ -110,7 +110,6 @@ export async function generateCompliancyQuery(
  * properties are included in the given class's domain.
  */
 export function makeCompliancyQuery(classID: string, propertyIDs: string[]) {
-  console.log({ makeCompliancyQuery: { classID, propertyIDs } });
   return `ASK {
 ${
     propertyIDs

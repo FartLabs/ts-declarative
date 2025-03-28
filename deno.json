@@ -10,6 +10,7 @@
   },
   "imports": {
     "#/": "./",
+    "@comunica/query-sparql-link-traversal": "npm:@comunica/query-sparql-link-traversal@^0.6.1",
     "@deno/doc": "jsr:@deno/doc@^0.169.0",
     "@deno/graph": "jsr:@deno/graph@^0.89.2",
     "@sinclair/typemap": "npm:@sinclair/typemap@^0.9.0",

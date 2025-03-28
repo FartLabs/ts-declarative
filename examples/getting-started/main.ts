@@ -8,7 +8,7 @@ import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 
 const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
 
-@context("http://schema.org/")
+@context("https://schema.org/")
 @jsonSchema()
 export class Person {
   public constructor(public name: string) {}
@@ -22,8 +22,8 @@ if (import.meta.main) {
   // Output:
   // [
   //   {
-  //     "@type": [ "http://schema.org/Person" ],
-  //     "http://schema.org/name": [ { "@value": "Ash Ketchum" } ]
+  //     "@type": "https://schema.org/Person",
+  //     "https://schema.org/name": [ { "@value": "Ash Ketchum" } ]
   //   }
   // ]
 

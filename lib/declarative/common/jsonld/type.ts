@@ -2,21 +2,23 @@ import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
 export interface ValueType {
-  type?: string[];
+  type?: string;
 }
 
-export const type: (
-  ...args: Array<string | string[]>
-) => (target: Class) => Class = createDecoratorFactory({
-  initialize: (...type: Array<string | string[]>) => {
-    return [declarativeType(...type)];
-  },
-});
+export const type: (...args: [string]) => (target: Class) => Class =
+  createDecoratorFactory({
+    initialize: (type: string) => {
+      return [declarativeType(type)];
+    },
+  });
 
 export function declarativeType<TValue extends ValueType>(
-  ...type: Array<string | string[]>
+  type?: string,
 ): Declarative<TValue> {
-  return <TValue extends ValueType>(value: TValue | undefined): TValue => {
-    return { ...value, type: type.flat() } as TValue;
+  return <TValue extends ValueType>(
+    value: TValue | undefined,
+    name: string,
+  ): TValue => {
+    return { ...value, type: type ?? name } as TValue;
   };
 }

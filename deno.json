@@ -1,7 +1,7 @@
 {
   "lock": false,
   "name": "@fartlabs/declarative",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "exports": {
     ".": "./lib/declarative/mod.ts",
     "./common/ts-morph": "./lib/declarative/common/ts-morph/mod.ts",

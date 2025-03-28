@@ -6,6 +6,7 @@ export type Context = string | Record<string, any>;
 
 // TODO: Replace context with prefix.
 export interface ValueContext {
+  // TODO: Consider replacing context with prefixes.
   context?: Context;
 }
 

@@ -2,7 +2,7 @@ import { assertEquals } from "@std/assert";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { context } from "./context.ts";
 
-const exampleContext = "http://example.com/";
+const exampleContext = "https://example.com/";
 
 @context(exampleContext)
 class Example {}

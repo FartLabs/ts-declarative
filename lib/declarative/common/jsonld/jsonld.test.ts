@@ -3,8 +3,10 @@ import { context } from "./context.ts";
 import { type } from "./type.ts";
 import { docOf, jsonld } from "./jsonld.ts";
 
-const exampleContext = "http://example.com/";
+const exampleContext = "https://example.com/";
 const exampleType = "MyPerson";
+const exampleName0 = "Ash Ketchum";
+const exampleName1 = "Gary Oak";
 
 @context(exampleContext)
 @type(exampleType)
@@ -14,24 +16,24 @@ class Example0 {
 
 @jsonld({
   context: exampleContext,
-  type: [exampleType],
+  type: exampleType,
 })
 class Example1 {
   public constructor(public name: string) {}
 }
 
 Deno.test("docOf renders linked data", () => {
-  const example0 = new Example0("Ash Ketchum");
+  const example0 = new Example0(exampleName0);
   assertEquals(docOf(example0), {
-    "@context": "http://example.com/",
-    "@type": ["MyPerson"],
-    name: "Ash Ketchum",
+    "@context": exampleContext,
+    "@type": exampleType,
+    name: exampleName0,
   });
 
-  const example1 = new Example1("Gary Oak");
+  const example1 = new Example1(exampleName1);
   assertEquals(docOf(example1), {
-    "@context": "http://example.com/",
-    "@type": ["MyPerson"],
-    name: "Gary Oak",
+    "@context": exampleContext,
+    "@type": exampleType,
+    name: exampleName1,
   });
 });

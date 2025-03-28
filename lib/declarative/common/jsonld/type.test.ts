@@ -9,6 +9,6 @@ class Example {}
 
 Deno.test("Decorator type decorates value", () => {
   assertEquals(getPrototypeValue(Example), {
-    type: [exampleType],
+    type: exampleType,
   });
 });

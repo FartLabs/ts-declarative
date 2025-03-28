@@ -22,7 +22,7 @@ if (import.meta.main) {
   // Output:
   // [
   //   {
-  //     "@type": [ "http://schema.org/Person" ],
+  //     "@type": "http://schema.org/Person",
   //     "http://schema.org/name": [ { "@value": "Ash Ketchum" } ]
   //   }
   // ]

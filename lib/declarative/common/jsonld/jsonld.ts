@@ -11,10 +11,7 @@ export interface ValueJSONLd extends ValueType, ValueContext {}
 export const jsonld: (value: ValueJSONLd) => (target: Class) => Class =
   createDecoratorFactory({
     initialize: (value: ValueJSONLd): Declarative<ValueJSONLd>[] => {
-      return [
-        declarativeType(...(value?.type ?? [])),
-        declarativeContext(value?.context),
-      ];
+      return [declarativeType(value?.type), declarativeContext(value?.context)];
     },
   });
 
@@ -30,6 +27,7 @@ export function docOf<T>(instance: T): Record<string, unknown> {
     Object.assign(doc, { "@context": value.context });
   }
 
+  console.log({ value });
   Object.assign(doc, { "@type": value.type ?? constructor.name });
   return doc;
 }

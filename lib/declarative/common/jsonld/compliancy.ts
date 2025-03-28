@@ -1,6 +1,4 @@
 import { assert } from "@std/assert/assert";
-// @deno-types="npm:@types/jsonld"
-import { default as jsonldjs } from "jsonld";
 import type { QueryEngine } from "@comunica/query-sparql-link-traversal";
 import type { Class } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
@@ -17,24 +15,47 @@ export async function assertCompliancy(
   assert(isCompliant, `Class ${target.name} is not compliant.`);
 }
 
-export async function expandStrings(
-  context: Context,
-  strings: string[],
-): Promise<string[]> {
-  // console.log({ expandStrings: { context, strings } });
-  const expanded = await jsonldjs.expand(
-    Object.assign(
-      { "@context": context },
-      ...strings.map((key, i) => ({ [key]: i })),
-    ),
-  );
-  if (expanded.length !== 1) {
-    throw new Error("Failed to expand keys.");
+export function expandStrings(context: Context, strings: string[]): string[] {
+  const prefixes = getPrefixesFromContext(context);
+  return strings.map((value) => {
+    const prefixIndex = value.indexOf(":");
+    const prefix = value.slice(0, prefixIndex + 1);
+    const suffix = value.slice(prefixIndex + 1);
+    const replacement = prefixes.get(prefix);
+    if (replacement === undefined) {
+      return value;
+    }
+
+    return `${replacement}${suffix}`;
+  });
+}
+
+/**
+ * getPrefixesFromContext returns the prefixes from a JSON-LD context.
+ *
+ * This function only supports the "@vocab" key and the top-level keys for simplicity.
+ * Therefore, it won't work for every JSON-LD context.
+ */
+function getPrefixesFromContext(context: Context): Map<string, string> {
+  const prefixes = new Map<string, string>();
+  if (typeof context === "string") {
+    prefixes.set("", context);
+    return prefixes;
   }
 
-  return Object.entries(expanded[0] as Record<string, { "@value": number }>)
-    .toSorted(([, a], [, b]) => a["@value"] - b["@value"])
-    .map(([key]) => key);
+  if (context["@vocab"] !== undefined) {
+    prefixes.set("", context["@vocab"]);
+  }
+
+  for (const [key, value] of Object.entries(context)) {
+    if (key.startsWith("@")) {
+      continue;
+    }
+
+    prefixes.set(key, value);
+  }
+
+  return prefixes;
 }
 
 /**
@@ -78,8 +99,8 @@ export async function generateCompliancyQuery(
   propertyIDs: string[],
 ): Promise<string> {
   const [classIDExpanded, ...propertyIDsExpanded] = await expandStrings(
-    prepareSchemaOrgContext(context),
-    [classID, ...propertyIDs].map((id) => prepareSchemaOrgID(id)),
+    context,
+    [classID, ...propertyIDs],
   );
   return makeCompliancyQuery(classIDExpanded, propertyIDsExpanded);
 }
@@ -103,20 +124,4 @@ ${
       .join("\n")
   }
 }`;
-}
-
-export function prepareSchemaOrgID(id: string): string {
-  return id.replace(/^http:\/\/schema.org\//, "https://schema.org/");
-}
-
-export function prepareSchemaOrgContext(context: Context): Context {
-  const after = JSON.parse(
-    JSON.stringify(context).replaceAll(
-      "http://schema.org/",
-      "https://schema.org/",
-    ),
-  );
-
-  console.log({ before: context, after });
-  return after;
 }

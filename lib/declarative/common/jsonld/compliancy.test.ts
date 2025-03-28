@@ -3,6 +3,7 @@ import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-
 import { jsonld } from "#/lib/declarative/common/jsonld/jsonld.ts";
 import {
   assertCompliancy,
+  expandStrings,
   generateCompliancyQuery,
   generateCompliancyQueryFromClass,
   makeCompliancyQuery,
@@ -11,7 +12,7 @@ import { assertEquals } from "@std/assert/equals";
 
 const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
 
-@jsonld({ context: "http://schema.org/" })
+@jsonld({ context: "https://schema.org/" })
 @jsonSchema()
 class Person {
   public constructor(public givenName: string, public familyName: string) {}
@@ -36,15 +37,15 @@ Deno.test("generateCompliancyQueryFromClass makes a valid query", async () => {
 
 Deno.test("generateCompliancyQuery generates a valid query", async () => {
   const query = await generateCompliancyQuery(
-    "http://schema.org/",
-    "http://schema.org/Person",
-    ["http://schema.org/givenName", "http://schema.org/familyName"],
+    "https://schema.org/",
+    "https://schema.org/Person",
+    ["https://schema.org/givenName", "https://schema.org/familyName"],
   );
   assertEquals(
     query,
     `ASK {
-<https://schema.org/familyName> <https://schema.org/domainIncludes> <https://schema.org/Person> .
 <https://schema.org/givenName> <https://schema.org/domainIncludes> <https://schema.org/Person> .
+<https://schema.org/familyName> <https://schema.org/domainIncludes> <https://schema.org/Person> .
 }`,
   );
 });
@@ -61,4 +62,15 @@ Deno.test("makeCompliancyQuery makes a valid query", () => {
 <https://schema.org/familyName> <https://schema.org/domainIncludes> <https://schema.org/Person> .
 }`,
   );
+});
+
+Deno.test("expandStrings expands strings correctly", () => {
+  const expanded = expandStrings("https://schema.org/", [
+    "givenName",
+    "familyName",
+  ]);
+  assertEquals(expanded, [
+    "https://schema.org/givenName",
+    "https://schema.org/familyName",
+  ]);
 });

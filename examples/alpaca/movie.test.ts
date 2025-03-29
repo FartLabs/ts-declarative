@@ -4,6 +4,7 @@
 //
 // const queryEngine = new QueryEngine();
 //
+// TODO: Fix Movie test.
 // Deno.test("Movie is compliant", async () => {
 //   await assertCompliancy(queryEngine, Movie);
 // });

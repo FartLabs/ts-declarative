@@ -6,16 +6,16 @@ import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
 
 @jsonld({
-  context: {
-    "@vocab": "https://schema.org/",
-    id: "@id",
-    label: "http://www.w3.org/2000/01/rdf-schema#label",
-  },
+  context: "https://www.w3.org/2002/12/cal/ical#",
+  type: "Vtodo",
 })
 @jsonSchema()
-export class Movie {
-  public constructor(public id: string, public label?: string) {}
+export class Todo {
+  public constructor(
+    public uid: string,
+    public summary: string, // TODO: Add status property to tell if the todo is done or not.
+  ) {}
 }
 
-export const jsonSchemaMovie = getPrototypeValue<ValueJSONSchema>(Movie)
+export const jsonSchemaTodo = getPrototypeValue<ValueJSONSchema>(Todo)
   ?.jsonSchema;

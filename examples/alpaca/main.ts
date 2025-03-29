@@ -1,21 +1,20 @@
 import { route } from "@std/http/unstable-route";
-import { Movie } from "./movie.ts";
+import { Todo } from "./todo.ts";
 
-// TODO: Create movie list application.
-// http://dbpedia.org/resource/Pok%C3%A9mon:_The_First_Movie
-//
+// TODO: Create todo list application.
 // Endpoints:
-// GET /movies - List of movies
-// GET /movies/:id - Get movie by ID
-// POST /movies - Add movie to list
-// DELETE /movies/:id - Remove movie from list
+// GET /todos - List of todos
+// GET /todos/:id - Get todo by ID
+// POST /todos - Add todo to list
+// DELETE /todos/:id - Remove todo from list
 //
 
-// TODO: Autocomplete API for movies from DBpedia with Orama.
+// TODO: Autocomplete API for todos using Orama.
 //
 
 const kv = await Deno.openKv(":memory:");
 
+// TODO: Refactor to use rtx.
 const router = route(
   [
     {
@@ -27,68 +26,76 @@ const router = route(
     },
     {
       method: "GET",
-      pattern: new URLPattern({ pathname: "/movies" }),
+      pattern: new URLPattern({ pathname: "/todos" }),
       handler: async () => {
         // TODO: Implement pagination.
-        const movies = await Array.fromAsync(
-          kv.list<Movie>({ prefix: ["movies"] }),
+        const todos = await Array.fromAsync(
+          kv.list<Todo>({ prefix: ["todos"] }),
         );
 
-        // TODO: Render message to add movie if list is empty.
-        // TODO: Render form to add movie.
-        // TODO: Render delete button that deletes selected movies, allowing the user to select all movies easily.
+        // TODO: Render message to add todo if list is empty.
+        // TODO: Render form to add todo.
+        // TODO: Render delete button that deletes selected todos, allowing the user to select all todos easily.
+        // TODO: Manually test endpoints.
         return new Response(
-          movies.length === 0
-            ? "No movies"
-            : renderMovies(movies.map(({ value: movie }) => movie)),
+          todos.length === 0
+            ? "No todos"
+            : renderTodos(todos.map(({ value: todo }) => todo)),
           { headers: { "Content-Type": "text/html" } },
         );
       },
     },
     {
       method: "POST",
-      pattern: new URLPattern({ pathname: "/movies" }),
+      pattern: new URLPattern({ pathname: "/todos" }),
       handler: async (request) => {
         const formData = await request.formData();
-        const id = formData.get("id")?.toString();
-        if (id === undefined) {
-          throw new Error("Missing ID");
+        const uid = formData.get("uid")?.toString();
+        if (uid === undefined) {
+          throw new Error("Missing UID");
         }
 
-        const label = formData.get("label")?.toString();
-        const movie = new Movie(id, label);
-        await kv.set(["movies", id], movie);
+        const summary = formData.get("summary")?.toString();
+        if (summary === undefined) {
+          throw new Error("Missing summary");
+        }
+
+        const todo = new Todo(uid, summary);
+        await kv.set(["todos", uid], todo);
         return new Response("OK", { status: 200 });
       },
     },
     {
       method: "DELETE",
-      pattern: new URLPattern({ pathname: "/movies/:id" }),
+      pattern: new URLPattern({ pathname: "/todos/:uid" }),
       handler: async (_request, params) => {
-        const id = params?.pathname.groups?.id;
-        if (id === undefined) {
-          throw new Error("Missing ID");
+        const uid = params?.pathname.groups?.uid;
+        if (uid === undefined) {
+          throw new Error("Missing UID");
         }
 
-        await kv.delete(["movies", id]);
+        await kv.delete(["todos", uid]);
         return new Response("OK", { status: 200 });
       },
     },
     {
       method: "GET",
-      pattern: new URLPattern({ pathname: "/movies/:id" }),
+      pattern: new URLPattern({ pathname: "/todos/:uid" }),
       handler: async (_request, params) => {
-        const id = params?.pathname.groups?.id;
-        if (id === undefined) {
-          throw new Error("Missing ID");
+        const uid = params?.pathname.groups?.uid;
+        if (uid === undefined) {
+          throw new Error("Missing UID");
         }
 
-        const movie = await kv.get<Movie>(["movies", id]);
-        if (movie.value === null) {
+        const todo = await kv.get<Todo>(["todos", uid]);
+        if (todo.value === null) {
           return new Response("Not Found", { status: 404 });
         }
 
-        return new Response(renderMovie(movie.value), {
+        // TODO: Render form to update todo.
+        // TODO: Render delete button to delete todo.
+        // TODO: Render done button to toggle done status.
+        return new Response(renderTodo(todo.value), {
           headers: { "Content-Type": "text/html" },
         });
       },
@@ -103,17 +110,16 @@ if (import.meta.main) {
   Deno.serve((request) => router(request));
 }
 
-function renderMovies(movies: Movie[]) {
+// TODO: Refactor to use htx.
+function renderTodos(todos: Todo[]) {
   return `<ul>${
-    movies
-      .map((movie) => `<li>${renderMovie(movie)}</li>`)
+    todos
+      .map((todo) => `<li>${renderTodo(todo)}</li>`)
       .join("")
   }</ul>`;
 }
 
-function renderMovie(movie: Movie) {
-  const movieURL = `/movies/${encodeURIComponent(movie.id)}`;
-  return `<a href="${movieURL}">${movie.id}${
-    movie.label !== undefined ? ` "${movie.label}"` : ""
-  }</a>`;
+function renderTodo(todo: Todo) {
+  const todoURL = `/todos/${encodeURIComponent(todo.uid)}`;
+  return `<a href="${todoURL}">${todo.uid} - ${todo.summary}</a>`;
 }

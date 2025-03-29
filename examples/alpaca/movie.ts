@@ -8,12 +8,13 @@ const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
 @jsonld({
   context: {
     "@vocab": "https://schema.org/",
+    id: "@id",
     label: "http://www.w3.org/2000/01/rdf-schema#label",
   },
 })
 @jsonSchema()
 export class Movie {
-  public constructor(public label: string) {}
+  public constructor(public id: string, public label?: string) {}
 }
 
 export const jsonSchemaMovie = getPrototypeValue<ValueJSONSchema>(Movie)

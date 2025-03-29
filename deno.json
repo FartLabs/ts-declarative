@@ -25,7 +25,7 @@
   },
   "tasks": {
     "example": "deno -A examples/getting-started/main.ts",
-    "example:alpaca": "deno -A examples/alpaca/main.ts",
+    "example:alpaca": "deno -A --unstable-kv examples/alpaca/main.ts",
     "check": "deno check **/*.ts",
     "outdated": "deno outdated --update --latest",
     "test": "deno test --allow-all",

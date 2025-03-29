@@ -1,6 +1,5 @@
+import { route } from "@std/http/unstable-route";
 import { Movie } from "./movie.ts";
-
-const kv = await Deno.openKv(":memory:");
 
 // TODO: Create movie list application.
 // http://dbpedia.org/resource/Pok%C3%A9mon:_The_First_Movie
@@ -15,52 +14,104 @@ const kv = await Deno.openKv(":memory:");
 // TODO: Autocomplete API for movies from DBpedia with Orama.
 //
 
-if (import.meta.main) {
-  Deno.serve(async (request) => {
-    const url = new URL(request.url);
-    if (url.pathname === "/movies") {
-      switch (request.method) {
-        case "GET": {
-          const movies = await Array.fromAsync(
-            kv.list<Movie>({ prefix: ["movies"] }),
-          );
-          if (movies.length === 0) {
-            return new Response("No movies");
-          }
+const kv = await Deno.openKv(":memory:");
 
-          return new Response(
-            movies
-              .map(
-                ({ value: movie }) =>
-                  `- ${movie.id}${
-                    movie.label !== undefined ? `: ${movie.label}` : ""
-                  }`,
-              )
-              .join("\n"),
-            {
-              headers: { "Content-Type": "text/plain" },
-            },
-          );
+const router = route(
+  [
+    {
+      method: "GET",
+      pattern: new URLPattern({ pathname: "/favicon.ico" }),
+      handler: () => {
+        return Response.redirect("https://fartlabs.org/fl-logo.png");
+      },
+    },
+    {
+      method: "GET",
+      pattern: new URLPattern({ pathname: "/movies" }),
+      handler: async () => {
+        const movies = await Array.fromAsync(
+          kv.list<Movie>({ prefix: ["movies"] }),
+        );
+        return new Response(
+          // TODO: Render message to add movie if list is empty.
+          // TODO: Render form to add movie.
+          // TODO: Render delete button that deletes selected movies, allowing the user to select all movies easily.
+
+          movies.length === 0
+            ? "No movies"
+            : renderMovies(movies.map(({ value: movie }) => movie)),
+          { headers: { "Content-Type": "text/html" } },
+        );
+      },
+    },
+    {
+      method: "POST",
+      pattern: new URLPattern({ pathname: "/movies" }),
+      handler: async (request) => {
+        const formData = await request.formData();
+        const id = formData.get("id")?.toString();
+        if (id === undefined) {
+          throw new Error("Missing ID");
         }
 
-        case "POST": {
-          const formData = await request.formData();
-          if (!formData.has("id")) {
-            return new Response("Missing ID", { status: 400 });
-          }
-
-          // TODO: Fetch label by ID via DBpedia SPARQL endpoint.
-          const movie = new Movie(formData.get("id")!.toString());
-          await kv.set(["movies", movie.id], movie);
-          return new Response("OK", { status: 200 });
+        const label = formData.get("label")?.toString();
+        await kv.set(["movies", id], new Movie(id, label));
+        return new Response("OK", { status: 200 });
+      },
+    },
+    {
+      method: "DELETE",
+      pattern: new URLPattern({ pathname: "/movies/:id" }),
+      handler: async (_request, params) => {
+        const id = params?.pathname.groups?.id;
+        if (id === undefined) {
+          throw new Error("Missing ID");
         }
-      }
-    }
 
-    if (url.pathname === "/favicon.ico") {
-      return Response.redirect("https://fartlabs.org/fl-logo.png", 302);
-    }
+        await kv.delete(["movies", id]);
+        return new Response("OK", { status: 200 });
+      },
+    },
+    {
+      method: "GET",
+      pattern: new URLPattern({ pathname: "/movies/:id" }),
+      handler: async (_request, params) => {
+        const id = params?.pathname.groups?.id;
+        if (id === undefined) {
+          throw new Error("Missing ID");
+        }
 
+        const movie = await kv.get<Movie>(["movies", id]);
+        if (movie.value === null) {
+          return new Response("Not Found", { status: 404 });
+        }
+
+        return new Response(renderMovie(movie.value), {
+          headers: { "Content-Type": "text/html" },
+        });
+      },
+    },
+  ],
+  () => {
     return new Response("Not Found", { status: 404 });
-  });
+  },
+);
+
+if (import.meta.main) {
+  Deno.serve((request) => router(request));
+}
+
+function renderMovies(movies: Movie[]) {
+  return `<ul>${
+    movies
+      .map((movie) => `<li>${renderMovie(movie)}</li>`)
+      .join("")
+  }</ul>`;
+}
+
+function renderMovie(movie: Movie) {
+  const movieURL = `/movies/${encodeURIComponent(movie.id)}`;
+  return `<a href="${movieURL}">${movie.id}${
+    movie.label !== undefined ? ` "${movie.label}"` : ""
+  }</a>`;
 }

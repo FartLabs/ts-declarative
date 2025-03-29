@@ -29,14 +29,15 @@ const router = route(
       method: "GET",
       pattern: new URLPattern({ pathname: "/movies" }),
       handler: async () => {
+        // TODO: Implement pagination.
         const movies = await Array.fromAsync(
           kv.list<Movie>({ prefix: ["movies"] }),
         );
-        return new Response(
-          // TODO: Render message to add movie if list is empty.
-          // TODO: Render form to add movie.
-          // TODO: Render delete button that deletes selected movies, allowing the user to select all movies easily.
 
+        // TODO: Render message to add movie if list is empty.
+        // TODO: Render form to add movie.
+        // TODO: Render delete button that deletes selected movies, allowing the user to select all movies easily.
+        return new Response(
           movies.length === 0
             ? "No movies"
             : renderMovies(movies.map(({ value: movie }) => movie)),
@@ -55,7 +56,8 @@ const router = route(
         }
 
         const label = formData.get("label")?.toString();
-        await kv.set(["movies", id], new Movie(id, label));
+        const movie = new Movie(id, label);
+        await kv.set(["movies", id], movie);
         return new Response("OK", { status: 200 });
       },
     },

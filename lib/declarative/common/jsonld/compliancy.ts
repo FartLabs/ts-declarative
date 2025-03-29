@@ -21,6 +21,10 @@ export function expandStrings(context: Context, strings: string[]): string[] {
     const prefixIndex = value.indexOf(":");
     const prefix = value.slice(0, prefixIndex + 1);
     const suffix = value.slice(prefixIndex + 1);
+    if (prefix === "" && prefixes.has(suffix)) {
+      return prefixes.get(suffix)!;
+    }
+
     const replacement = prefixes.get(prefix);
     if (replacement === undefined) {
       return value;
@@ -120,6 +124,7 @@ ${
         return [
           // TODO: Use rdfs:domain instead of schema:domainIncludes.
           // TODO: Check type of propertyID matches TypeScript class property type.
+          // TODO: Support subclasses (indirect domainIncludes).
           `<${propertyID}> <https://schema.org/domainIncludes> <${classID}> .`,
         ];
       })

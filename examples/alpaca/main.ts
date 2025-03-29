@@ -1,5 +1,5 @@
 import { Eta } from "@eta-dev/eta";
-import { jsonSchemaString } from "./movie.ts";
+import { jsonSchemaMovie } from "./movie.ts";
 
 const renderer = new Eta();
 const htmlTmpl = await Deno.readTextFile(
@@ -11,7 +11,7 @@ if (import.meta.main) {
     const url = new URL(request.url);
     if (url.pathname === "/") {
       const result = await renderer.renderStringAsync(htmlTmpl, {
-        jsonSchemaString,
+        jsonSchemaString: JSON.stringify(jsonSchemaMovie),
       });
 
       return new Response(result, { headers: { "Content-Type": "text/html" } });

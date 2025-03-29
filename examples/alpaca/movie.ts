@@ -5,12 +5,16 @@ import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 
 const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
 
-@jsonld({ context: "https://schema.org/" })
+@jsonld({
+  context: {
+    "@vocab": "https://schema.org/",
+    label: "http://www.w3.org/2000/01/rdf-schema#label",
+  },
+})
 @jsonSchema()
 export class Movie {
-  public constructor(public titleEIDR: string) {}
+  public constructor(public label: string) {}
 }
 
-export const jsonSchemaString = JSON.stringify(
-  getPrototypeValue<ValueJSONSchema>(Movie)?.jsonSchema ?? {},
-);
+export const jsonSchemaMovie = getPrototypeValue<ValueJSONSchema>(Movie)
+  ?.jsonSchema;

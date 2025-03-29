@@ -6,6 +6,10 @@ const htmlTmpl = await Deno.readTextFile(
   new URL(import.meta.resolve("./index.tmpl.html")),
 );
 
+// TODO: Create movie list application.
+// http://dbpedia.org/resource/Pok%C3%A9mon:_The_First_Movie
+//
+
 if (import.meta.main) {
   Deno.serve(async (request) => {
     const url = new URL(request.url);

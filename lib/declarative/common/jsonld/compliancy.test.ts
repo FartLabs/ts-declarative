@@ -1,6 +1,6 @@
 import { QueryEngine } from "@comunica/query-sparql-link-traversal";
-import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-schema/json-schema-file.ts";
 import { jsonld } from "#/lib/declarative/common/jsonld/jsonld.ts";
+import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-schema/json-schema-file.ts";
 import {
   assertCompliancy,
   expandStrings,

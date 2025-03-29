@@ -1,7 +1,8 @@
 import { Eta } from "@eta-dev/eta";
+import { jsonSchemaString } from "./movie.ts";
 
 const renderer = new Eta();
-const tmpl = await Deno.readTextFile(
+const htmlTmpl = await Deno.readTextFile(
   new URL(import.meta.resolve("./index.tmpl.html")),
 );
 
@@ -9,8 +10,8 @@ if (import.meta.main) {
   Deno.serve(async (request) => {
     const url = new URL(request.url);
     if (url.pathname === "/") {
-      const result = await renderer.renderStringAsync(tmpl, {
-        name: Math.random() > 0.5 ? undefined : "FartLabs",
+      const result = await renderer.renderStringAsync(htmlTmpl, {
+        jsonSchemaString,
       });
 
       return new Response(result, { headers: { "Content-Type": "text/html" } });

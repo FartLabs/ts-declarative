@@ -24,6 +24,25 @@ Deno.test("jsonSchema from decorator factory decorates value", () => {
   assertEquals(personSchema.type, "object");
 });
 
+@jsonSchema(import.meta.url, {
+  properties: {
+    name: {
+      title: "Name",
+    },
+  },
+})
+class Person2 {
+  public constructor(public name: string) {}
+}
+
+Deno.test("jsonSchema from decorator factory decorates masked value", () => {
+  const personSchema = getPrototypeValue<ValueJSONSchema>(Person2)?.jsonSchema;
+  assertEquals(personSchema.properties.name.title, "Name");
+  assertEquals(personSchema.properties.name.type, "string");
+  assertEquals(personSchema.required, ["name"]);
+  assertEquals(personSchema.type, "object");
+});
+
 Deno.test("Ajv validates instance", () => {
   const ajv = new Ajv();
   const validate = ajv.compile(

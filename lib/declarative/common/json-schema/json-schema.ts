@@ -1,3 +1,6 @@
+// deno-lint-ignore-file no-explicit-any
+
+import { deepMerge } from "@std/collections/deep-merge";
 import { TypeBoxFromSyntax } from "@sinclair/typemap";
 import type { Project } from "ts-morph";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
@@ -6,35 +9,34 @@ import { declarativeTsMorph } from "#/lib/declarative/common/ts-morph/ts-morph.t
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
 export interface ValueJSONSchema extends ValueTsMorph {
-  // deno-lint-ignore no-explicit-any
   jsonSchema?: any;
 }
 
 export function jsonSchemaDecoratorFactory(
   project: Project,
-): (specifier: string | URL) => (target: Class) => Class {
+): (specifier: string | URL, mask?: any) => (target: Class) => Class {
   return createDecoratorFactory({
-    // TODO: Add another argument to apply custom schema generation.
-    initialize: (specifier: URL | string) => {
+    initialize: (specifier, mask) => {
       const sourceFile = project.getSourceFileOrThrow(specifier.toString());
-      return [declarativeTsMorph(sourceFile), declarativeJSONSchema()];
+      return [declarativeTsMorph(sourceFile), declarativeJSONSchema(mask)];
     },
   });
 }
 
-export function declarativeJSONSchema<
-  TValue extends ValueJSONSchema,
->(): Declarative<TValue> {
+export function declarativeJSONSchema<TValue extends ValueJSONSchema>(
+  mask?: any,
+): Declarative<TValue> {
   return (value) => {
     if (value === undefined) {
       return;
     }
 
-    return { ...value, jsonSchema: compile(value) };
+    return Object.assign(value, {
+      jsonSchema: deepMerge(compile(value), mask ?? {}),
+    });
   };
 }
 
-// deno-lint-ignore no-explicit-any
 export function compile({ tsMorph }: ValueTsMorph): any {
   return TypeBoxFromSyntax({}, serialize({ tsMorph }));
 }

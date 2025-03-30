@@ -24,13 +24,7 @@ Deno.test("jsonSchema from decorator factory decorates value", () => {
   assertEquals(personSchema.type, "object");
 });
 
-@jsonSchema(import.meta.url, {
-  properties: {
-    name: {
-      title: "Name",
-    },
-  },
-})
+@jsonSchema(import.meta.url, { properties: { name: { title: "Name" } } })
 class Person2 {
   public constructor(public name: string) {}
 }

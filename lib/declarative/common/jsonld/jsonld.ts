@@ -6,6 +6,12 @@ import { declarativeType } from "./type.ts";
 import type { ValueContext } from "./context.ts";
 import { declarativeContext } from "./context.ts";
 
+export function jsonldOf<TClass extends Class>(
+  target: TClass,
+): ValueJSONLd | undefined {
+  return getPrototypeValue<ValueJSONLd>(target);
+}
+
 export interface ValueJSONLd extends ValueType, ValueContext {}
 
 export const jsonld: (value: ValueJSONLd) => (target: Class) => Class =

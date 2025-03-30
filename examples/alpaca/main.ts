@@ -1,7 +1,8 @@
 import { Eta } from "@eta-dev/eta";
-import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
-import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/mod.ts";
-import { opinionatedJSONSchemaMask } from "#/lib/declarative/common/json-schema/json-schema.ts";
+import {
+  jsonSchemaOf,
+  opinionatedJSONSchemaMask,
+} from "#/lib/declarative/common/json-schema/json-schema.ts";
 import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-schema/json-schema-file.ts";
 
 const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(
@@ -29,8 +30,7 @@ export async function renderTemplate(
   });
 }
 
-export const jsonSchemaPerson = getPrototypeValue<ValueJSONSchema>(Person)
-  ?.jsonSchema;
+export const jsonSchemaPerson = jsonSchemaOf(Person);
 
 if (import.meta.main) {
   Deno.serve(async () => {

@@ -1,5 +1,12 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
+import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+
+export function typeOf<TClass extends Class>(
+  target: TClass,
+): string | undefined {
+  return getPrototypeValue<ValueType>(target)?.type;
+}
 
 export interface ValueType {
   type?: string;

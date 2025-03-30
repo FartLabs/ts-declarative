@@ -1,5 +1,12 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
+import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+
+export function contextOf<TClass extends Class>(
+  target: TClass,
+): Context | undefined {
+  return getPrototypeValue<ValueContext>(target)?.context;
+}
 
 // deno-lint-ignore no-explicit-any
 export type Context = string | Record<string, any>;

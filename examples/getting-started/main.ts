@@ -2,9 +2,10 @@
 import jsonld from "jsonld";
 import { Ajv } from "ajv";
 import { context, docOf } from "#/lib/declarative/common/jsonld/mod.ts";
-import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/mod.ts";
-import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-schema/mod.ts";
-import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
+import {
+  jsonSchemaDecoratorFactoryOfFile,
+  jsonSchemaOf,
+} from "#/lib/declarative/common/json-schema/mod.ts";
 
 const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
 
@@ -28,9 +29,7 @@ if (import.meta.main) {
   // ]
 
   const ajv = new Ajv();
-  const validate = ajv.compile(
-    getPrototypeValue<ValueJSONSchema>(Person)?.jsonSchema,
-  );
+  const validate = ajv.compile(jsonSchemaOf(Person));
   const isValid = validate(ash);
   console.log(isValid);
   // Output:

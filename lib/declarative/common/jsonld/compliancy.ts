@@ -1,9 +1,8 @@
 import { assert } from "@std/assert/assert";
 import type { QueryEngine } from "@comunica/query-sparql-link-traversal";
 import type { Class } from "#/lib/declarative/declarative.ts";
-import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
-import type { ValueJSONLd } from "#/lib/declarative/common/jsonld/jsonld.ts";
-import type { ValueTsMorph } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
+import { jsonldOf } from "#/lib/declarative/common/jsonld/jsonld.ts";
+import { tsMorphOf } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
 import { expandStrings, makeCompliancyQuery } from "./sparql.ts";
 
 export async function assertCompliancy(
@@ -19,28 +18,23 @@ export async function assertCompliancy(
  * makeCompliancyQueryFromClass generates a SPARQL query from a class.
  */
 export function makeCompliancyQueryFromClass(target: Class): string {
-  const value = getPrototypeValue<ValueJSONLd & ValueTsMorph>(target);
-  if (value === undefined) {
-    throw new Error(
-      `Class ${target.name} is missing a JSON-LD or ts-morph value.`,
-    );
-  }
-
-  if (value.context === undefined) {
-    throw new Error(`Class ${target.name} is missing a JSON-LD context.`);
-  }
-
-  if (value.type === undefined) {
+  const { type, context } = jsonldOf(target) ?? {};
+  if (type === undefined) {
     throw new Error(`Class ${target.name} is missing a JSON-LD type.`);
   }
 
-  if (value.tsMorph === undefined) {
-    throw new Error(`Class ${target.name} is missing a ts-morph value.`);
+  if (context === undefined) {
+    throw new Error(`Class ${target.name} is missing a JSON-LD context.`);
   }
 
+  const tsMorph = tsMorphOf(target);
+  if (tsMorph === undefined) {
+    throw new Error(`Class ${target.name} is missing a ts-morph value.`);
+  }
+  const properties = tsMorph.properties.map((property) => property.name);
   const [classIDExpanded, ...propertyIDsExpanded] = expandStrings(
-    value.context,
-    [value.type, ...value.tsMorph.properties.map((property) => property.name)],
+    context,
+    [type, ...properties],
   );
 
   return makeCompliancyQuery(classIDExpanded, propertyIDsExpanded);

@@ -1,5 +1,6 @@
 import type { Project, SourceFile } from "ts-morph";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
+import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
 /**
@@ -15,6 +16,12 @@ export interface TsMorphProperty {
   paramIndex?: number;
   // TODO: Add documentation.
   // TODO: Add which class the inherited properties associate with respectively.
+}
+
+export function tsMorphOf<TClass extends Class>(
+  target: TClass,
+): TsMorph | undefined {
+  return getPrototypeValue<ValueTsMorph>(target)?.tsMorph;
 }
 
 export interface ValueTsMorph {

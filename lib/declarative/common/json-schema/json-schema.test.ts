@@ -1,9 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { Ajv } from "ajv";
 import { Project } from "ts-morph";
-import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
-import type { ValueJSONSchema } from "./json-schema.ts";
-import { jsonSchemaDecoratorFactory } from "./json-schema.ts";
+import { jsonSchemaDecoratorFactory, jsonSchemaOf } from "./json-schema.ts";
 
 const project = new Project({ useInMemoryFileSystem: true });
 project.createSourceFile(
@@ -18,7 +16,7 @@ class Person {
 }
 
 Deno.test("jsonSchema from decorator factory decorates value", () => {
-  const personSchema = getPrototypeValue<ValueJSONSchema>(Person)?.jsonSchema;
+  const personSchema = jsonSchemaOf(Person);
   assertEquals(personSchema.properties.name.type, "string");
   assertEquals(personSchema.required, ["name"]);
   assertEquals(personSchema.type, "object");
@@ -30,7 +28,7 @@ class Person2 {
 }
 
 Deno.test("jsonSchema from decorator factory decorates masked value", () => {
-  const personSchema = getPrototypeValue<ValueJSONSchema>(Person2)?.jsonSchema;
+  const personSchema = jsonSchemaOf(Person2);
   assertEquals(personSchema.properties.name.title, "Name");
   assertEquals(personSchema.properties.name.type, "string");
   assertEquals(personSchema.required, ["name"]);
@@ -40,7 +38,7 @@ Deno.test("jsonSchema from decorator factory decorates masked value", () => {
 Deno.test("Ajv validates instance", () => {
   const ajv = new Ajv();
   const validate = ajv.compile(
-    getPrototypeValue<ValueJSONSchema>(Person)?.jsonSchema,
+    jsonSchemaOf(Person),
   );
 
   const ash = new Person("Ash Ketchum");

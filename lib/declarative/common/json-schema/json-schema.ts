@@ -4,9 +4,14 @@ import { deepMerge } from "@std/collections/deep-merge";
 import { TypeBoxFromSyntax } from "@sinclair/typemap";
 import type { Project } from "ts-morph";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
+import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import type { ValueTsMorph } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
 import { declarativeTsMorph } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+
+export function jsonSchemaOf<TClass extends Class>(target: TClass): any {
+  return getPrototypeValue<ValueJSONSchema>(target)?.jsonSchema;
+}
 
 export interface ValueJSONSchema extends ValueTsMorph {
   jsonSchema?: any;

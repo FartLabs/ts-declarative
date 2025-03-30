@@ -34,6 +34,6 @@
     "publish:dry": "deno publish --dry-run --allow-dirty"
   },
   "fmt": {
-    "exclude": ["./examples/alpaca/index.tmpl.html"]
+    "exclude": ["./examples/alpaca/index.eta.html"]
   }
 }

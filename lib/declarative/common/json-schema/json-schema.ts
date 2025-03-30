@@ -14,17 +14,23 @@ export interface ValueJSONSchema extends ValueTsMorph {
 
 export function jsonSchemaDecoratorFactory(
   project: Project,
-): (specifier: string | URL, mask?: any) => (target: Class) => Class {
+): (
+  specifier: string | URL,
+  maskOrMaskFn?: JSONSchemaMask,
+) => (target: Class) => Class {
   return createDecoratorFactory({
-    initialize: (specifier, mask) => {
+    initialize: (specifier, maskOrMaskFn) => {
       const sourceFile = project.getSourceFileOrThrow(specifier.toString());
-      return [declarativeTsMorph(sourceFile), declarativeJSONSchema(mask)];
+      return [
+        declarativeTsMorph(sourceFile),
+        declarativeJSONSchema(maskOrMaskFn),
+      ];
     },
   });
 }
 
 export function declarativeJSONSchema<TValue extends ValueJSONSchema>(
-  mask?: any,
+  maskOrMaskFn?: JSONSchemaMask,
 ): Declarative<TValue> {
   return (value) => {
     if (value === undefined) {
@@ -32,10 +38,26 @@ export function declarativeJSONSchema<TValue extends ValueJSONSchema>(
     }
 
     return Object.assign(value, {
-      jsonSchema: deepMerge(compile(value), mask ?? {}),
+      jsonSchema: applyJSONSchemaMask(compile(value), maskOrMaskFn),
     });
   };
 }
+
+export function applyJSONSchemaMask(
+  value: any,
+  maskOrMaskFn?: JSONSchemaMask,
+): any {
+  const mask = typeof maskOrMaskFn === "function"
+    ? maskOrMaskFn(value)
+    : maskOrMaskFn;
+  if (mask === undefined) {
+    return value;
+  }
+
+  return deepMerge(value, mask);
+}
+
+export type JSONSchemaMask = any | ((value: any) => any);
 
 export function compile({ tsMorph }: ValueTsMorph): any {
   return TypeBoxFromSyntax({}, serialize({ tsMorph }));

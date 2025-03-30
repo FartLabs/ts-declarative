@@ -41,7 +41,7 @@ snapshot[`Generate Alpaca form from JSON Schema 1`] = `
   <body>
     <div id="form1"></div>
     <script type="text/javascript">
-      \$("#form1").alpaca({ "schema": {"type":"object","properties":{"givenName":{"type":"string","title":"givenName"},"familyName":{"type":"string","title":"familyName"}},"required":["givenName","familyName"]} })
+      \$("#form1").alpaca({ "schema": {"type":"object","properties":{"givenName":{"type":"string","title":"givenName"},"familyName":{"type":"string","title":"familyName"}},"required":["givenName","familyName"]}, "options": {} });
     </script>
   </body>
 </html>

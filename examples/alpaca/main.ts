@@ -19,8 +19,14 @@ const templateString = await Deno.readTextFile(
 );
 const eta = new Eta();
 
-export async function renderTemplate(jsonSchemaString: string) {
-  return await eta.renderStringAsync(templateString, { jsonSchemaString });
+export async function renderTemplate(
+  jsonSchemaString: string,
+  alpacaOptions = "{}",
+) {
+  return await eta.renderStringAsync(templateString, {
+    jsonSchemaString,
+    optionsString: alpacaOptions,
+  });
 }
 
 export const jsonSchemaPerson = getPrototypeValue<ValueJSONSchema>(Person)

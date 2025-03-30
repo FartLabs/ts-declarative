@@ -1,7 +1,7 @@
 import { route } from "@std/http/unstable-route";
 import { Todo } from "./todo.ts";
 
-// TODO: Create todo list application.
+// TODO: Create todo list application in separate repository.
 // Endpoints:
 // GET /todos - List of todos
 // GET /todos/:id - Get todo by ID

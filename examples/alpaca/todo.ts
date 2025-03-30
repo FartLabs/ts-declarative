@@ -10,11 +10,15 @@ const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
   type: "Vtodo",
 })
 @jsonSchema()
+// {
+//   // TODO: deepMerge this argument with the resulting jsonSchema object.
+//   properties: {
+//     summary: { title: "Summary" },
+//     completed: { title: "Completed" },
+//   },
+// }
 export class Todo {
-  public constructor(
-    public uid: string,
-    public summary: string, // TODO: Add status property to tell if the todo is done or not.
-  ) {}
+  public constructor(public summary: string, public completed: Date) {}
 }
 
 export const jsonSchemaTodo = getPrototypeValue<ValueJSONSchema>(Todo)

@@ -1,16 +1,15 @@
 import { Eta } from "@eta-dev/eta";
-import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/mod.ts";
-import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-schema/mod.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
+import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/mod.ts";
+import { opinionatedJSONSchemaMask } from "#/lib/declarative/common/json-schema/json-schema.ts";
+import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-schema/json-schema-file.ts";
 
-const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
+const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(
+  import.meta.url,
+  opinionatedJSONSchemaMask,
+);
 
-@jsonSchema({
-  properties: {
-    givenName: { title: "Given name" },
-    familyName: { title: "Family name" },
-  },
-})
+@jsonSchema()
 export class Person {
   public constructor(public givenName: string, public familyName: string) {}
 }
@@ -31,9 +30,7 @@ if (import.meta.main) {
   Deno.serve(async () => {
     return new Response(
       await renderTemplate(JSON.stringify(jsonSchemaPerson)),
-      {
-        headers: { "content-type": "text/html" },
-      },
+      { headers: { "content-type": "text/html" } },
     );
   });
 }

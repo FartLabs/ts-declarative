@@ -15,6 +15,7 @@ class Person {
   public constructor(public givenName: string, public familyName: string) {}
 }
 
+// TODO: Migrate to query engine that does not require access to the Internet.
 const queryEngine = new QueryEngine();
 
 Deno.test("assertCompliancy asserts class is compliant", async () => {

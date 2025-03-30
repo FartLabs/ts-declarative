@@ -14,16 +14,17 @@ export interface ValueJSONSchema extends ValueTsMorph {
 
 export function jsonSchemaDecoratorFactory(
   project: Project,
+  maskOrMaskFn1?: JSONSchemaMask,
 ): (
   specifier: string | URL,
   maskOrMaskFn?: JSONSchemaMask,
 ) => (target: Class) => Class {
   return createDecoratorFactory({
-    initialize: (specifier, maskOrMaskFn) => {
+    initialize: (specifier, maskOrMaskFn0) => {
       const sourceFile = project.getSourceFileOrThrow(specifier.toString());
       return [
         declarativeTsMorph(sourceFile),
-        declarativeJSONSchema(maskOrMaskFn),
+        declarativeJSONSchema(maskOrMaskFn0 ?? maskOrMaskFn1),
       ];
     },
   });
@@ -40,6 +41,17 @@ export function declarativeJSONSchema<TValue extends ValueJSONSchema>(
     return Object.assign(value, {
       jsonSchema: applyJSONSchemaMask(compile(value), maskOrMaskFn),
     });
+  };
+}
+
+export function opinionatedJSONSchemaMask(value: any): any {
+  return {
+    properties: Object.fromEntries(
+      Object.entries(value.properties).map(([key, _value]) => [
+        key,
+        { title: key },
+      ]),
+    ),
   };
 }
 

@@ -7,6 +7,7 @@ import { declarativeJSONSchema } from "./json-schema.ts";
 
 export async function jsonSchemaDecoratorFactoryOfFile(
   specifier: string | URL,
+  maskOrMaskFn1?: JSONSchemaMask,
 ): Promise<(maskOrMaskFn?: JSONSchemaMask) => (target: Class) => Class> {
   const project = new Project({ useInMemoryFileSystem: true });
   project.createSourceFile(
@@ -15,11 +16,11 @@ export async function jsonSchemaDecoratorFactoryOfFile(
   );
 
   return createDecoratorFactory({
-    initialize: (maskOrMaskFn) => {
+    initialize: (maskOrMaskFn0) => {
       const sourceFile = project.getSourceFileOrThrow(specifier.toString());
       return [
         declarativeTsMorph(sourceFile),
-        declarativeJSONSchema(maskOrMaskFn),
+        declarativeJSONSchema(maskOrMaskFn0 ?? maskOrMaskFn1),
       ];
     },
   });

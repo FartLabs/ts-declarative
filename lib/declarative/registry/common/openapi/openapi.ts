@@ -11,7 +11,7 @@ import { jsonSchemaOf } from "#/lib/declarative/common/json-schema/json-schema.t
  */
 export class OpenAPIServer implements Registry {
   public specification: OpenAPIV3_1.Document;
-  public routes: Route[] = []; // TODO: Append routes on register.
+  public routes: Route[] = [];
 
   public constructor(specification?: Partial<OpenAPIV3_1.Document>) {
     this.specification = {
@@ -30,49 +30,35 @@ export class OpenAPIServer implements Registry {
 
     const { path, endpoints } = openapiResourceOptions(target, options);
     if (endpoints.create) {
-      const operationPath = operationPathOf(path, "create");
-      {
-        if (this.hasOperation(operationPath, methodOf("create"))) {
-          throw new Error(
-            `Path ${operationPath} already has a create operation.`,
-          );
-        }
-
-        this.setCreateOperation(operationPath, jsonSchema);
+      if (this.hasOperation(`${path}`, "post")) {
+        throw new Error(`Path ${path} already has a create operation.`);
       }
 
-      if (endpoints.read) {
-        const operationPath = operationPathOf(path, "read");
-        if (this.hasOperation(operationPath, methodOf("read"))) {
-          throw new Error(
-            `Path ${operationPath} already has a read operation.`,
-          );
-        }
+      this.setCreateOperation(path, jsonSchema);
+    }
 
-        this.setReadOperation(operationPath, jsonSchema);
+    if (endpoints.read) {
+      if (this.hasOperation(`${path}/{id}`, "get")) {
+        throw new Error(`Path ${path}/{id} already has a read operation.`);
       }
 
-      if (endpoints.update) {
-        const operationPath = operationPathOf(path, "update");
-        if (this.hasOperation(operationPath, methodOf("update"))) {
-          throw new Error(
-            `Path ${operationPath} already has an update operation.`,
-          );
-        }
+      this.setReadOperation(path, jsonSchema);
+    }
 
-        this.setUpdateOperation(operationPath, jsonSchema);
+    if (endpoints.update) {
+      if (this.hasOperation(`${path}/{id}`, "post")) {
+        throw new Error(`Path ${path}/{id} already has a update operation.`);
       }
 
-      if (endpoints.delete) {
-        const operationPath = operationPathOf(path, "delete");
-        if (this.hasOperation(operationPath, methodOf("delete"))) {
-          throw new Error(
-            `Path ${operationPath} already has a delete operation.`,
-          );
-        }
+      this.setUpdateOperation(path, jsonSchema);
+    }
 
-        this.setDeleteOperation(operationPath);
+    if (endpoints.delete) {
+      if (this.hasOperation(`${path}/{id}`, "delete")) {
+        throw new Error(`Path ${path}/{id} already has a delete operation.`);
       }
+
+      this.setDeleteOperation(path);
     }
   }
 
@@ -80,56 +66,97 @@ export class OpenAPIServer implements Registry {
     return Object.hasOwn(this.specification.paths?.[path] ?? {}, method);
   }
 
-  // deno-lint-ignore no-explicit-any
-  public setOperation(path: string, method: string, data: any): void {
+  public setOperation(
+    path: string,
+    method: string,
+    data: OpenAPIV3_1.OperationObject,
+  ): void {
     this.specification.paths ??= {};
     this.specification.paths[path] ??= {};
-    this.specification.paths[path][method as ReturnType<typeof methodOf>] =
-      data;
+    Object.assign(this.specification.paths[path], { [method]: data });
   }
 
   public setCreateOperation<T>(path: string, jsonSchema: T): void {
-    this.setOperation(path, methodOf("create"), {
+    this.setOperation(path, "post", {
       requestBody: {
         content: {
           // TODO: Use $ref instead of schema directly.
-          "application/json": { schema: jsonSchema },
+          "application/json": {
+            schema: jsonSchema as OpenAPIV3_1.SchemaObject,
+          },
         },
       },
       responses: { "200": { description: "Created" } },
     });
+
+    this.routes.push({
+      pattern: new URLPattern({ pathname: path }),
+      method: "POST",
+      handler: (_request) => {
+        throw new Error("Not implemented");
+      },
+    });
   }
 
   public setReadOperation<T>(path: string, jsonSchema: T): void {
-    this.setOperation(path, methodOf("read"), {
+    this.setOperation(`${path}/{id}`, "get", {
       parameters: [idPathParameter],
       responses: {
         "200": {
           description: "OK",
           content: {
-            // TODO: Use $ref instead of schema directly.
-            "application/json": { schema: jsonSchema },
+            "application/json": {
+              schema: jsonSchema as OpenAPIV3_1.SchemaObject,
+            },
           },
         },
+      },
+    });
+
+    this.routes.push({
+      pattern: new URLPattern({ pathname: `${path}/:id` }),
+      method: "GET",
+      handler: (_request) => {
+        throw new Error("Not implemented");
       },
     });
   }
 
   public setUpdateOperation<T>(path: string, jsonSchema: T): void {
-    this.setOperation(path, methodOf("update"), {
+    this.setOperation(`${path}/{id}`, "post", {
       parameters: [idPathParameter],
       requestBody: {
-        content: { "application/json": { schema: jsonSchema } },
+        content: {
+          "application/json": {
+            schema: jsonSchema as OpenAPIV3_1.SchemaObject,
+          },
+        },
       },
       responses: { "200": { description: "Updated" } },
+    });
+
+    this.routes.push({
+      pattern: new URLPattern({ pathname: `${path}/:id` }),
+      method: "POST",
+      handler: (_request) => {
+        throw new Error("Not implemented");
+      },
     });
   }
 
   public setDeleteOperation(path: string): void {
-    this.setOperation(path, methodOf("delete"), {
+    this.setOperation(`${path}/{id}`, "delete", {
       parameters: [idPathParameter],
       responses: {
         "200": { description: "Deleted" },
+      },
+    });
+
+    this.routes.push({
+      pattern: new URLPattern({ pathname: `${path}/:id` }),
+      method: "DELETE",
+      handler: (_request) => {
+        throw new Error("Not implemented");
       },
     });
   }
@@ -164,49 +191,6 @@ export function openapiResourceOptions(
 export interface OpenAPIResourceOptions {
   path?: string;
   endpoints?: Record<OpenAPIResourceEndpointKind, boolean>;
-}
-
-export function methodOf(
-  endpointKind: OpenAPIResourceEndpointKind,
-): "get" | "post" | "delete" {
-  switch (endpointKind) {
-    case "create": {
-      return "post";
-    }
-
-    case "read": {
-      return "get";
-    }
-
-    case "update": {
-      return "post";
-    }
-
-    case "delete": {
-      return "delete";
-    }
-
-    default: {
-      throw new Error(`Unknown endpoint kind: ${endpointKind}`);
-    }
-  }
-}
-
-export function operationPathOf(
-  prefix: string,
-  endpointKind: OpenAPIResourceEndpointKind,
-): string {
-  switch (endpointKind) {
-    case "create": {
-      return prefix;
-    }
-
-    case "read":
-    case "update":
-    case "delete": {
-      return `${prefix}/{id}`;
-    }
-  }
 }
 
 export function defaultOpenAPIResourceEndpointKinds(): Record<

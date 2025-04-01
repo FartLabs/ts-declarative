@@ -13,5 +13,6 @@ Deno.test("OpenAPIServer registers class", async (t) => {
   const server = new OpenAPIServer();
   server.register(Example);
 
-  await assertSnapshot(t, JSON.stringify(server.specification, null, 2));
+  const actual = JSON.stringify(server.specification, null, 2);
+  await assertSnapshot(t, actual);
 });

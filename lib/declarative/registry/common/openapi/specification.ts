@@ -4,12 +4,15 @@ import { getPrototypeID } from "#/lib/declarative/declarative.ts";
 import type { Registry } from "#/lib/declarative/registry/registry.ts";
 import { jsonSchemaOf } from "#/lib/declarative/common/json-schema/json-schema.ts";
 
-export class OpenAPISpecification
-  implements Registry<OpenAPISpecificationOptions> {
+/**
+ * OpenAPISpecification is a registry for OpenAPI resources that builds an
+ * OpenAPI specification.
+ */
+export class OpenAPISpecification implements Registry<OpenAPIResourceOptions> {
   // deno-lint-ignore no-explicit-any
   public constructor(public specification: any) {}
 
-  public register(target: Class, _options?: OpenAPISpecificationOptions): void {
+  public register(target: Class, _options?: OpenAPIResourceOptions): void {
     const id = getPrototypeID(target);
     if (id === undefined) {
       throw new Error("Target must be a class");
@@ -28,6 +31,9 @@ export class OpenAPISpecification
   }
 }
 
-export interface OpenAPISpecificationOptions {
+/**
+ * OpenAPIResourceOptions are options for registering an OpenAPI resource.
+ */
+export interface OpenAPIResourceOptions {
   path?: string;
 }

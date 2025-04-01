@@ -10,7 +10,7 @@ import { jsonSchemaOf } from "#/lib/declarative/common/json-schema/json-schema.t
  */
 export class OpenAPISpecification implements Registry<OpenAPIResourceOptions> {
   // deno-lint-ignore no-explicit-any
-  public constructor(public specification: any) {}
+  public constructor(public specification?: any) {}
 
   public register(target: Class, _options?: OpenAPIResourceOptions): void {
     const id = getPrototypeID(target);

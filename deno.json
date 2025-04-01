@@ -6,7 +6,9 @@
     ".": "./lib/declarative/mod.ts",
     "./common/ts-morph": "./lib/declarative/common/ts-morph/mod.ts",
     "./common/json-schema": "./lib/declarative/common/json-schema/mod.ts",
-    "./common/jsonld": "./lib/declarative/common/jsonld/mod.ts"
+    "./common/jsonld": "./lib/declarative/common/jsonld/mod.ts",
+    "./registry": "./lib/declarative/registry/mod.ts",
+    "./registry/common/openapi": "./lib/declarative/registry/common/openapi/mod.ts"
   },
   "imports": {
     "#/": "./",
@@ -24,6 +26,7 @@
     "@types/jsonld": "npm:@types/jsonld@^1.5.15",
     "ajv": "npm:ajv@^8.17.1",
     "jsonld": "npm:jsonld@^8.3.3",
+    "openapi-types": "npm:openapi-types@^12.1.3",
     "ts-morph": "npm:ts-morph@^25.0.1"
   },
   "tasks": {

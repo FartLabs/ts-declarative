@@ -1,4 +1,5 @@
 import type { Route } from "@std/http/unstable-route";
+import { route } from "@std/http/unstable-route";
 import { slugify } from "@std/text/unstable-slugify";
 import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class } from "#/lib/declarative/declarative.ts";
@@ -12,14 +13,17 @@ import { jsonSchemaOf } from "#/lib/declarative/common/json-schema/json-schema.t
 export class OpenAPIServer implements Registry {
   public specification: OpenAPIV3_1.Document;
   public routes: Route[] = [];
+  public db: Map<string, unknown> = new Map();
 
   public constructor(specification?: Partial<OpenAPIV3_1.Document>) {
-    this.specification = {
-      ...specification,
-      openapi: specification?.openapi ?? "3.1.0",
-      info: specification?.info ?? { title: "Example API", version: "1.0.0" },
-      paths: specification?.paths ?? {},
-    };
+    this.specification = Object.assign(
+      {
+        openapi: "3.1.0",
+        info: { title: "Example API", version: "1.0.0" },
+        paths: {},
+      },
+      specification,
+    );
   }
 
   public register(target: Class, options?: OpenAPIResourceOptions): void {
@@ -30,7 +34,7 @@ export class OpenAPIServer implements Registry {
 
     const { path, endpoints } = openapiResourceOptions(target, options);
     if (endpoints.create) {
-      if (this.hasOperation(`${path}`, "post")) {
+      if (this.hasOperation(path, "post")) {
         throw new Error(`Path ${path} already has a create operation.`);
       }
 
@@ -62,6 +66,13 @@ export class OpenAPIServer implements Registry {
     }
   }
 
+  public fetch(request: Request): Response | Promise<Response> {
+    const handle = route(this.routes, () => {
+      return new Response(null, { status: 404 });
+    });
+    return handle(request);
+  }
+
   public hasOperation(path: string, method: string): boolean {
     return Object.hasOwn(this.specification.paths?.[path] ?? {}, method);
   }
@@ -80,8 +91,8 @@ export class OpenAPIServer implements Registry {
     this.setOperation(path, "post", {
       requestBody: {
         content: {
-          // TODO: Use $ref instead of schema directly.
           "application/json": {
+            // TODO: Use $ref instead of schema directly.
             schema: jsonSchema as OpenAPIV3_1.SchemaObject,
           },
         },
@@ -92,8 +103,10 @@ export class OpenAPIServer implements Registry {
     this.routes.push({
       pattern: new URLPattern({ pathname: path }),
       method: "POST",
-      handler: (_request) => {
-        throw new Error("Not implemented");
+      handler: async (request) => {
+        const resource = await request.json();
+        this.db.set(resource.id, resource);
+        return new Response(null, { status: 200 });
       },
     });
   }
@@ -116,8 +129,18 @@ export class OpenAPIServer implements Registry {
     this.routes.push({
       pattern: new URLPattern({ pathname: `${path}/:id` }),
       method: "GET",
-      handler: (_request) => {
-        throw new Error("Not implemented");
+      handler: (_request, params) => {
+        const id = params?.pathname.groups.id;
+        if (id === undefined) {
+          return new Response(null, { status: 404 });
+        }
+
+        const resource = this.db.get(id);
+        if (resource === undefined) {
+          return new Response(null, { status: 404 });
+        }
+
+        return new Response(JSON.stringify(resource), { status: 200 });
       },
     });
   }
@@ -138,8 +161,15 @@ export class OpenAPIServer implements Registry {
     this.routes.push({
       pattern: new URLPattern({ pathname: `${path}/:id` }),
       method: "POST",
-      handler: (_request) => {
-        throw new Error("Not implemented");
+      handler: async (request, params) => {
+        const id = params?.pathname.groups.id;
+        if (id === undefined) {
+          return new Response(null, { status: 404 });
+        }
+
+        const resource = await request.json();
+        this.db.set(id, resource);
+        return new Response(null, { status: 200 });
       },
     });
   }
@@ -155,8 +185,14 @@ export class OpenAPIServer implements Registry {
     this.routes.push({
       pattern: new URLPattern({ pathname: `${path}/:id` }),
       method: "DELETE",
-      handler: (_request) => {
-        throw new Error("Not implemented");
+      handler: (_request, params) => {
+        const id = params?.pathname.groups.id;
+        if (id === undefined) {
+          return new Response(null, { status: 404 });
+        }
+
+        this.db.delete(id);
+        return new Response(null, { status: 200 });
       },
     });
   }

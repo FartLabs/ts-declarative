@@ -5,6 +5,8 @@ import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class } from "#/lib/declarative/declarative.ts";
 import type { Registry } from "#/lib/declarative/registry/registry.ts";
 import { jsonSchemaOf } from "#/lib/declarative/common/json-schema/json-schema.ts";
+import type { OpenAPIServerStorage } from "./storage/storage.ts";
+import { MemoryOpenAPIServerStorage } from "./storage/memory.ts";
 
 /**
  * OpenAPIServer is a registry for OpenAPI resources that builds an
@@ -13,9 +15,11 @@ import { jsonSchemaOf } from "#/lib/declarative/common/json-schema/json-schema.t
 export class OpenAPIServer implements Registry {
   public specification: OpenAPIV3_1.Document;
   public routes: Route[] = [];
-  public db: Map<string, unknown> = new Map();
 
-  public constructor(specification?: Partial<OpenAPIV3_1.Document>) {
+  public constructor(
+    public storage: OpenAPIServerStorage = new MemoryOpenAPIServerStorage(),
+    specification?: Partial<OpenAPIV3_1.Document>,
+  ) {
     this.specification = Object.assign(
       {
         openapi: "3.1.0",
@@ -105,7 +109,7 @@ export class OpenAPIServer implements Registry {
       method: "POST",
       handler: async (request) => {
         const resource = await request.json();
-        this.db.set(resource.id, resource);
+        await this.storage.set(resource.id, resource);
         return new Response(null, { status: 200 });
       },
     });
@@ -129,13 +133,13 @@ export class OpenAPIServer implements Registry {
     this.routes.push({
       pattern: new URLPattern({ pathname: `${path}/:id` }),
       method: "GET",
-      handler: (_request, params) => {
+      handler: async (_request, params) => {
         const id = params?.pathname.groups.id;
         if (id === undefined) {
           return new Response(null, { status: 404 });
         }
 
-        const resource = this.db.get(id);
+        const resource = await this.storage.get(id);
         if (resource === undefined) {
           return new Response(null, { status: 404 });
         }
@@ -168,7 +172,7 @@ export class OpenAPIServer implements Registry {
         }
 
         const resource = await request.json();
-        this.db.set(id, resource);
+        await this.storage.set(id, resource);
         return new Response(null, { status: 200 });
       },
     });
@@ -185,13 +189,13 @@ export class OpenAPIServer implements Registry {
     this.routes.push({
       pattern: new URLPattern({ pathname: `${path}/:id` }),
       method: "DELETE",
-      handler: (_request, params) => {
+      handler: async (_request, params) => {
         const id = params?.pathname.groups.id;
         if (id === undefined) {
           return new Response(null, { status: 404 });
         }
 
-        this.db.delete(id);
+        await this.storage.delete(id);
         return new Response(null, { status: 200 });
       },
     });

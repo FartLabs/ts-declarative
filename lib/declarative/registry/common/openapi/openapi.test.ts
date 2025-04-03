@@ -41,7 +41,10 @@ Deno.test("OpenAPIServer manages resources", async (t) => {
     );
 
     assert(response.status === 200);
-    assertEquals(server.db.get("1"), { id: "1", name: "Ash Ketchum" });
+    assertEquals(await server.storage.get("1"), {
+      id: "1",
+      name: "Ash Ketchum",
+    });
     assertEquals(await response.json(), { id: "1", name: "Ash Ketchum" });
   });
 
@@ -56,7 +59,7 @@ Deno.test("OpenAPIServer manages resources", async (t) => {
     );
 
     assert(response.status === 200);
-    assertEquals(server.db.get("1"), { id: "1", name: "Gary Oak" });
+    assertEquals(await server.storage.get("1"), { id: "1", name: "Gary Oak" });
   });
 
   await t.step("Delete resource", async () => {
@@ -67,6 +70,6 @@ Deno.test("OpenAPIServer manages resources", async (t) => {
     );
 
     assert(response.status === 200);
-    assertEquals(server.db.get("1"), undefined);
+    assertEquals(await server.storage.get("1"), undefined);
   });
 });

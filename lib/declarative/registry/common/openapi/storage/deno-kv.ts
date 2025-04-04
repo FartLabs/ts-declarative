@@ -20,6 +20,17 @@ export class DenoKvOpenAPIServerStorage implements OpenAPIServerStorage {
     await this.kv.delete([...this.prefix, key]);
   }
 
+  public async list<T>(): Promise<T[]> {
+    const result = await Array.fromAsync(
+      this.kv.list<T>({ prefix: this.prefix }),
+    );
+
+    return result.map((entry) => entry.value);
+  }
+
+  /**
+   * clear clears all data from storage.
+   */
   public static async clear(kv: Deno.Kv): Promise<void> {
     for await (const entry of kv.list({ prefix: [] })) {
       await kv.delete(entry.key);

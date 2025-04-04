@@ -36,6 +36,35 @@ snapshot[`OpenAPIServer registers class 1`] = `
             "description": "Created"
           }
         }
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/example/{id}": {

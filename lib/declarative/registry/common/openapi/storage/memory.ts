@@ -19,4 +19,8 @@ export class MemoryOpenAPIServerStorage implements OpenAPIServerStorage {
     this.storage.delete(key);
     return Promise.resolve();
   }
+
+  public list<T>(): Promise<T[]> {
+    return Promise.resolve(Array.from(this.storage.values()));
+  }
 }

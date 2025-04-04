@@ -68,12 +68,21 @@ export class OpenAPIServer implements Registry {
 
       this.setDeleteOperation(path);
     }
+
+    if (endpoints.list) {
+      if (this.hasOperation(path, "get")) {
+        throw new Error(`Path ${path} already has a list operation.`);
+      }
+
+      this.setListOperation(path, jsonSchema);
+    }
   }
 
   public fetch(request: Request): Response | Promise<Response> {
     const handle = route(this.routes, () => {
       return new Response(null, { status: 404 });
     });
+
     return handle(request);
   }
 
@@ -131,8 +140,8 @@ export class OpenAPIServer implements Registry {
     });
 
     this.routes.push({
-      pattern: new URLPattern({ pathname: `${path}/:id` }),
       method: "GET",
+      pattern: new URLPattern({ pathname: `${path}/:id` }),
       handler: async (_request, params) => {
         const id = params?.pathname.groups.id;
         if (id === undefined) {
@@ -163,8 +172,8 @@ export class OpenAPIServer implements Registry {
     });
 
     this.routes.push({
-      pattern: new URLPattern({ pathname: `${path}/:id` }),
       method: "POST",
+      pattern: new URLPattern({ pathname: `${path}/:id` }),
       handler: async (request, params) => {
         const id = params?.pathname.groups.id;
         if (id === undefined) {
@@ -187,8 +196,8 @@ export class OpenAPIServer implements Registry {
     });
 
     this.routes.push({
-      pattern: new URLPattern({ pathname: `${path}/:id` }),
       method: "DELETE",
+      pattern: new URLPattern({ pathname: `${path}/:id` }),
       handler: async (_request, params) => {
         const id = params?.pathname.groups.id;
         if (id === undefined) {
@@ -197,6 +206,33 @@ export class OpenAPIServer implements Registry {
 
         await this.storage.delete(id);
         return new Response(null, { status: 200 });
+      },
+    });
+  }
+
+  public setListOperation<T>(path: string, jsonSchema: T): void {
+    this.setOperation(path, "get", {
+      responses: {
+        "200": {
+          description: "OK",
+          content: {
+            "application/json": {
+              schema: {
+                type: "array",
+                items: jsonSchema as OpenAPIV3_1.SchemaObject,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    this.routes.push({
+      method: "GET",
+      pattern: new URLPattern({ pathname: path }),
+      handler: async (_request) => {
+        const resources = await this.storage.list();
+        return new Response(JSON.stringify(resources), { status: 200 });
       },
     });
   }
@@ -230,7 +266,7 @@ export function openapiResourceOptions(
  */
 export interface OpenAPIResourceOptions {
   path?: string;
-  endpoints?: Record<OpenAPIResourceEndpointKind, boolean>;
+  endpoints?: Partial<Record<OpenAPIResourceEndpointKind, boolean>>;
 }
 
 export function defaultOpenAPIResourceEndpointKinds(): Record<
@@ -247,15 +283,10 @@ export function defaultOpenAPIResourceEndpointKinds(): Record<
 export type OpenAPIResourceEndpointKind =
   (typeof openapiResourceEndpointKinds)[number];
 
-export const openapiResourceEndpointKinds: [
+export const openapiResourceEndpointKinds = [
   "create",
   "read",
   "update",
   "delete",
-] = [
-  "create",
-  "read",
-  "update",
-  "delete",
-  // "batchCreate", "batchRead", "batchUpdate", "batchDelete",
-];
+  "list",
+] as const;

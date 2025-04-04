@@ -62,6 +62,15 @@ Deno.test("OpenAPIServer manages resources", async (t) => {
     assertEquals(await server.storage.get("1"), { id: "1", name: "Gary Oak" });
   });
 
+  await t.step("List resources", async () => {
+    const response = await server.fetch(
+      new Request("http://localhost:8000/example"),
+    );
+
+    assert(response.status === 200);
+    assertEquals(await response.json(), [{ id: "1", name: "Gary Oak" }]);
+  });
+
   await t.step("Delete resource", async () => {
     const response = await server.fetch(
       new Request("http://localhost:8000/example/1", {

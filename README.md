@@ -47,6 +47,15 @@ The following example shows how to use this library to declare a class and its
 annotations.
 
 ```ts
+// @deno-types="@types/jsonld"
+import jsonld from "jsonld";
+import { Ajv } from "ajv";
+import { context, docOf } from "@fartlabs/declarative/common/jsonld";
+import {
+  jsonSchemaDecoratorFactoryOfFile,
+  jsonSchemaOf,
+} from "@fartlabs/declarative/common/json-schema";
+
 @context("https://schema.org/")
 @jsonSchema()
 export class Person {

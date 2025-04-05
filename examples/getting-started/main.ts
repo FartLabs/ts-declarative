@@ -15,7 +15,7 @@ export class Person {
   public constructor(public name: string) {}
 }
 
-// deno task example
+// Important: Changes MUST be reflected in README.md section.
 if (import.meta.main) {
   const ash = new Person("Ash Ketchum");
   const expandedAsh = await jsonld.expand(docOf(ash));

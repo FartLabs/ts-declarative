@@ -7,9 +7,8 @@
     "./common/ts-morph": "./lib/declarative/common/ts-morph/mod.ts",
     "./common/json-schema": "./lib/declarative/common/json-schema/mod.ts",
     "./common/jsonld": "./lib/declarative/common/jsonld/mod.ts",
-    "./registry": "./lib/declarative/registry/mod.ts",
-    "./registry/common/openapi": "./lib/declarative/registry/common/openapi/mod.ts",
-    "./registry/common/openapi/storage": "./lib/declarative/registry/common/openapi/storage/mod.ts"
+    "./common/openapi": "./lib/declarative/common/openapi/mod.ts",
+    "./common/google-aip": "./lib/declarative/common/google-aip/mod.ts"
   },
   "imports": {
     "#/": "./",

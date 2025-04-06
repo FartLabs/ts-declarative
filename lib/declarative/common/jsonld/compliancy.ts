@@ -1,4 +1,4 @@
-import { assert } from "@std/assert/assert";
+deno FormDataimport { assert } from "@std/assert/assert";
 import type { QueryEngine } from "@comunica/query-sparql-link-traversal";
 import type { Class } from "#/lib/declarative/declarative.ts";
 import { jsonldOf } from "#/lib/declarative/common/jsonld/jsonld.ts";

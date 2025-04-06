@@ -10,7 +10,7 @@ import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-
  * specificationOf returns the OpenAPI specification of the class.
  */
 export function specificationOf<TClass extends Class>(
-  target: TClass
+  target: TClass,
 ): OpenAPIV3_1.Document | undefined {
   return getPrototypeValue<ValueOpenAPI>(target)?.specification;
 }
@@ -19,7 +19,7 @@ export function specificationOf<TClass extends Class>(
  * routesOf returns the HTTP routes of the OpenAPI class.
  */
 export function routesOf<TClass extends Class>(
-  target: TClass
+  target: TClass,
 ): Route[] | undefined {
   return getPrototypeValue<ValueOpenAPI>(target)?.routes;
 }
@@ -33,7 +33,7 @@ export function openapiDecoratorFactory(): () => (target: Class) => Class {
 }
 
 export function declarativeOpenAPI<TValue extends ValueOpenAPI>(
-  value0?: TValue
+  value0?: TValue,
 ): Declarative<TValue> {
   return (value1) => {
     return Object.assign({}, value0, value1);

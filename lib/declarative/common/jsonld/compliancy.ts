@@ -1,4 +1,4 @@
-deno FormDataimport { assert } from "@std/assert/assert";
+import { assert } from "@std/assert/assert";
 import type { QueryEngine } from "@comunica/query-sparql-link-traversal";
 import type { Class } from "#/lib/declarative/declarative.ts";
 import { jsonldOf } from "#/lib/declarative/common/jsonld/jsonld.ts";
@@ -32,10 +32,10 @@ export function makeCompliancyQueryFromClass(target: Class): string {
     throw new Error(`Class ${target.name} is missing a ts-morph value.`);
   }
   const properties = tsMorph.properties.map((property) => property.name);
-  const [classIDExpanded, ...propertyIDsExpanded] = expandStrings(
-    context,
-    [type, ...properties],
-  );
+  const [classIDExpanded, ...propertyIDsExpanded] = expandStrings(context, [
+    type,
+    ...properties,
+  ]);
 
   return makeCompliancyQuery(classIDExpanded, propertyIDsExpanded);
 }

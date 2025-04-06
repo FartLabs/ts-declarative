@@ -3,7 +3,6 @@ import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
-import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
 
 /**
  * standardGet is the standard Get operation specification of the resource.
@@ -56,7 +55,7 @@ export interface StandardGetOptions {
 /**
  * ValueStandardGet is the value of the standard Get operation of the resource.
  */
-export interface ValueStandardGet extends ValueJSONSchema {
+export interface ValueStandardGet {
   standardGet?: StandardGet;
 }
 

@@ -33,9 +33,16 @@ export function declarativeStandardList<TValue extends ValueStandardList>(
   options?: StandardListOptions,
 ): Declarative<TValue> {
   return (value, name) => {
+    const schemaRef = `#/components/schemas/${options?.resourceName ?? name}`;
+    if (options?.pagination !== undefined) {
+      throw new Error("Pagination is not supported yet.");
+    }
+
     return Object.assign({}, value, {
       standardList: {
-        path: options?.path ?? `/${slugify(name)}`,
+        path: `${options?.parent ?? ""}/${
+          options?.resourcePath ?? slugify(name)
+        }`,
         method: "get",
         value: {
           parameters: [{ name: "page_size", in: "query" }],
@@ -46,9 +53,7 @@ export function declarativeStandardList<TValue extends ValueStandardList>(
                 "application/json": {
                   schema: {
                     type: "array",
-                    items: {
-                      $ref: "#/components/schemas/" + name,
-                    },
+                    items: { $ref: schemaRef },
                   },
                 },
               },
@@ -65,11 +70,15 @@ export function declarativeStandardList<TValue extends ValueStandardList>(
  * resource.
  */
 export interface StandardListOptions {
-  path?: string;
+  parent?: string;
+  resourcePath?: string;
+  resourceName?: string;
 
   /**
    * pagination is the pagination option of the standard List operation of the
    * resource. If left unset, pagination is disabled.
+   *
+   * @see https://google.aip.dev/158
    */
   pagination?: {
     /**

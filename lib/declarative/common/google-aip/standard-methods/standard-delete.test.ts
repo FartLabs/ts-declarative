@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { standardDelete, standardDeleteOf } from "./standard-delete.ts";
 
-@standardDelete({ path: "/persons" })
+@standardDelete({ resourcePath: "persons" })
 class Person {
   public constructor(public name: string) {}
 }

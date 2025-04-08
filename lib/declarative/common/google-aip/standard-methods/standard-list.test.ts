@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { standardList, standardListOf } from "./standard-list.ts";
 
-@standardList({ path: "/persons" })
+@standardList({ resourcePath: "persons" })
 class Person {
   public constructor(public name: string) {}
 }

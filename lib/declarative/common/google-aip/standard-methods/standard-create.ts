@@ -1,3 +1,5 @@
+// deno-lint-ignore-file no-explicit-any
+
 import { slugify } from "@std/text/unstable-slugify";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
@@ -33,10 +35,12 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
   options?: StandardCreateOptions,
 ): Declarative<TValue> {
   return (value, name) => {
-    const schemaRef = `#/components/schemas/${name}`;
+    const schemaRef = `#/components/schemas/${options?.resourceName ?? name}`;
     return Object.assign({}, value, {
       standardCreate: {
-        path: options?.path ?? `/${slugify(name)}`,
+        path: `${options?.parent ?? ""}/${
+          options?.resourcePath ?? slugify(name)
+        }`,
         method: "post",
         value: {
           ...(options?.input?.strategy === "body"
@@ -79,7 +83,9 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
  * resource.
  */
 export interface StandardCreateOptions {
-  path?: string;
+  parent?: string;
+  resourcePath?: string;
+  resourceName?: string;
   input?: { jsonSchema?: any; strategy?: "body" | "query" };
 }
 

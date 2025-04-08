@@ -35,7 +35,9 @@ export function declarativeStandardDelete<TValue extends ValueStandardDelete>(
   return (value, name) => {
     return Object.assign({}, value, {
       standardDelete: {
-        path: `${options?.path ?? `/${slugify(name)}`}/{name}`,
+        path: `${options?.parent ?? ""}/${
+          options?.resourcePath ?? slugify(name)
+        }/{name}`,
         method: "delete",
         value: {
           parameters: [{ name: "name", in: "path", required: true }],
@@ -50,7 +52,8 @@ export function declarativeStandardDelete<TValue extends ValueStandardDelete>(
  * resource.
  */
 export interface StandardDeleteOptions {
-  path?: string;
+  parent?: string;
+  resourcePath?: string;
 }
 
 /**

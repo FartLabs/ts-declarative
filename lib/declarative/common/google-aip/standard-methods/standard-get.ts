@@ -35,7 +35,9 @@ export function declarativeStandardGet<TValue extends ValueStandardGet>(
   return (value, name) => {
     return Object.assign({}, value, {
       standardGet: {
-        path: `${options?.path ?? `/${slugify(name)}`}/{name}`,
+        path: `${options?.parent ?? ""}/${
+          options?.resourcePath ?? slugify(name)
+        }/{name}`,
         method: "get",
         value: {
           parameters: [{ name: "name", in: "path", required: true }],
@@ -50,7 +52,8 @@ export function declarativeStandardGet<TValue extends ValueStandardGet>(
  * resource.
  */
 export interface StandardGetOptions {
-  path?: string;
+  parent?: string;
+  resourcePath?: string;
 }
 
 /**

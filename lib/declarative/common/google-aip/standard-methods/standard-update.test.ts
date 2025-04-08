@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { standardUpdate, standardUpdateOf } from "./standard-update.ts";
 
-@standardUpdate({ path: "/persons" })
+@standardUpdate({ resourcePath: "persons" })
 class Person {
   public constructor(public name: string) {}
 }

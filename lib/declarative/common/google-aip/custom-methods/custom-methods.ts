@@ -5,37 +5,37 @@ import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { Operation } from "#/lib/declarative/common/openapi/openapi.ts";
 
 /**
- * standardCreate is the standard Create operation specification of the resource.
+ * customMethods is the customMethods operation specification of the resource.
  */
-export const standardCreate: (
-  options?: StandardCreateOptions,
+export const customMethods: (
+  options?: CustomMethodOptions,
 ) => (target: Class) => Class = createDecoratorFactory({
-  initialize: (options?: StandardCreateOptions) => {
-    return [declarativeStandardCreate(options)];
+  initialize: (options?: CustomMethodOptions) => {
+    return [declarativeCustomMethods(options)];
   },
 });
 
 /**
- * standardCreateOf returns the standard Create operation of the resource.
+ * customMethodsOf returns the customMethods operation of the resource.
  */
-export function standardCreateOf<TClass extends Class>(
+export function customMethodsOf<TClass extends Class>(
   target: TClass,
-): Operation | undefined {
-  return getPrototypeValue<ValueStandardCreate>(target)?.standardCreate;
+): Operation[] | undefined {
+  return getPrototypeValue<ValueCustomMethods>(target)?.customMethods;
 }
 
 /**
- * declarativeStandardCreate returns the standard Create operation of the resource.
+ * declarativeCustomMethods returns the customMethods operation of the resource.
  *
- * @see https://google.aip.dev/133
+ * @see https://google.aip.dev/136
  */
-export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
-  options?: StandardCreateOptions,
+export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
+  options?: CustomMethodOptions,
 ): Declarative<TValue> {
   return (value, name) => {
     const schemaRef = `#/components/schemas/${name}`;
     return Object.assign({}, value, {
-      standardCreate: {
+      customMethods: {
         path: options?.path ?? `/${slugify(name)}`,
         method: "post",
         value: {
@@ -45,7 +45,7 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
                 required: true,
                 content: {
                   "application/json": {
-                    schema: options?.input?.jsonSchema ?? { $ref: schemaRef },
+                    schema: { $ref: schemaRef },
                   },
                 },
               },
@@ -54,16 +54,16 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
             ? {
               query: {
                 required: true,
-                schema: options?.input?.jsonSchema ?? { $ref: schemaRef },
+                schema: { $ref: schemaRef },
               },
             }
             : {}),
           responses: {
             "200": {
-              description: "Created resource.",
+              description: "Executes an operation on a resource.",
               content: {
                 "application/json": {
-                  schema: { $ref: schemaRef },
+                  schema: options?.output?.jsonSchema ?? { $ref: schemaRef },
                 },
               },
             },
@@ -75,17 +75,18 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
 }
 
 /**
- * StandardCreateOptions is the options for the standard Create operation of the
+ * CustomMethodOptions is the options for the customMethods operation of the
  * resource.
  */
-export interface StandardCreateOptions {
+export interface CustomMethodOptions {
   path?: string;
   input?: { jsonSchema?: any; strategy?: "body" | "query" };
+  output?: { jsonSchema?: any };
 }
 
 /**
- * ValueStandardCreate is the value of the standard Create operation of the resource.
+ * ValueCustomMethods is the value of the customMethods operation of the resource.
  */
-export interface ValueStandardCreate {
-  standardCreate?: Operation;
+export interface ValueCustomMethods {
+  customMethods?: Operation[];
 }

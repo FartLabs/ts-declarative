@@ -27,7 +27,7 @@ export function standardDeleteOf<TClass extends Class>(
 /**
  * declarativeStandardDelete returns the standard Delete operation of the resource.
  *
- * @see https://google.aip.dev/133
+ * @see https://google.aip.dev/135
  */
 export function declarativeStandardDelete<TValue extends ValueStandardDelete>(
   options?: StandardDeleteOptions,

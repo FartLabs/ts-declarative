@@ -33,11 +33,31 @@ export function declarativeStandardUpdate<TValue extends ValueStandardUpdate>(
   options?: StandardUpdateOptions,
 ): Declarative<TValue> {
   return (value, name) => {
+    const schemaRef = `#/components/schemas/${name}`;
     return Object.assign({}, value, {
       standardUpdate: {
         path: `${options?.path ?? `/${slugify(name)}`}/{name}`,
         method: "post",
         value: {
+          ...(options?.input?.strategy === "body"
+            ? {
+              requestBody: {
+                required: true,
+                content: {
+                  "application/json": {
+                    schema: options?.input?.jsonSchema ?? { $ref: schemaRef },
+                  },
+                },
+              },
+            }
+            : options?.input?.strategy === "query"
+            ? {
+              query: {
+                required: true,
+                schema: options?.input?.jsonSchema ?? { $ref: schemaRef },
+              },
+            }
+            : {}),
           parameters: [{ name: "name", in: "path", required: true }],
         },
       },
@@ -51,6 +71,7 @@ export function declarativeStandardUpdate<TValue extends ValueStandardUpdate>(
  */
 export interface StandardUpdateOptions {
   path?: string;
+  input?: { jsonSchema?: any; strategy?: "body" | "query" };
 }
 
 /**

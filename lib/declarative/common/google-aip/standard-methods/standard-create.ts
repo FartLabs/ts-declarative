@@ -1,8 +1,8 @@
 import { slugify } from "@std/text/unstable-slugify";
-import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+import type { StandardOperation } from "./standard-operation.ts";
 
 /**
  * standardCreate is the standard Create operation specification of the resource.
@@ -20,7 +20,7 @@ export const standardCreate: (
  */
 export function standardCreateOf<TClass extends Class>(
   target: TClass,
-): StandardCreate | undefined {
+): StandardOperation | undefined {
   return getPrototypeValue<ValueStandardCreate>(target)?.standardCreate;
 }
 
@@ -37,7 +37,8 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
     return Object.assign({}, value, {
       standardCreate: {
         path: options?.path ?? `/${slugify(name)}`,
-        operation: {
+        method: "post",
+        value: {
           ...(options?.payloadStrategy === "body"
             ? {
               requestBody: {
@@ -86,13 +87,5 @@ export interface StandardCreateOptions {
  * ValueStandardCreate is the value of the standard Create operation of the resource.
  */
 export interface ValueStandardCreate {
-  standardCreate?: StandardCreate;
-}
-
-/**
- * StandardCreate is the standard Create operation specification of the resource.
- */
-export interface StandardCreate {
-  path: string;
-  operation: OpenAPIV3_1.OperationObject;
+  standardCreate?: StandardOperation;
 }

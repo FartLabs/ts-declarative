@@ -1,16 +1,16 @@
 import { assertEquals } from "@std/assert";
-import { standardGet, standardGetOf } from "./standard-get.ts";
+import { standardUpdate, standardUpdateOf } from "./standard-update.ts";
 
-@standardGet({ path: "/persons" })
+@standardUpdate({ path: "/persons" })
 class Person {
   public constructor(public name: string) {}
 }
 
-Deno.test("standardGet decorator factory decorates value", () => {
-  const actual = standardGetOf(Person);
+Deno.test("standardUpdate decorator factory decorates value", () => {
+  const actual = standardUpdateOf(Person);
   assertEquals(actual, {
     path: "/persons/{name}",
-    method: "get",
+    method: "post",
     value: {
       parameters: [{ name: "name", in: "path", required: true }],
     },

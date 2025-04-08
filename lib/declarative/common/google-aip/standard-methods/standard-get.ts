@@ -1,8 +1,8 @@
 import { slugify } from "@std/text/unstable-slugify";
-import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+import type { StandardOperation } from "./standard-operation.ts";
 
 /**
  * standardGet is the standard Get operation specification of the resource.
@@ -20,7 +20,7 @@ export const standardGet: (
  */
 export function standardGetOf<TClass extends Class>(
   target: TClass,
-): StandardGet | undefined {
+): StandardOperation | undefined {
   return getPrototypeValue<ValueStandardGet>(target)?.standardGet;
 }
 
@@ -36,7 +36,8 @@ export function declarativeStandardGet<TValue extends ValueStandardGet>(
     return Object.assign({}, value, {
       standardGet: {
         path: `${options?.path ?? `/${slugify(name)}`}/{name}`,
-        operation: {
+        method: "get",
+        value: {
           parameters: [{ name: "name", in: "path", required: true }],
         },
       },
@@ -56,13 +57,5 @@ export interface StandardGetOptions {
  * ValueStandardGet is the value of the standard Get operation of the resource.
  */
 export interface ValueStandardGet {
-  standardGet?: StandardGet;
-}
-
-/**
- * StandardGet is the standard Get operation specification of the resource.
- */
-export interface StandardGet {
-  path: string;
-  operation: OpenAPIV3_1.OperationObject;
+  standardGet?: StandardOperation;
 }

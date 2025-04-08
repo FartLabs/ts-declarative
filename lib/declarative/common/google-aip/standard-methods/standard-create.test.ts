@@ -10,7 +10,8 @@ Deno.test("standardCreate decorator factory decorates value", () => {
   const actual = standardCreateOf(Person);
   assertEquals(actual, {
     path: "/persons",
-    operation: {
+    method: "post",
+    value: {
       requestBody: {
         required: true,
         content: {

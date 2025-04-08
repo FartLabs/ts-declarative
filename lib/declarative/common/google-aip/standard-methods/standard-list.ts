@@ -1,8 +1,8 @@
 import { slugify } from "@std/text/unstable-slugify";
-import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+import type { StandardOperation } from "./standard-operation.ts";
 
 /**
  * standardList is the standard List operation specification of the resource.
@@ -20,7 +20,7 @@ export const standardList: (
  */
 export function standardListOf<TClass extends Class>(
   target: TClass,
-): StandardList | undefined {
+): StandardOperation | undefined {
   return getPrototypeValue<ValueStandardList>(target)?.standardList;
 }
 
@@ -36,7 +36,8 @@ export function declarativeStandardList<TValue extends ValueStandardList>(
     return Object.assign({}, value, {
       standardList: {
         path: options?.path ?? `/${slugify(name)}`,
-        operation: {
+        method: "get",
+        value: {
           parameters: [{ name: "page_size", in: "query" }],
           responses: {
             "200": {
@@ -82,13 +83,5 @@ export interface StandardListOptions {
  * ValueStandardList is the value of the standard List operation of the resource.
  */
 export interface ValueStandardList {
-  standardList?: StandardList;
-}
-
-/**
- * StandardList is the standard List operation specification of the resource.
- */
-export interface StandardList {
-  path: string;
-  operation: OpenAPIV3_1.OperationObject;
+  standardList?: StandardOperation;
 }

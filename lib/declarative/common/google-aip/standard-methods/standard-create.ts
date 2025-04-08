@@ -2,7 +2,7 @@ import { slugify } from "@std/text/unstable-slugify";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
-import type { StandardOperation } from "./standard-operation.ts";
+import type { Operation } from "#/lib/declarative/common/openapi/openapi.ts";
 
 /**
  * standardCreate is the standard Create operation specification of the resource.
@@ -20,7 +20,7 @@ export const standardCreate: (
  */
 export function standardCreateOf<TClass extends Class>(
   target: TClass,
-): StandardOperation | undefined {
+): Operation | undefined {
   return getPrototypeValue<ValueStandardCreate>(target)?.standardCreate;
 }
 
@@ -87,5 +87,5 @@ export interface StandardCreateOptions {
  * ValueStandardCreate is the value of the standard Create operation of the resource.
  */
 export interface ValueStandardCreate {
-  standardCreate?: StandardOperation;
+  standardCreate?: Operation;
 }

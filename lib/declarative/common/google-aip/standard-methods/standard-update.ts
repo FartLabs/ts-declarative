@@ -2,7 +2,7 @@ import { slugify } from "@std/text/unstable-slugify";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
-import type { StandardOperation } from "./standard-operation.ts";
+import type { Operation } from "#/lib/declarative/common/openapi/openapi.ts";
 
 /**
  * standardUpdate is the standard Update operation specification of the resource.
@@ -20,7 +20,7 @@ export const standardUpdate: (
  */
 export function standardUpdateOf<TClass extends Class>(
   target: TClass,
-): StandardOperation | undefined {
+): Operation | undefined {
   return getPrototypeValue<ValueStandardUpdate>(target)?.standardUpdate;
 }
 
@@ -57,5 +57,5 @@ export interface StandardUpdateOptions {
  * ValueStandardUpdate is the value of the standard Update operation of the resource.
  */
 export interface ValueStandardUpdate {
-  standardUpdate?: StandardOperation;
+  standardUpdate?: Operation;
 }

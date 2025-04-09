@@ -10,8 +10,8 @@ Deno.test("standardGet decorator factory decorates value", () => {
   const actual = standardGetOf(Person);
   assertEquals(actual, {
     path: "/persons/{name}",
-    method: "get",
-    value: {
+    httpMethod: "get",
+    specification: {
       parameters: [{ name: "name", in: "path", required: true }],
     },
   });

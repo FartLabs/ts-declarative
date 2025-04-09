@@ -10,8 +10,8 @@ Deno.test("standardList decorator factory decorates value", () => {
   const actual = standardListOf(Person);
   assertEquals(actual, {
     path: "/persons",
-    method: "get",
-    value: {
+    httpMethod: "get",
+    specification: {
       parameters: [{ in: "query", name: "page_size" }],
       responses: {
         "200": {

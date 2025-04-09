@@ -10,8 +10,8 @@ Deno.test("standardUpdate decorator factory decorates value", () => {
   const actual = standardUpdateOf(Person);
   assertEquals(actual, {
     path: "/persons/{name}",
-    method: "post",
-    value: {
+    httpMethod: "post",
+    specification: {
       parameters: [{ name: "name", in: "path", required: true }],
     },
   });

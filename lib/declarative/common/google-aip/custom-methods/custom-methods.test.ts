@@ -1,15 +1,20 @@
 import { assertEquals } from "@std/assert";
-import { standardCreate, standardCreateOf } from "./standard-create.ts";
+import { customMethod, customMethodsOf } from "./custom-methods.ts";
 
-@standardCreate({ resourcePath: "persons", input: { strategy: "body" } })
+@customMethod({
+  verb: "batchCreate",
+  resourcePath: "persons",
+  input: { strategy: "body" },
+  output: { description: "Created resources." },
+})
 class Person {
   public constructor(public name: string) {}
 }
 
-Deno.test("standardCreate decorator factory decorates value", () => {
-  const actual = standardCreateOf(Person);
-  assertEquals(actual, {
-    path: "/persons",
+Deno.test("customMethod decorator factory decorates value", () => {
+  const actual = customMethodsOf(Person);
+  assertEquals(actual, [{
+    path: "/persons:batchCreate",
     httpMethod: "post",
     specification: {
       requestBody: {
@@ -27,9 +32,9 @@ Deno.test("standardCreate decorator factory decorates value", () => {
               schema: { $ref: "#/components/schemas/Person" },
             },
           },
-          description: "Created resource.",
+          description: "Created resources.",
         },
       },
     },
-  });
+  }]);
 });

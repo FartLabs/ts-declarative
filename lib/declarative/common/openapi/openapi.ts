@@ -3,8 +3,6 @@ import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
-// import type { ValueTsMorph } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
-// import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
 
 /**
  * specificationOf returns the OpenAPI specification of the class.
@@ -64,7 +62,20 @@ export interface ValueOpenAPI {
  * Operation is an operation of an OpenAPI specification.
  */
 export interface Operation {
+  /**
+   * path is the path of the operation.
+   */
   path: string;
-  method: string;
-  value: OpenAPIV3_1.OperationObject;
+
+  /**
+   * httpMethod is the HTTP method of the operation.
+   *
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
+   */
+  httpMethod: string;
+
+  /**
+   * specification is the OpenAPI specification of the operation.
+   */
+  specification: OpenAPIV3_1.OperationObject;
 }

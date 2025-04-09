@@ -38,8 +38,8 @@ export function declarativeStandardDelete<TValue extends ValueStandardDelete>(
         path: `${options?.parent ?? ""}/${
           options?.resourcePath ?? slugify(name)
         }/{name}`,
-        method: "delete",
-        value: {
+        httpMethod: "delete",
+        specification: {
           parameters: [{ name: "name", in: "path", required: true }],
         },
       },

@@ -38,8 +38,8 @@ export function declarativeStandardGet<TValue extends ValueStandardGet>(
         path: `${options?.parent ?? ""}/${
           options?.resourcePath ?? slugify(name)
         }/{name}`,
-        method: "get",
-        value: {
+        httpMethod: "get",
+        specification: {
           parameters: [{ name: "name", in: "path", required: true }],
         },
       },

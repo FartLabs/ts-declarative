@@ -7,9 +7,10 @@ import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { Operation } from "#/lib/declarative/common/openapi/openapi.ts";
 
 /**
- * customMethods is the customMethods operation specification of the resource.
+ * customMethod is a decorator factory that creates a custom method for the
+ * resource.
  */
-export const customMethods: (
+export const customMethod: (
   options?: CustomMethodOptions,
 ) => (target: Class) => Class = createDecoratorFactory({
   initialize: (options?: CustomMethodOptions) => {
@@ -36,9 +37,7 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
 ): Declarative<TValue> {
   return (value, name) => {
     const schemaRef = `#/components/schemas/${options?.resourceName ?? name}`;
-    const path = `${options?.parent ?? ""}/${
-      options?.resourcePath ?? slugify(name)
-    }:${options?.verb}`;
+    const path = customMethodPath(options);
     if (value?.customMethods?.some((operation) => operation.path === path)) {
       throw new Error(
         `customMethods "${path}" already exists for resource "${name}"`,
@@ -50,8 +49,8 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
         ...(value?.customMethods ?? []),
         {
           path,
-          method: "post",
-          value: {
+          httpMethod: options?.httpMethod ?? "post",
+          specification: {
             ...(options?.input?.strategy === "body"
               ? {
                 requestBody: {
@@ -73,7 +72,7 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
               : {}),
             responses: {
               "200": {
-                description: "Executes an operation on a resource.",
+                description: options?.output?.description,
                 content: {
                   "application/json": {
                     schema: options?.output?.jsonSchema ?? { $ref: schemaRef },
@@ -89,10 +88,24 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
 }
 
 /**
+ * customMethodPath returns the path for the custom method.
+ */
+export function customMethodPath(options?: CustomMethodOptions): string {
+  return `${options?.parent ?? ""}/${
+    options?.resourcePath ?? slugify(options?.resourceName ?? "")
+  }:${options?.verb}`;
+}
+
+/**
  * CustomMethodOptions is the options for the customMethods operation of the
  * resource.
  */
 export interface CustomMethodOptions {
+  /**
+   * verb is the prefix for the custom method. Must be camelCase.
+   */
+  verb: string;
+
   /**
    * parent is the parent of the resource.
    */
@@ -109,19 +122,23 @@ export interface CustomMethodOptions {
   resourceName?: string;
 
   /**
-   * verb is the prefix for the custom method. Must be camelCase.
+   * httpMethod is the HTTP method for the custom method. Defaults to "post".
    */
-  verb?: string;
+  httpMethod?: string;
 
   /**
    * input is the input for the custom method.
    */
-  input?: { jsonSchema?: any; strategy?: "body" | "query" };
+  input?: {
+    strategy?: "body" | "query";
+    jsonSchema?: any;
+    description?: string;
+  };
 
   /**
    * output is the output for the custom method.
    */
-  output?: { jsonSchema?: any };
+  output?: { jsonSchema?: any; description: string };
 }
 
 /**

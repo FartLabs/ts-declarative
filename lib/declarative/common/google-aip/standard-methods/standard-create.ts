@@ -41,8 +41,8 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
         path: `${options?.parent ?? ""}/${
           options?.resourcePath ?? slugify(name)
         }`,
-        method: "post",
-        value: {
+        httpMethod: "post",
+        specification: {
           ...(options?.input?.strategy === "body"
             ? {
               requestBody: {

@@ -43,8 +43,8 @@ export function declarativeStandardList<TValue extends ValueStandardList>(
         path: `${options?.parent ?? ""}/${
           options?.resourcePath ?? slugify(name)
         }`,
-        method: "get",
-        value: {
+        httpMethod: "get",
+        specification: {
           parameters: [{ name: "page_size", in: "query" }],
           responses: {
             "200": {

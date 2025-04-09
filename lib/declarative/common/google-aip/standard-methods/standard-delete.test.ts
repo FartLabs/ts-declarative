@@ -10,8 +10,8 @@ Deno.test("standardDelete decorator factory decorates value", () => {
   const actual = standardDeleteOf(Person);
   assertEquals(actual, {
     path: "/persons/{name}",
-    method: "delete",
-    value: {
+    httpMethod: "delete",
+    specification: {
       parameters: [{ name: "name", in: "path", required: true }],
     },
   });

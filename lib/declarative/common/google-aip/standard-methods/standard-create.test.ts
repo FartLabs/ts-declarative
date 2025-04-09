@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { standardCreate, standardCreateOf } from "./standard-create.ts";
 
-@standardCreate({ resourcePath: "persons", input: { strategy: "body" } })
+@standardCreate({ input: { strategy: "body" } })
 class Person {
   public constructor(public name: string) {}
 }
@@ -9,7 +9,7 @@ class Person {
 Deno.test("standardCreate decorator factory decorates value", () => {
   const actual = standardCreateOf(Person);
   assertEquals(actual, {
-    path: "/persons",
+    path: "/people",
     httpMethod: "post",
     specification: {
       requestBody: {

@@ -25,6 +25,7 @@
     "@std/testing": "jsr:@std/testing@^1.0.9",
     "@std/text": "jsr:@std/text@^1.0.12",
     "@types/jsonld": "npm:@types/jsonld@^1.5.15",
+    "@wei/pluralize": "jsr:@wei/pluralize@^8.0.2",
     "ajv": "npm:ajv@^8.17.1",
     "jsonld": "npm:jsonld@^8.3.3",
     "openapi-types": "npm:openapi-types@^12.1.3",

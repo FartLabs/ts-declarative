@@ -1,7 +1,7 @@
-import { slugify } from "@std/text/unstable-slugify";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+import { toCollectionIdentifier } from "#/lib/declarative/common/google-aip/to-collection-identifier.ts";
 import type { Operation } from "#/lib/declarative/common/openapi/openapi.ts";
 
 /**
@@ -36,7 +36,7 @@ export function declarativeStandardDelete<TValue extends ValueStandardDelete>(
     return Object.assign({}, value, {
       standardDelete: {
         path: `${options?.parent ?? ""}/${
-          options?.resourcePath ?? slugify(name)
+          options?.collectionIdentifier ?? toCollectionIdentifier(name)
         }/{name}`,
         httpMethod: "delete",
         specification: {
@@ -53,7 +53,7 @@ export function declarativeStandardDelete<TValue extends ValueStandardDelete>(
  */
 export interface StandardDeleteOptions {
   parent?: string;
-  resourcePath?: string;
+  collectionIdentifier?: string;
 }
 
 /**

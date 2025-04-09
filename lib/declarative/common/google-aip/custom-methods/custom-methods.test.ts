@@ -3,7 +3,6 @@ import { customMethod, customMethodsOf } from "./custom-methods.ts";
 
 @customMethod({
   verb: "batchCreate",
-  resourcePath: "persons",
   input: { strategy: "body" },
   output: { description: "Created resources." },
 })
@@ -14,7 +13,7 @@ class Person {
 Deno.test("customMethod decorator factory decorates value", () => {
   const actual = customMethodsOf(Person);
   assertEquals(actual, [{
-    path: "/persons:batchCreate",
+    path: "/people:batchCreate",
     httpMethod: "post",
     specification: {
       requestBody: {

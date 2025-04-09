@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { standardGet, standardGetOf } from "./standard-get.ts";
 
-@standardGet({ resourcePath: "persons" })
+@standardGet()
 class Person {
   public constructor(public name: string) {}
 }
@@ -9,7 +9,7 @@ class Person {
 Deno.test("standardGet decorator factory decorates value", () => {
   const actual = standardGetOf(Person);
   assertEquals(actual, {
-    path: "/persons/{name}",
+    path: "/people/{name}",
     httpMethod: "get",
     specification: {
       parameters: [{ name: "name", in: "path", required: true }],

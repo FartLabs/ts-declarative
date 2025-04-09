@@ -1,9 +1,9 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { slugify } from "@std/text/unstable-slugify";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+import { toCollectionIdentifier } from "../to-collection-identifier.ts";
 import type { Operation } from "#/lib/declarative/common/openapi/openapi.ts";
 
 /**
@@ -37,7 +37,9 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
 ): Declarative<TValue> {
   return (value, name) => {
     const schemaRef = `#/components/schemas/${options?.resourceName ?? name}`;
-    const path = customMethodPath(options);
+    const path = `${options?.parent ?? ""}/${
+      options?.collectionIdentifier ?? toCollectionIdentifier(name)
+    }:${options?.verb}`;
     if (value?.customMethods?.some((operation) => operation.path === path)) {
       throw new Error(
         `customMethods "${path}" already exists for resource "${name}"`,
@@ -88,15 +90,6 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
 }
 
 /**
- * customMethodPath returns the path for the custom method.
- */
-export function customMethodPath(options?: CustomMethodOptions): string {
-  return `${options?.parent ?? ""}/${
-    options?.resourcePath ?? slugify(options?.resourceName ?? "")
-  }:${options?.verb}`;
-}
-
-/**
  * CustomMethodOptions is the options for the customMethods operation of the
  * resource.
  */
@@ -112,9 +105,9 @@ export interface CustomMethodOptions {
   parent?: string;
 
   /**
-   * resourcePath is the path of the resource.
+   * collectionIdentifier is the collection identifier of the resource.
    */
-  resourcePath?: string;
+  collectionIdentifier?: string;
 
   /**
    * resourceName is the name of the resource.

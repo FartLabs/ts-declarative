@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { standardUpdate, standardUpdateOf } from "./standard-update.ts";
 
-@standardUpdate({ resourcePath: "persons" })
+@standardUpdate()
 class Person {
   public constructor(public name: string) {}
 }
@@ -9,7 +9,7 @@ class Person {
 Deno.test("standardUpdate decorator factory decorates value", () => {
   const actual = standardUpdateOf(Person);
   assertEquals(actual, {
-    path: "/persons/{name}",
+    path: "/people/{name}",
     httpMethod: "post",
     specification: {
       parameters: [{ name: "name", in: "path", required: true }],

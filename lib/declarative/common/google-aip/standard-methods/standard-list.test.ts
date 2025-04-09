@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { standardList, standardListOf } from "./standard-list.ts";
 
-@standardList({ resourcePath: "persons" })
+@standardList()
 class Person {
   public constructor(public name: string) {}
 }
@@ -9,7 +9,7 @@ class Person {
 Deno.test("standardList decorator factory decorates value", () => {
   const actual = standardListOf(Person);
   assertEquals(actual, {
-    path: "/persons",
+    path: "/people",
     httpMethod: "get",
     specification: {
       parameters: [{ in: "query", name: "page_size" }],

@@ -11,7 +11,7 @@ Deno.test("standardCreate decorator factory decorates value", () => {
   assertEquals(actual, {
     path: "/people",
     httpMethod: "post",
-    specification: {
+    schema: {
       requestBody: {
         required: true,
         content: {

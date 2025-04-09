@@ -3,8 +3,11 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
-import { toCollectionIdentifier } from "#/lib/declarative/common/google-aip/to-collection-identifier.ts";
-import type { Operation } from "#/lib/declarative/common/openapi/openapi.ts";
+import type {
+  Operation,
+  OperationOptions,
+} from "#/lib/declarative/common/google-aip/operation.ts";
+import { toPath } from "#/lib/declarative/common/google-aip/operation.ts";
 
 /**
  * standardUpdate is the standard Update operation specification of the resource.
@@ -35,21 +38,20 @@ export function declarativeStandardUpdate<TValue extends ValueStandardUpdate>(
   options?: StandardUpdateOptions,
 ): Declarative<TValue> {
   return (value, name) => {
-    const schemaRef = `#/components/schemas/${options?.resourceName ?? name}`;
+    const resourceName = options?.resourceName ?? name;
+    const schemaRef = `#/components/schemas/${resourceName}`;
     return Object.assign({}, value, {
       standardUpdate: {
-        path: `${options?.parent ?? ""}/${
-          options?.collectionIdentifier ?? toCollectionIdentifier(name)
-        }/{name}`,
+        path: `${toPath(name, options)}/{name}`,
         httpMethod: "post",
-        specification: {
+        schema: {
           ...(options?.input?.strategy === "body"
             ? {
               requestBody: {
                 required: true,
                 content: {
                   "application/json": {
-                    schema: options?.input?.jsonSchema ?? { $ref: schemaRef },
+                    schema: options?.input?.schema ?? { $ref: schemaRef },
                   },
                 },
               },
@@ -58,7 +60,7 @@ export function declarativeStandardUpdate<TValue extends ValueStandardUpdate>(
             ? {
               query: {
                 required: true,
-                schema: options?.input?.jsonSchema ?? { $ref: schemaRef },
+                schema: options?.input?.schema ?? { $ref: schemaRef },
               },
             }
             : {}),
@@ -73,11 +75,8 @@ export function declarativeStandardUpdate<TValue extends ValueStandardUpdate>(
  * StandardUpdateOptions is the options for the standard Update operation of the
  * resource.
  */
-export interface StandardUpdateOptions {
-  parent?: string;
-  collectionIdentifier?: string;
-  resourceName?: string;
-  input?: { jsonSchema?: any; strategy?: "body" | "query" };
+export interface StandardUpdateOptions extends OperationOptions {
+  input?: { schema?: any; strategy?: "body" | "query" };
 }
 
 /**

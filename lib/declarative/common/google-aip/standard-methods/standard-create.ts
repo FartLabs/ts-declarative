@@ -3,8 +3,11 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
-import { toCollectionIdentifier } from "#/lib/declarative/common/google-aip/to-collection-identifier.ts";
-import type { Operation } from "#/lib/declarative/common/openapi/openapi.ts";
+import type {
+  Operation,
+  OperationOptions,
+} from "#/lib/declarative/common/google-aip/operation.ts";
+import { toPath } from "#/lib/declarative/common/google-aip/operation.ts";
 
 /**
  * standardCreate is the standard Create operation specification of the resource.
@@ -35,21 +38,20 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
   options?: StandardCreateOptions,
 ): Declarative<TValue> {
   return (value, name) => {
-    const schemaRef = `#/components/schemas/${options?.resourceName ?? name}`;
+    const resourceName = options?.resourceName ?? name;
+    const schemaRef = `#/components/schemas/${resourceName}`;
     return Object.assign({}, value, {
       standardCreate: {
-        path: `${options?.parent ?? ""}/${
-          options?.collectionIdentifier ?? toCollectionIdentifier(name)
-        }`,
+        path: toPath(name, options),
         httpMethod: "post",
-        specification: {
+        schema: {
           ...(options?.input?.strategy === "body"
             ? {
               requestBody: {
                 required: true,
                 content: {
                   "application/json": {
-                    schema: options?.input?.jsonSchema ?? { $ref: schemaRef },
+                    schema: options?.input?.schema ?? { $ref: schemaRef },
                   },
                 },
               },
@@ -58,7 +60,7 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
             ? {
               query: {
                 required: true,
-                schema: options?.input?.jsonSchema ?? { $ref: schemaRef },
+                schema: options?.input?.schema ?? { $ref: schemaRef },
               },
             }
             : {}),
@@ -82,11 +84,8 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
  * StandardCreateOptions is the options for the standard Create operation of the
  * resource.
  */
-export interface StandardCreateOptions {
-  parent?: string;
-  collectionIdentifier?: string;
-  resourceName?: string;
-  input?: { jsonSchema?: any; strategy?: "body" | "query" };
+export interface StandardCreateOptions extends OperationOptions {
+  input?: { schema?: any; strategy?: "body" | "query" };
 }
 
 /**

@@ -1,8 +1,11 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
-import { toCollectionIdentifier } from "#/lib/declarative/common/google-aip/to-collection-identifier.ts";
-import type { Operation } from "#/lib/declarative/common/openapi/openapi.ts";
+import type {
+  Operation,
+  OperationOptions,
+} from "#/lib/declarative/common/google-aip/operation.ts";
+import { toPath } from "#/lib/declarative/common/google-aip/operation.ts";
 
 /**
  * standardList is the standard List operation specification of the resource.
@@ -33,18 +36,17 @@ export function declarativeStandardList<TValue extends ValueStandardList>(
   options?: StandardListOptions,
 ): Declarative<TValue> {
   return (value, name) => {
-    const schemaRef = `#/components/schemas/${options?.resourceName ?? name}`;
+    const resourceName = options?.resourceName ?? name;
+    const schemaRef = `#/components/schemas/${resourceName}`;
     if (options?.pagination !== undefined) {
       throw new Error("Pagination is not supported yet.");
     }
 
     return Object.assign({}, value, {
       standardList: {
-        path: `${options?.parent ?? ""}/${
-          options?.collectionIdentifier ?? toCollectionIdentifier(name)
-        }`,
+        path: toPath(name, options),
         httpMethod: "get",
-        specification: {
+        schema: {
           parameters: [{ name: "page_size", in: "query" }],
           responses: {
             "200": {
@@ -69,11 +71,7 @@ export function declarativeStandardList<TValue extends ValueStandardList>(
  * StandardListOptions is the options for the standard List operation of the
  * resource.
  */
-export interface StandardListOptions {
-  parent?: string;
-  collectionIdentifier?: string;
-  resourceName?: string;
-
+export interface StandardListOptions extends OperationOptions {
   /**
    * pagination is the pagination option of the standard List operation of the
    * resource. If left unset, pagination is disabled.

@@ -11,7 +11,7 @@ Deno.test("standardGet decorator factory decorates value", () => {
   assertEquals(actual, {
     path: "/people/{name}",
     httpMethod: "get",
-    specification: {
+    schema: {
       parameters: [{ name: "name", in: "path", required: true }],
     },
   });

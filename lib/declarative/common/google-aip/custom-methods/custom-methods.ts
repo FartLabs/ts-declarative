@@ -3,8 +3,11 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
-import { toCollectionIdentifier } from "../to-collection-identifier.ts";
-import type { Operation } from "#/lib/declarative/common/openapi/openapi.ts";
+import type {
+  Operation,
+  OperationOptions,
+} from "#/lib/declarative/common/google-aip/operation.ts";
+import { toPath } from "#/lib/declarative/common/google-aip/operation.ts";
 
 /**
  * customMethod is a decorator factory that creates a custom method for the
@@ -36,13 +39,16 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
   options?: CustomMethodOptions,
 ): Declarative<TValue> {
   return (value, name) => {
-    const schemaRef = `#/components/schemas/${options?.resourceName ?? name}`;
-    const path = `${options?.parent ?? ""}/${
-      options?.collectionIdentifier ?? toCollectionIdentifier(name)
-    }:${options?.verb}`;
+    if (options?.verb === undefined) {
+      throw new Error("verb is required");
+    }
+
+    const resourceName = options?.resourceName ?? name;
+    const schemaRef = `#/components/schemas/${resourceName}`;
+    const path = `${toPath(name, options)}:${options?.verb}`;
     if (value?.customMethods?.some((operation) => operation.path === path)) {
       throw new Error(
-        `customMethods "${path}" already exists for resource "${name}"`,
+        `customMethods "${path}" already exists for resource "${resourceName}"`,
       );
     }
 
@@ -52,7 +58,7 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
         {
           path,
           httpMethod: options?.httpMethod ?? "post",
-          specification: {
+          schema: {
             ...(options?.input?.strategy === "body"
               ? {
                 requestBody: {
@@ -77,7 +83,7 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
                 description: options?.output?.description,
                 content: {
                   "application/json": {
-                    schema: options?.output?.jsonSchema ?? { $ref: schemaRef },
+                    schema: options?.output?.schema ?? { $ref: schemaRef },
                   },
                 },
               },
@@ -93,26 +99,11 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
  * CustomMethodOptions is the options for the customMethods operation of the
  * resource.
  */
-export interface CustomMethodOptions {
+export interface CustomMethodOptions extends OperationOptions {
   /**
    * verb is the prefix for the custom method. Must be camelCase.
    */
   verb: string;
-
-  /**
-   * parent is the parent of the resource.
-   */
-  parent?: string;
-
-  /**
-   * collectionIdentifier is the collection identifier of the resource.
-   */
-  collectionIdentifier?: string;
-
-  /**
-   * resourceName is the name of the resource.
-   */
-  resourceName?: string;
 
   /**
    * httpMethod is the HTTP method for the custom method. Defaults to "post".
@@ -124,14 +115,14 @@ export interface CustomMethodOptions {
    */
   input?: {
     strategy?: "body" | "query";
-    jsonSchema?: any;
+    schema?: any;
     description?: string;
   };
 
   /**
    * output is the output for the custom method.
    */
-  output?: { jsonSchema?: any; description: string };
+  output?: { schema?: any; description: string };
 }
 
 /**

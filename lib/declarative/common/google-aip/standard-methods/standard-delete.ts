@@ -1,8 +1,11 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
-import { toCollectionIdentifier } from "#/lib/declarative/common/google-aip/to-collection-identifier.ts";
-import type { Operation } from "#/lib/declarative/common/openapi/openapi.ts";
+import type {
+  Operation,
+  OperationOptions,
+} from "#/lib/declarative/common/google-aip/operation.ts";
+import { toPath } from "#/lib/declarative/common/google-aip/operation.ts";
 
 /**
  * standardDelete is the standard Delete operation specification of the resource.
@@ -35,11 +38,9 @@ export function declarativeStandardDelete<TValue extends ValueStandardDelete>(
   return (value, name) => {
     return Object.assign({}, value, {
       standardDelete: {
-        path: `${options?.parent ?? ""}/${
-          options?.collectionIdentifier ?? toCollectionIdentifier(name)
-        }/{name}`,
+        path: `${toPath(name, options)}/{name}`,
         httpMethod: "delete",
-        specification: {
+        schema: {
           parameters: [{ name: "name", in: "path", required: true }],
         },
       },
@@ -51,10 +52,7 @@ export function declarativeStandardDelete<TValue extends ValueStandardDelete>(
  * StandardDeleteOptions is the options for the standard Delete operation of the
  * resource.
  */
-export interface StandardDeleteOptions {
-  parent?: string;
-  collectionIdentifier?: string;
-}
+export interface StandardDeleteOptions extends OperationOptions {}
 
 /**
  * ValueStandardDelete is the value of the standard Delete operation of the resource.

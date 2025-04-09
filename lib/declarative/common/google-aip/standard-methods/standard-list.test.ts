@@ -11,7 +11,7 @@ Deno.test("standardList decorator factory decorates value", () => {
   assertEquals(actual, {
     path: "/people",
     httpMethod: "get",
-    specification: {
+    schema: {
       parameters: [{ in: "query", name: "page_size" }],
       responses: {
         "200": {

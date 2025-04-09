@@ -12,28 +12,30 @@ class Person {
 
 Deno.test("customMethod decorator factory decorates value", () => {
   const actual = customMethodsOf(Person);
-  assertEquals(actual, [{
-    path: "/people:batchCreate",
-    httpMethod: "post",
-    specification: {
-      requestBody: {
-        required: true,
-        content: {
-          "application/json": {
-            schema: { $ref: "#/components/schemas/Person" },
-          },
-        },
-      },
-      responses: {
-        "200": {
+  assertEquals(actual, [
+    {
+      path: "/people:batchCreate",
+      httpMethod: "post",
+      schema: {
+        requestBody: {
+          required: true,
           content: {
             "application/json": {
               schema: { $ref: "#/components/schemas/Person" },
             },
           },
-          description: "Created resources.",
+        },
+        responses: {
+          "200": {
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Person" },
+              },
+            },
+            description: "Created resources.",
+          },
         },
       },
     },
-  }]);
+  ]);
 });

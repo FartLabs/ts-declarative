@@ -57,25 +57,3 @@ export interface ValueOpenAPI {
    */
   resources?: Class[];
 }
-
-/**
- * Operation is an operation of an OpenAPI specification.
- */
-export interface Operation {
-  /**
-   * path is the path of the operation.
-   */
-  path: string;
-
-  /**
-   * httpMethod is the HTTP method of the operation.
-   *
-   * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
-   */
-  httpMethod: string;
-
-  /**
-   * specification is the OpenAPI specification of the operation.
-   */
-  specification: OpenAPIV3_1.OperationObject;
-}

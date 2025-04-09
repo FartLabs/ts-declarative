@@ -1,8 +1,11 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
-import { toCollectionIdentifier } from "#/lib/declarative/common/google-aip/to-collection-identifier.ts";
-import type { Operation } from "#/lib/declarative/common/openapi/openapi.ts";
+import type {
+  Operation,
+  OperationOptions,
+} from "#/lib/declarative/common/google-aip/operation.ts";
+import { toPath } from "#/lib/declarative/common/google-aip/operation.ts";
 
 /**
  * standardGet is the standard Get operation specification of the resource.
@@ -35,11 +38,9 @@ export function declarativeStandardGet<TValue extends ValueStandardGet>(
   return (value, name) => {
     return Object.assign({}, value, {
       standardGet: {
-        path: `${options?.parent ?? ""}/${
-          options?.collectionIdentifier ?? toCollectionIdentifier(name)
-        }/{name}`,
+        path: `${toPath(name, options)}/{name}`,
         httpMethod: "get",
-        specification: {
+        schema: {
           parameters: [{ name: "name", in: "path", required: true }],
         },
       },
@@ -51,10 +52,7 @@ export function declarativeStandardGet<TValue extends ValueStandardGet>(
  * StandardGetOptions is the options for the standard Get operation of the
  * resource.
  */
-export interface StandardGetOptions {
-  parent?: string;
-  collectionIdentifier?: string;
-}
+export interface StandardGetOptions extends OperationOptions {}
 
 /**
  * ValueStandardGet is the value of the standard Get operation of the resource.

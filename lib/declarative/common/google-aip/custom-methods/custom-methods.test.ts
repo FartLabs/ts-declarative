@@ -3,8 +3,8 @@ import { customMethod, customMethodsOf } from "./custom-methods.ts";
 
 @customMethod({
   verb: "batchCreate",
-  input: { strategy: "body" },
-  output: { description: "Created resources." },
+  request: { strategy: "body" },
+  response: { description: "Created resources." },
 })
 class Person {
   public constructor(public name: string) {}

@@ -59,7 +59,7 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
           path,
           httpMethod: options?.httpMethod ?? "post",
           schema: {
-            ...(options?.input?.strategy === "body"
+            ...(options?.request?.strategy === "body"
               ? {
                 requestBody: {
                   required: true,
@@ -70,7 +70,7 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
                   },
                 },
               }
-              : options?.input?.strategy === "query"
+              : options?.request?.strategy === "query"
               ? {
                 query: {
                   required: true,
@@ -80,10 +80,10 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
               : {}),
             responses: {
               "200": {
-                description: options?.output?.description,
+                description: options?.response?.description,
                 content: {
                   "application/json": {
-                    schema: options?.output?.schema ?? { $ref: schemaRef },
+                    schema: options?.response?.schema ?? { $ref: schemaRef },
                   },
                 },
               },
@@ -111,18 +111,18 @@ export interface CustomMethodOptions extends OperationOptions {
   httpMethod?: string;
 
   /**
-   * input is the input for the custom method.
+   * request is the input for the custom method.
    */
-  input?: {
+  request?: {
     strategy?: "body" | "query";
     schema?: any;
     description?: string;
   };
 
   /**
-   * output is the output for the custom method.
+   * response is the output for the custom method.
    */
-  output?: { schema?: any; description: string };
+  response?: { schema?: any; description: string };
 }
 
 /**

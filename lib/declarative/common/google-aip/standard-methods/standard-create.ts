@@ -45,22 +45,22 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
         path: toPath(name, options),
         httpMethod: "post",
         schema: {
-          ...(options?.input?.strategy === "body"
+          ...(options?.request?.strategy === "body"
             ? {
               requestBody: {
                 required: true,
                 content: {
                   "application/json": {
-                    schema: options?.input?.schema ?? { $ref: schemaRef },
+                    schema: options?.request?.schema ?? { $ref: schemaRef },
                   },
                 },
               },
             }
-            : options?.input?.strategy === "query"
+            : options?.request?.strategy === "query"
             ? {
               query: {
                 required: true,
-                schema: options?.input?.schema ?? { $ref: schemaRef },
+                schema: options?.request?.schema ?? { $ref: schemaRef },
               },
             }
             : {}),
@@ -85,7 +85,7 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
  * resource.
  */
 export interface StandardCreateOptions extends OperationOptions {
-  input?: { schema?: any; strategy?: "body" | "query" };
+  request?: { schema?: any; strategy?: "body" | "query" };
 }
 
 /**

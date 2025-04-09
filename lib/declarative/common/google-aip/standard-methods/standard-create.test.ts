@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { standardCreate, standardCreateOf } from "./standard-create.ts";
 
-@standardCreate({ input: { strategy: "body" } })
+@standardCreate({ request: { strategy: "body" } })
 class Person {
   public constructor(public name: string) {}
 }

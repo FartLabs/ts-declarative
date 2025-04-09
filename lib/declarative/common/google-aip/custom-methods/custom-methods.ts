@@ -35,8 +35,10 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
   options?: CustomMethodOptions,
 ): Declarative<TValue> {
   return (value, name) => {
-    const schemaRef = `#/components/schemas/${name}`;
-    const path = `/${slugify(name)}:${options?.verb ?? "custom"}`;
+    const schemaRef = `#/components/schemas/${options?.resourceName ?? name}`;
+    const path = `${options?.parent ?? ""}/${
+      options?.resourcePath ?? slugify(name)
+    }:${options?.verb}`;
     if (value?.customMethods?.some((operation) => operation.path === path)) {
       throw new Error(
         `customMethods "${path}" already exists for resource "${name}"`,
@@ -91,6 +93,21 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
  * resource.
  */
 export interface CustomMethodOptions {
+  /**
+   * parent is the parent of the resource.
+   */
+  parent?: string;
+
+  /**
+   * resourcePath is the path of the resource.
+   */
+  resourcePath?: string;
+
+  /**
+   * resourceName is the name of the resource.
+   */
+  resourceName?: string;
+
   /**
    * verb is the prefix for the custom method. Must be camelCase.
    */

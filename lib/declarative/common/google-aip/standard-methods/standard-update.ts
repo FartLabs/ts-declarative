@@ -1,11 +1,10 @@
-// deno-lint-ignore-file no-explicit-any
-
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type {
   Operation,
   OperationOptions,
+  OperationRequest,
 } from "#/lib/declarative/common/google-aip/operation.ts";
 import { toPath } from "#/lib/declarative/common/google-aip/operation.ts";
 
@@ -76,7 +75,7 @@ export function declarativeStandardUpdate<TValue extends ValueStandardUpdate>(
  * resource.
  */
 export interface StandardUpdateOptions extends OperationOptions {
-  request?: { schema?: any; strategy?: "body" | "query" };
+  request?: OperationRequest;
 }
 
 /**

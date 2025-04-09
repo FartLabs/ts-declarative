@@ -24,6 +24,43 @@ export interface Operation {
 }
 
 /**
+ * OperationRequest is the request of an operation.
+ */
+export interface OperationRequest {
+  /**
+   * schema is the OpenAPI specification of the response.
+   */
+  // deno-lint-ignore no-explicit-any
+  schema?: any;
+
+  /**
+   * strategy is the strategy of the request payload.
+   */
+  strategy?: "body" | "query";
+
+  /**
+   * description is the description of the request.
+   */
+  description?: string;
+}
+
+/**
+ * Operationresponse is the response of an operation.
+ */
+export interface OperationResponse {
+  /**
+   * schema is the OpenAPI specification of the response.
+   */
+  // deno-lint-ignore no-explicit-any
+  schema?: any;
+
+  /**
+   * description is the description of the response.
+   */
+  description?: string;
+}
+
+/**
  * OperationOptions is the options for the operation of the resource.
  */
 export interface OperationOptions {

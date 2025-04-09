@@ -1,11 +1,11 @@
-// deno-lint-ignore-file no-explicit-any
-
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type {
   Operation,
   OperationOptions,
+  OperationRequest,
+  OperationResponse,
 } from "#/lib/declarative/common/google-aip/operation.ts";
 import { toPath } from "#/lib/declarative/common/google-aip/operation.ts";
 
@@ -113,16 +113,12 @@ export interface CustomMethodOptions extends OperationOptions {
   /**
    * request is the input for the custom method.
    */
-  request?: {
-    strategy?: "body" | "query";
-    schema?: any;
-    description?: string;
-  };
+  request?: OperationRequest;
 
   /**
    * response is the output for the custom method.
    */
-  response?: { schema?: any; description: string };
+  response?: OperationResponse;
 }
 
 /**

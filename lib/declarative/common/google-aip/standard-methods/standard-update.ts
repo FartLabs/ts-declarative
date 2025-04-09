@@ -1,12 +1,16 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
 import type {
   Operation,
   OperationOptions,
   OperationRequest,
 } from "#/lib/declarative/common/google-aip/operation.ts";
-import { toPath } from "#/lib/declarative/common/google-aip/operation.ts";
+import {
+  toOperationPath,
+  toOperationSchema,
+} from "#/lib/declarative/common/google-aip/operation.ts";
 
 /**
  * standardUpdate is the standard Update operation specification of the resource.
@@ -38,28 +42,33 @@ export function declarativeStandardUpdate<TValue extends ValueStandardUpdate>(
 ): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
-    const schemaRef = `#/components/schemas/${resourceName}`;
     return Object.assign({}, value, {
       standardUpdate: {
-        path: `${toPath(name, options)}/{name}`,
+        path: `${
+          toOperationPath(
+            resourceName,
+            options?.collectionIdentifier,
+            options?.parent,
+          )
+        }/{name}`,
         httpMethod: "post",
+        description: options?.description ?? `Updates ${resourceName}`,
         schema: {
-          ...(options?.request?.strategy === "body"
+          ...((options?.request?.strategy ?? "body") === "body"
             ? {
+              description: options?.request?.description ??
+                `The ${resourceName} to update`,
               requestBody: {
                 required: true,
                 content: {
                   "application/json": {
-                    schema: options?.request?.schema ?? { $ref: schemaRef },
+                    schema: toOperationSchema(
+                      resourceName,
+                      value?.jsonSchema,
+                      options?.request?.schema,
+                    ),
                   },
                 },
-              },
-            }
-            : options?.request?.strategy === "query"
-            ? {
-              query: {
-                required: true,
-                schema: options?.request?.schema ?? { $ref: schemaRef },
               },
             }
             : {}),
@@ -81,6 +90,6 @@ export interface StandardUpdateOptions extends OperationOptions {
 /**
  * ValueStandardUpdate is the value of the standard Update operation of the resource.
  */
-export interface ValueStandardUpdate {
+export interface ValueStandardUpdate extends ValueJSONSchema {
   standardUpdate?: Operation;
 }

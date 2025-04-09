@@ -3,8 +3,11 @@ import type { QueryEngine } from "@comunica/query-sparql-link-traversal";
 import type { Class } from "#/lib/declarative/declarative.ts";
 import { jsonldOf } from "#/lib/declarative/common/jsonld/jsonld.ts";
 import { tsMorphOf } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
-import { expandStrings, makeCompliancyQuery } from "./sparql.ts";
+import { expandStrings } from "./sparql.ts";
 
+/**
+ * assertCompliancy asserts that a class is semantically valid.
+ */
 export async function assertCompliancy(
   queryEngine: QueryEngine,
   target: Class,
@@ -38,4 +41,28 @@ export function makeCompliancyQueryFromClass(target: Class): string {
   ]);
 
   return makeCompliancyQuery(classIDExpanded, propertyIDsExpanded);
+}
+
+/**
+ * makeCompliancyQuery makes a SPARQL query that asserts that the given set of
+ * properties are included in the given class's domain.
+ */
+export function makeCompliancyQuery(
+  classID: string,
+  propertyIDs: string[],
+): string {
+  return `ASK {
+${
+    propertyIDs
+      .flatMap((propertyID) => {
+        return [
+          // TODO: Use rdfs:domain instead of schema:domainIncludes.
+          // TODO: Check type of propertyID matches TypeScript class property type.
+          // TODO: Support subclasses (indirect domainIncludes).
+          `<${propertyID}> <https://schema.org/domainIncludes> <${classID}> .`,
+        ];
+      })
+      .join("\n")
+  }
+}`;
 }

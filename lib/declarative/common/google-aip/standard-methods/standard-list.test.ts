@@ -11,10 +11,15 @@ Deno.test("standardList decorator factory decorates value", () => {
   assertEquals(actual, {
     path: "/people",
     httpMethod: "get",
+    description: "Lists People",
     schema: {
-      parameters: [{ in: "query", name: "page_size" }],
+      parameters: [
+        { in: "query", name: "page_size" },
+        { in: "query", name: "page_token" },
+      ],
       responses: {
         "200": {
+          description: "List of People",
           content: {
             "application/json": {
               schema: {
@@ -23,7 +28,6 @@ Deno.test("standardList decorator factory decorates value", () => {
               },
             },
           },
-          description: "List of resources.",
         },
       },
     },

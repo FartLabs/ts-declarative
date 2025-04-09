@@ -1,11 +1,17 @@
+import pluralize from "@wei/pluralize";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
 import type {
   Operation,
   OperationOptions,
+  OperationResponse,
 } from "#/lib/declarative/common/google-aip/operation.ts";
-import { toPath } from "#/lib/declarative/common/google-aip/operation.ts";
+import {
+  toOperationPath,
+  toOperationSchema,
+} from "#/lib/declarative/common/google-aip/operation.ts";
 
 /**
  * standardList is the standard List operation specification of the resource.
@@ -37,25 +43,37 @@ export function declarativeStandardList<TValue extends ValueStandardList>(
 ): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
-    const schemaRef = `#/components/schemas/${resourceName}`;
     if (options?.pagination !== undefined) {
       throw new Error("Pagination is not supported yet.");
     }
 
     return Object.assign({}, value, {
       standardList: {
-        path: toPath(name, options),
+        path: toOperationPath(
+          name,
+          options?.collectionIdentifier,
+          options?.parent,
+        ),
         httpMethod: "get",
+        description: options?.description ?? `Lists ${pluralize(resourceName)}`,
         schema: {
-          parameters: [{ name: "page_size", in: "query" }],
+          parameters: [
+            { name: "page_size", in: "query" },
+            { name: "page_token", in: "query" },
+          ],
           responses: {
             "200": {
-              description: "List of resources.",
+              description: options?.response?.description ??
+                `List of ${pluralize(resourceName)}`,
               content: {
                 "application/json": {
                   schema: {
                     type: "array",
-                    items: { $ref: schemaRef },
+                    items: toOperationSchema(
+                      resourceName,
+                      value?.jsonSchema,
+                      options?.response?.schema,
+                    ),
                   },
                 },
               },
@@ -84,11 +102,17 @@ export interface StandardListOptions extends OperationOptions {
      */
     pageSize: number;
   };
+
+  /**
+   * response is the response option of the standard List operation of the
+   * resource.
+   */
+  response?: OperationResponse;
 }
 
 /**
  * ValueStandardList is the value of the standard List operation of the resource.
  */
-export interface ValueStandardList {
+export interface ValueStandardList extends ValueJSONSchema {
   standardList?: Operation;
 }

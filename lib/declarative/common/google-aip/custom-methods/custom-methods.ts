@@ -1,13 +1,17 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
 import type {
   Operation,
   OperationOptions,
   OperationRequest,
   OperationResponse,
 } from "#/lib/declarative/common/google-aip/operation.ts";
-import { toPath } from "#/lib/declarative/common/google-aip/operation.ts";
+import {
+  toOperationPath,
+  toOperationSchema,
+} from "#/lib/declarative/common/google-aip/operation.ts";
 
 /**
  * customMethod is a decorator factory that creates a custom method for the
@@ -38,43 +42,48 @@ export function customMethodsOf<TClass extends Class>(
 export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
   options?: CustomMethodOptions,
 ): Declarative<TValue> {
-  return (value, name) => {
-    if (options?.verb === undefined) {
+  return (value, name): TValue => {
+    if (options?.name === undefined) {
       throw new Error("verb is required");
     }
 
     const resourceName = options?.resourceName ?? name;
-    const schemaRef = `#/components/schemas/${resourceName}`;
-    const path = `${toPath(name, options)}:${options?.verb}`;
+    const path = `${
+      toOperationPath(
+        resourceName,
+        options.collectionIdentifier,
+        options.parent,
+      )
+    }:${options?.name}`;
     if (value?.customMethods?.some((operation) => operation.path === path)) {
       throw new Error(
         `customMethods "${path}" already exists for resource "${resourceName}"`,
       );
     }
 
-    return Object.assign({}, value, {
+    return {
+      ...value,
       customMethods: [
         ...(value?.customMethods ?? []),
         {
           path,
           httpMethod: options?.httpMethod ?? "post",
+          description: options?.description,
           schema: {
-            ...(options?.request?.strategy === "body"
+            ...((options?.request?.strategy ?? "body") === "body"
               ? {
+                description: options?.request?.description,
                 requestBody: {
                   required: true,
                   content: {
                     "application/json": {
-                      schema: { $ref: schemaRef },
+                      schema: toOperationSchema(
+                        resourceName,
+                        value?.jsonSchema,
+                        options.request?.schema,
+                      ),
                     },
                   },
-                },
-              }
-              : options?.request?.strategy === "query"
-              ? {
-                query: {
-                  required: true,
-                  schema: { $ref: schemaRef },
                 },
               }
               : {}),
@@ -83,7 +92,11 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
                 description: options?.response?.description,
                 content: {
                   "application/json": {
-                    schema: options?.response?.schema ?? { $ref: schemaRef },
+                    schema: toOperationSchema(
+                      resourceName,
+                      value?.jsonSchema,
+                      options.response?.schema,
+                    ),
                   },
                 },
               },
@@ -91,7 +104,7 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
           },
         },
       ],
-    });
+    } as TValue;
   };
 }
 
@@ -101,9 +114,9 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
  */
 export interface CustomMethodOptions extends OperationOptions {
   /**
-   * verb is the prefix for the custom method. Must be camelCase.
+   * name is the prefix for the custom method. Must be a camelCase verb.
    */
-  verb: string;
+  name: string;
 
   /**
    * httpMethod is the HTTP method for the custom method. Defaults to "post".
@@ -124,6 +137,6 @@ export interface CustomMethodOptions extends OperationOptions {
 /**
  * ValueCustomMethods is the value of the customMethods operation of the resource.
  */
-export interface ValueCustomMethods {
+export interface ValueCustomMethods extends ValueJSONSchema {
   customMethods?: Operation[];
 }

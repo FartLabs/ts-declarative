@@ -11,8 +11,10 @@ Deno.test("standardCreate decorator factory decorates value", () => {
   assertEquals(actual, {
     path: "/people",
     httpMethod: "post",
+    description: "Creates Person",
     schema: {
       requestBody: {
+        description: "The Person to create",
         required: true,
         content: {
           "application/json": {
@@ -27,7 +29,7 @@ Deno.test("standardCreate decorator factory decorates value", () => {
               schema: { $ref: "#/components/schemas/Person" },
             },
           },
-          description: "Created resource.",
+          description: "Created Person",
         },
       },
     },

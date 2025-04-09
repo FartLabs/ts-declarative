@@ -1,12 +1,17 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
 import type {
   Operation,
   OperationOptions,
   OperationRequest,
+  OperationResponse,
 } from "#/lib/declarative/common/google-aip/operation.ts";
-import { toPath } from "#/lib/declarative/common/google-aip/operation.ts";
+import {
+  toOperationPath,
+  toOperationSchema,
+} from "#/lib/declarative/common/google-aip/operation.ts";
 
 /**
  * standardCreate is the standard Create operation specification of the resource.
@@ -38,37 +43,45 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
 ): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
-    const schemaRef = `#/components/schemas/${resourceName}`;
     return Object.assign({}, value, {
       standardCreate: {
-        path: toPath(name, options),
+        path: toOperationPath(
+          resourceName,
+          options?.collectionIdentifier,
+          options?.parent,
+        ),
         httpMethod: "post",
+        description: options?.description ?? `Creates ${resourceName}`,
         schema: {
-          ...(options?.request?.strategy === "body"
+          ...((options?.request?.strategy ?? "body") === "body"
             ? {
               requestBody: {
                 required: true,
+                description: options?.request?.description ??
+                  `The ${resourceName} to create`,
                 content: {
                   "application/json": {
-                    schema: options?.request?.schema ?? { $ref: schemaRef },
+                    schema: toOperationSchema(
+                      resourceName,
+                      value?.jsonSchema,
+                      options?.request?.schema,
+                    ),
                   },
                 },
-              },
-            }
-            : options?.request?.strategy === "query"
-            ? {
-              query: {
-                required: true,
-                schema: options?.request?.schema ?? { $ref: schemaRef },
               },
             }
             : {}),
           responses: {
             "200": {
-              description: "Created resource.",
+              description: options?.response?.description ??
+                `Created ${resourceName}`,
               content: {
                 "application/json": {
-                  schema: { $ref: schemaRef },
+                  schema: toOperationSchema(
+                    resourceName,
+                    value?.jsonSchema,
+                    options?.response?.schema,
+                  ),
                 },
               },
             },
@@ -85,11 +98,12 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
  */
 export interface StandardCreateOptions extends OperationOptions {
   request?: OperationRequest;
+  response?: OperationResponse;
 }
 
 /**
  * ValueStandardCreate is the value of the standard Create operation of the resource.
  */
-export interface ValueStandardCreate {
+export interface ValueStandardCreate extends ValueJSONSchema {
   standardCreate?: Operation;
 }

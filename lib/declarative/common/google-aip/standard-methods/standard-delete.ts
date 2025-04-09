@@ -5,7 +5,7 @@ import type {
   Operation,
   OperationOptions,
 } from "#/lib/declarative/common/google-aip/operation.ts";
-import { toPath } from "#/lib/declarative/common/google-aip/operation.ts";
+import { toOperationPath } from "#/lib/declarative/common/google-aip/operation.ts";
 
 /**
  * standardDelete is the standard Delete operation specification of the resource.
@@ -36,10 +36,19 @@ export function declarativeStandardDelete<TValue extends ValueStandardDelete>(
   options?: StandardDeleteOptions,
 ): Declarative<TValue> {
   return (value, name) => {
+    const resourceName = options?.resourceName ?? name;
     return Object.assign({}, value, {
       standardDelete: {
-        path: `${toPath(name, options)}/{name}`,
+        path: `${
+          toOperationPath(
+            resourceName,
+            options?.collectionIdentifier,
+            options?.parent,
+          )
+        }/{name}`,
         httpMethod: "delete",
+        description: options?.description ??
+          `Deletes ${resourceName}`,
         schema: {
           parameters: [{ name: "name", in: "path", required: true }],
         },

@@ -11,6 +11,7 @@ Deno.test("standardDelete decorator factory decorates value", () => {
   assertEquals(actual, {
     path: "/people/{name}",
     httpMethod: "delete",
+    description: "Deletes Person",
     schema: {
       parameters: [{ name: "name", in: "path", required: true }],
     },

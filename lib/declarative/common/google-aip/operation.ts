@@ -21,6 +21,11 @@ export interface Operation {
    * schema is the OpenAPI specification of the operation.
    */
   schema: OpenAPIV3_1.OperationObject;
+
+  /**
+   * description is the description of the operation.
+   */
+  description?: string;
 }
 
 /**
@@ -28,15 +33,15 @@ export interface Operation {
  */
 export interface OperationRequest {
   /**
-   * schema is the OpenAPI specification of the response.
-   */
-  // deno-lint-ignore no-explicit-any
-  schema?: any;
-
-  /**
    * strategy is the strategy of the request payload.
    */
-  strategy?: "body" | "query";
+  strategy?: "body"; // | "query";
+
+  /**
+   * schema is the OpenAPI specification of the request.
+   */
+  // deno-lint-ignore no-explicit-any
+  schema?: any | ((schema: any) => any);
 
   /**
    * description is the description of the request.
@@ -52,7 +57,7 @@ export interface OperationResponse {
    * schema is the OpenAPI specification of the response.
    */
   // deno-lint-ignore no-explicit-any
-  schema?: any;
+  schema?: any | ((schema: any) => any);
 
   /**
    * description is the description of the response.
@@ -80,17 +85,44 @@ export interface OperationOptions {
    * unspecified, the pluralized name of the resource is used.
    */
   collectionIdentifier?: string;
+
+  /**
+   * description is the description of the operation.
+   */
+  description?: string;
 }
 
 /**
- * toPath returns the path of an operation.
+ * toOperationPath returns the path of an operation.
  */
-export function toPath(
+export function toOperationPath(
   resourceName: string,
-  options?: OperationOptions,
+  collectionIdentifier?: string,
+  parent?: string,
 ): string {
-  return `${options?.parent ?? ""}/${
-    options?.collectionIdentifier ??
-      toCollectionIdentifier(options?.resourceName ?? resourceName)
+  return `${parent ?? ""}/${
+    collectionIdentifier ?? toCollectionIdentifier(resourceName)
   }`;
+}
+
+/**
+ * toOperationSchema returns the schema of an operation.
+ */
+export function toOperationSchema(
+  resourceName: string,
+  // deno-lint-ignore no-explicit-any
+  schema: any,
+  // deno-lint-ignore no-explicit-any
+  schemaOrFn?: any | ((schema: any) => any),
+): // deno-lint-ignore no-explicit-any
+any {
+  if (typeof schemaOrFn === "function") {
+    return schemaOrFn(schema);
+  }
+
+  if (schemaOrFn === undefined) {
+    return { $ref: `#/components/schemas/${resourceName}` };
+  }
+
+  return schemaOrFn;
 }

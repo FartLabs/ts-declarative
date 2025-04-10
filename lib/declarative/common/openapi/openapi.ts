@@ -23,6 +23,15 @@ export function routesOf<TClass extends Class>(
 }
 
 /**
+ * pathsObjectOf returns the paths object of the OpenAPI class.
+ */
+export function pathsObjectOf<TClass extends Class>(
+  target: TClass,
+): OpenAPIV3_1.PathsObject | undefined {
+  return getPrototypeValue<ValuePathsObject>(target)?.paths;
+}
+
+/**
  * openapi is the decorator for OpenAPI specification.
  */
 export const openapi: (
@@ -32,12 +41,30 @@ export const openapi: (
 /**
  * openapiDecoratorFactory is the factory function for the OpenAPI decorator.
  */
-export function openapiDecoratorFactory(): (
-  options?: OpenAPIDecoratorOptions,
-) => (target: Class) => Class {
+export function openapiDecoratorFactory() {
   return createDecoratorFactory({
-    initialize: (value?: ValueOpenAPI) => {
-      return [declarativeOpenAPI(value)];
+    initialize: (options?: OpenAPIDecoratorOptions) => {
+      if (options?.specification === undefined) {
+        throw new Error("base specification is required");
+      }
+
+      return [
+        declarativeOpenAPI({
+          specification: {
+            ...options.specification,
+            paths: {
+              ...options.specification?.paths,
+              ...(options.resources?.reduce(
+                (paths, resource) => ({
+                  ...paths,
+                  ...pathsObjectOf(resource),
+                }),
+                {},
+              ) ?? []),
+            },
+          },
+        }),
+      ];
     },
   });
 }
@@ -68,7 +95,7 @@ export function declarativeOpenAPI<TValue extends ValueOpenAPI>(
  */
 export interface ValueOpenAPI {
   /**
-   * specification is the OpenAPI specification.
+   * specification is the top-level object of the OpenAPI specification.
    */
   specification?: OpenAPIV3_1.Document;
 
@@ -76,4 +103,12 @@ export interface ValueOpenAPI {
    * routes are the HTTP routes of the OpenAPI specification.
    */
   routes?: Route[];
+}
+
+/**
+ * ValuePathsObject is the value of the paths object of the OpenAPI
+ * specification.
+ */
+export interface ValuePathsObject {
+  paths?: OpenAPIV3_1.PathsObject;
 }

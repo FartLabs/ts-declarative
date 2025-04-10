@@ -6,14 +6,30 @@ class Person {
   public constructor(public name: string) {}
 }
 
+// TODO: Refactor standardCreate.
 Deno.test("standardGet decorator factory decorates value", () => {
   const actual = standardGetOf(Person);
   assertEquals(actual, {
-    path: "/people/{name}",
-    httpMethod: "get",
     description: "Gets Person",
-    schema: {
-      parameters: [{ name: "name", in: "path", required: true }],
+    parameters: [
+      {
+        in: "path",
+        name: "name",
+        required: true,
+        schema: {
+          type: "string",
+        },
+      },
+    ],
+    responses: {
+      "200": {
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/Person" },
+          },
+        },
+        description: "Got Person",
+      },
     },
   });
 });

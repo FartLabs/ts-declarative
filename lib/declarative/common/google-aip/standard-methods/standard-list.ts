@@ -6,7 +6,6 @@ import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-
 import type {
   Operation,
   OperationOptions,
-  OperationResponse,
 } from "#/lib/declarative/common/google-aip/operation.ts";
 import {
   toOperationPath,
@@ -102,12 +101,6 @@ export interface StandardListOptions extends OperationOptions {
      */
     pageSize: number;
   };
-
-  /**
-   * response is the response option of the standard List operation of the
-   * resource.
-   */
-  response?: OperationResponse;
 }
 
 /**

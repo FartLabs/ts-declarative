@@ -25,7 +25,9 @@ export function routesOf<TClass extends Class>(
 /**
  * openapi is the decorator for OpenAPI specification.
  */
-export const openapi = openapiDecoratorFactory();
+export const openapi: (
+  options?: OpenAPIDecoratorOptions,
+) => (target: Class) => Class = openapiDecoratorFactory();
 
 /**
  * openapiDecoratorFactory is the factory function for the OpenAPI decorator.

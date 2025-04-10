@@ -1,18 +1,18 @@
-import { assertEquals } from "@std/assert/equals";
-import {
-  standardCreate,
-  standardGet,
-} from "#/lib/declarative/common/google-aip/mod.ts";
-import { openapi } from "./openapi.ts";
+// import { assertEquals } from "@std/assert/equals";
+// import {
+//   standardCreate,
+//   standardGet,
+// } from "#/lib/declarative/common/google-aip/mod.ts";
+// import { openapi } from "./openapi.ts";
 
-@standardCreate()
-@standardGet()
-class Person {
-  public constructor(public name: string) {}
-}
+// @standardCreate()
+// @standardGet()
+// class Person {
+//   public constructor(public name: string) {}
+// }
 
-@openapi()
-class App {}
+// @openapi()
+// class App {}
 
-Deno.test("openapi decorator decorates value", () => {
-});
+// Deno.test("openapi decorator decorates value", () => {
+// });

@@ -2,11 +2,12 @@ import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
-import type {
-  Operation,
-  OperationOptions,
-} from "#/lib/declarative/common/google-aip/operation.ts";
+import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
 import { toOperationPath } from "#/lib/declarative/common/google-aip/operation.ts";
+import type { OpenAPIV3_1 } from "openapi-types";
+import { toOperationSchema } from "#/lib/declarative/common/google-aip/mod.ts";
+
+// TODO: Create batch method batchGet.
 
 /**
  * standardGet is the standard Get operation specification of the resource.
@@ -24,8 +25,10 @@ export const standardGet: (
  */
 export function standardGetOf<TClass extends Class>(
   target: TClass,
-): Operation | undefined {
-  return getPrototypeValue<ValueStandardGet>(target)?.standardGet;
+): OpenAPIV3_1.OperationObject | undefined {
+  return getPrototypeValue<ValueStandardGet>(target)?.paths?.[
+    toStandardGetPath(target.name)
+  ]?.get;
 }
 
 /**
@@ -38,23 +41,58 @@ export function declarativeStandardGet<TValue extends ValueStandardGet>(
 ): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
-    return Object.assign({}, value, {
-      standardGet: {
-        path: `${
-          toOperationPath(
-            resourceName,
-            options?.collectionIdentifier,
-            options?.parent,
-          )
-        }/{name}`,
-        httpMethod: "get",
-        description: options?.description ?? `Gets ${name}`,
-        schema: {
-          parameters: [{ name: "name", in: "path", required: true }],
+    const operationPath = toStandardGetPath(
+      resourceName,
+      options?.collectionIdentifier,
+      options?.parent,
+    );
+    value ??= {} as TValue;
+    value!.paths ??= {} as OpenAPIV3_1.PathsObject;
+    value!.paths[operationPath] ??= {
+      get: {
+        description: options?.description ?? `Gets ${resourceName}`,
+        parameters: [
+          {
+            name: "name",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: options?.response?.description ??
+              `Got ${resourceName}`,
+            content: {
+              "application/json": {
+                schema: toOperationSchema(
+                  resourceName,
+                  value?.jsonSchema,
+                  options?.response?.schema,
+                ),
+              },
+            },
+          },
         },
       },
-    });
+    };
+
+    return value;
   };
+}
+
+/**
+ * toStandardGetPath returns the path of the standard Get operation of the
+ * resource.
+ */
+export function toStandardGetPath(
+  resourceName: string,
+  collectionIdentifier?: string,
+  parent?: string,
+): string {
+  return `${
+    toOperationPath(resourceName, collectionIdentifier, parent)
+  }/{name}`;
 }
 
 /**
@@ -67,5 +105,5 @@ export interface StandardGetOptions extends OperationOptions {}
  * ValueStandardGet is the value of the standard Get operation of the resource.
  */
 export interface ValueStandardGet extends ValueJSONSchema {
-  standardGet?: Operation;
+  paths?: OpenAPIV3_1.PathsObject;
 }

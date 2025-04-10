@@ -90,6 +90,16 @@ export interface OperationOptions {
    * description is the description of the operation.
    */
   description?: string;
+
+  /**
+   * request is the request of the operation.
+   */
+  request?: OperationRequest;
+
+  /**
+   * response is the response of the operation.
+   */
+  response?: OperationResponse;
 }
 
 /**

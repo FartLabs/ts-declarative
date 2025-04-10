@@ -5,8 +5,6 @@ import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-
 import type {
   Operation,
   OperationOptions,
-  OperationRequest,
-  OperationResponse,
 } from "#/lib/declarative/common/google-aip/operation.ts";
 import {
   toOperationPath,
@@ -97,8 +95,6 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
  * resource.
  */
 export interface StandardCreateOptions extends OperationOptions {
-  request?: OperationRequest;
-  response?: OperationResponse;
 }
 
 /**

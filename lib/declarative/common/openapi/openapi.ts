@@ -22,7 +22,17 @@ export function routesOf<TClass extends Class>(
   return getPrototypeValue<ValueOpenAPI>(target)?.routes;
 }
 
-export function openapiDecoratorFactory(): () => (target: Class) => Class {
+/**
+ * openapi is the decorator for OpenAPI specification.
+ */
+export const openapi = openapiDecoratorFactory();
+
+/**
+ * openapiDecoratorFactory is the factory function for the OpenAPI decorator.
+ */
+export function openapiDecoratorFactory(): (
+  options?: OpenAPIDecoratorOptions,
+) => (target: Class) => Class {
   return createDecoratorFactory({
     initialize: (value?: ValueOpenAPI) => {
       return [declarativeOpenAPI(value)];
@@ -30,11 +40,24 @@ export function openapiDecoratorFactory(): () => (target: Class) => Class {
   });
 }
 
+/**
+ * OpenAPIDecoratorOptions is the options for the OpenAPI decorator.
+ */
+export interface OpenAPIDecoratorOptions extends ValueOpenAPI {
+  /**
+   * resources are the resources of the OpenAPI specification.
+   */
+  resources?: Class[];
+}
+
+/**
+ * declarativeOpenAPI is the declarative function for OpenAPI specification.
+ */
 export function declarativeOpenAPI<TValue extends ValueOpenAPI>(
   value0?: TValue,
 ): Declarative<TValue> {
   return (value1) => {
-    return Object.assign({}, value0, value1);
+    return { ...value0, ...value1 } as TValue;
   };
 }
 
@@ -51,9 +74,4 @@ export interface ValueOpenAPI {
    * routes are the HTTP routes of the OpenAPI specification.
    */
   routes?: Route[];
-
-  /**
-   * resources are the resources registered in the OpenAPI specification.
-   */
-  resources?: Class[];
 }

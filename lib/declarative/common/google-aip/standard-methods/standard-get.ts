@@ -1,10 +1,11 @@
+import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
+import type { ValuePathsObject } from "#/lib/declarative/common/openapi/openapi.ts";
 import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
 import { toOperationPath } from "#/lib/declarative/common/google-aip/operation.ts";
-import type { OpenAPIV3_1 } from "openapi-types";
 import { toOperationSchema } from "#/lib/declarative/common/google-aip/mod.ts";
 
 // TODO: Create batch method batchGet.
@@ -91,7 +92,11 @@ export function toStandardGetPath(
   parent?: string,
 ): string {
   return `${
-    toOperationPath(resourceName, collectionIdentifier, parent)
+    toOperationPath(
+      resourceName,
+      collectionIdentifier,
+      parent,
+    )
   }/{name}`;
 }
 
@@ -104,6 +109,4 @@ export interface StandardGetOptions extends OperationOptions {}
 /**
  * ValueStandardGet is the value of the standard Get operation of the resource.
  */
-export interface ValueStandardGet extends ValueJSONSchema {
-  paths?: OpenAPIV3_1.PathsObject;
-}
+export interface ValueStandardGet extends ValueJSONSchema, ValuePathsObject {}

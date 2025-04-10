@@ -41,7 +41,9 @@ export const openapi: (
 /**
  * openapiDecoratorFactory is the factory function for the OpenAPI decorator.
  */
-export function openapiDecoratorFactory() {
+export function openapiDecoratorFactory(): (
+  options?: OpenAPIDecoratorOptions | undefined,
+) => (target: Class) => Class {
   return createDecoratorFactory({
     initialize: (options?: OpenAPIDecoratorOptions) => {
       if (options?.specification === undefined) {

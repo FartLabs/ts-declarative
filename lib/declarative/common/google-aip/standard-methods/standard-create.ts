@@ -3,6 +3,7 @@ import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
+import type { ValuePathsObject } from "#/lib/declarative/common/openapi/openapi.ts";
 import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
 import {
   toOperationPath,
@@ -108,6 +109,5 @@ export interface StandardCreateOptions extends OperationOptions {}
 /**
  * ValueStandardCreate is the value of the standard Create operation of the resource.
  */
-export interface ValueStandardCreate extends ValueJSONSchema {
-  paths?: OpenAPIV3_1.PathsObject;
-}
+export interface ValueStandardCreate
+  extends ValueJSONSchema, ValuePathsObject {}

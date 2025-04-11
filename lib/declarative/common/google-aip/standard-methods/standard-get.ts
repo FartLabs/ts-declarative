@@ -1,6 +1,5 @@
 import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
-import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
 import type { ValuePathsObject } from "#/lib/declarative/common/openapi/openapi.ts";
@@ -20,17 +19,6 @@ export const standardGet: (
     return [declarativeStandardGet(options)];
   },
 });
-
-/**
- * standardGetOf returns the standard Get operation of the resource.
- */
-export function standardGetOf<TClass extends Class>(
-  target: TClass,
-): OpenAPIV3_1.OperationObject | undefined {
-  return getPrototypeValue<ValueStandardGet>(target)?.paths?.[
-    toStandardGetPath(target.name)
-  ]?.get;
-}
 
 /**
  * declarativeStandardGet returns the standard Get operation of the resource.

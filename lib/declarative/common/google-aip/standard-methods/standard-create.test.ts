@@ -1,5 +1,6 @@
 import { assertEquals } from "@std/assert";
-import { standardCreate, standardCreateOf } from "./standard-create.ts";
+import { pathsObjectOf } from "#/lib/declarative/common/openapi/openapi.ts";
+import { standardCreate } from "./standard-create.ts";
 
 @standardCreate()
 class Person {
@@ -7,26 +8,30 @@ class Person {
 }
 
 Deno.test("standardCreate decorator factory decorates value", () => {
-  const actual = standardCreateOf(Person);
+  const actual = pathsObjectOf(Person);
   assertEquals(actual, {
-    description: "Creates Person",
-    requestBody: {
-      content: {
-        "application/json": {
-          schema: { "$ref": "#/components/schemas/Person" },
+    "/people": {
+      post: {
+        description: "Creates Person",
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/Person" },
+            },
+          },
+          description: "The Person to create",
+          required: true,
         },
-      },
-      description: "The Person to create",
-      required: true,
-    },
-    responses: {
-      "200": {
-        content: {
-          "application/json": {
-            schema: { "$ref": "#/components/schemas/Person" },
+        responses: {
+          "200": {
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Person" },
+              },
+            },
+            description: "The created Person",
           },
         },
-        description: "The created Person",
       },
     },
   });

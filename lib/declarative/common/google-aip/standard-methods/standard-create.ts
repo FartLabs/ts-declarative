@@ -1,6 +1,4 @@
-import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
-import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
 import type { ValuePathsObject } from "#/lib/declarative/common/openapi/openapi.ts";
@@ -22,17 +20,6 @@ export const standardCreate: (
 });
 
 /**
- * standardCreateOf returns the standard Create operation of the resource.
- */
-export function standardCreateOf<TClass extends Class>(
-  target: TClass,
-): OpenAPIV3_1.OperationObject | undefined {
-  return getPrototypeValue<ValueStandardCreate>(target)?.paths?.[
-    toStandardCreatePath(target.name)
-  ]?.post;
-}
-
-/**
  * declarativeStandardCreate returns the standard Create operation of the resource.
  *
  * @see https://google.aip.dev/133
@@ -47,37 +34,37 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
       options?.collectionIdentifier,
       options?.parent,
     );
+
     value ??= {} as TValue;
-    value!.paths ??= {} as OpenAPIV3_1.PathsObject;
-    value!.paths[operationPath] ??= {
-      post: {
-        description: options?.description ?? `Creates ${resourceName}`,
-        requestBody: {
-          required: true,
-          description: options?.request?.description ??
-            `The ${resourceName} to create`,
+    value["paths"] ??= {};
+    value["paths"][operationPath] ??= {};
+    value["paths"][operationPath]["post"] = {
+      description: options?.description ?? `Creates ${resourceName}`,
+      requestBody: {
+        required: true,
+        description: options?.request?.description ??
+          `The ${resourceName} to create`,
+        content: {
+          "application/json": {
+            schema: toOperationSchema(
+              resourceName,
+              value?.jsonSchema,
+              options?.request?.schema,
+            ),
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: options?.response?.description ??
+            `The created ${resourceName}`,
           content: {
             "application/json": {
               schema: toOperationSchema(
                 resourceName,
                 value?.jsonSchema,
-                options?.request?.schema,
+                options?.response?.schema,
               ),
-            },
-          },
-        },
-        responses: {
-          "200": {
-            description: options?.response?.description ??
-              `The created ${resourceName}`,
-            content: {
-              "application/json": {
-                schema: toOperationSchema(
-                  resourceName,
-                  value?.jsonSchema,
-                  options?.response?.schema,
-                ),
-              },
             },
           },
         },

@@ -16,14 +16,14 @@ export async function generateOazapftsOf<TClass extends Class>(
 
 /**
  * oazapfts is a decorator that generates a TypeScript client for the OpenAPI
- * specification using oazapfts.
+ * specification using Oazapfts.
  */
 export const oazapfts: (
   options?: OazapftsOptions | undefined,
 ) => (target: Class) => Class = oazapftsDecoratorFactory();
 
 /**
- * oazapftsDecoratorFactory is a decorator factory for oazapfts.
+ * oazapftsDecoratorFactory is a decorator factory for Oazapfts.
  */
 export function oazapftsDecoratorFactory(): (
   options?: OazapftsOptions | undefined,
@@ -36,7 +36,7 @@ export function oazapftsDecoratorFactory(): (
 }
 
 /**
- * declarativeOazapfts is a declarative for oazapfts.
+ * declarativeOazapfts is a declarative for Oazapfts.
  *
  * @see https://github.com/oazapfts/oazapfts
  */
@@ -53,17 +53,17 @@ export function declarativeOazapfts<
 }
 
 /**
- * OazapftsOptions is the options for the oazapfts decorator.
+ * OazapftsOptions is the options for the Oazapfts decorator.
  */
 export type OazapftsOptions = Opts;
 
 /**
- * ValueOazapfts is the value expected by the oazapfts decorator.
+ * ValueOazapfts is the value expected by the Oazapfts decorator.
  */
 export interface ValueOazapfts extends ValueOpenAPI {
   /**
    * generateOazapfts generates the TypeScript client for the OpenAPI specification
-   * using oazapfts.
+   * via Oazapfts.
    */
   generateOazapfts?: () => Promise<string>;
 }

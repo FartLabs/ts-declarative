@@ -1,4 +1,5 @@
 import { assertSnapshot } from "@std/testing/snapshot";
+import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-schema/json-schema-file.ts";
 import {
   standardCreate,
   standardGet,
@@ -6,8 +7,11 @@ import {
 import { openapi } from "#/lib/declarative/common/openapi/openapi.ts";
 import { generateOazapftsOf, oazapfts } from "./oazapfts.ts";
 
+const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
+
 @standardCreate()
 @standardGet()
+@jsonSchema()
 class Person {
   public constructor(public name: string) {}
 }
@@ -23,8 +27,7 @@ class Person {
 })
 class App {}
 
-// TODO: error: MissingPointerError: Token "schemas" does not exist.
 Deno.test("oazapfts decorator decorates value", async (t) => {
   const sourceCode = await generateOazapftsOf(App);
-  assertSnapshot(t, sourceCode);
+  await assertSnapshot(t, sourceCode);
 });

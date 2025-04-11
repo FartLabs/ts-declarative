@@ -1,13 +1,9 @@
+import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
-import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
-import type {
-  Operation,
-  OperationOptions,
-  OperationRequest,
-  OperationResponse,
-} from "#/lib/declarative/common/google-aip/operation.ts";
+import type { ValuePathsObject } from "#/lib/declarative/common/openapi/openapi.ts";
+import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
 import {
   toOperationPath,
   toOperationSchema,
@@ -25,14 +21,7 @@ export const customMethod: (
   },
 });
 
-/**
- * customMethodsOf returns the customMethods operation of the resource.
- */
-export function customMethodsOf<TClass extends Class>(
-  target: TClass,
-): Operation[] | undefined {
-  return getPrototypeValue<ValueCustomMethods>(target)?.customMethods;
-}
+// TODO: Refactor standard methods to use declarativeCustomMethod as a base.
 
 /**
  * declarativeCustomMethods returns the customMethods operation of the resource.
@@ -48,64 +37,62 @@ export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
     }
 
     const resourceName = options?.resourceName ?? name;
-    const path = `${
-      toOperationPath(
-        resourceName,
-        options.collectionIdentifier,
-        options.parent,
-      )
-    }:${options?.name}`;
-    if (value?.customMethods?.some((operation) => operation.path === path)) {
-      throw new Error(
-        `customMethods "${path}" already exists for resource "${resourceName}"`,
-      );
-    }
+    const operationPath = toCustomMethodPath(resourceName, options);
 
-    return {
-      ...value,
-      customMethods: [
-        ...(value?.customMethods ?? []),
-        {
-          path,
-          httpMethod: options?.httpMethod ?? "post",
-          description: options?.description,
-          schema: {
-            ...((options?.request?.strategy ?? "body") === "body"
-              ? {
-                description: options?.request?.description,
-                requestBody: {
-                  required: true,
-                  content: {
-                    "application/json": {
-                      schema: toOperationSchema(
-                        resourceName,
-                        value?.jsonSchema,
-                        options.request?.schema,
-                      ),
-                    },
-                  },
-                },
-              }
-              : {}),
-            responses: {
-              "200": {
-                description: options?.response?.description,
-                content: {
-                  "application/json": {
-                    schema: toOperationSchema(
-                      resourceName,
-                      value?.jsonSchema,
-                      options.response?.schema,
-                    ),
-                  },
-                },
-              },
+    value ??= {} as TValue;
+    value["paths"] ??= {};
+    value["paths"][operationPath] ??= {};
+    value["paths"][operationPath][
+      (options?.httpMethod as OpenAPIV3_1.HttpMethods) ?? "post"
+    ] = {
+      description: options?.description ?? `Custom ${options?.name}`,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: toOperationSchema(
+              resourceName,
+              value?.jsonSchema,
+              options?.request?.schema,
+            ),
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: options?.response?.description ?? `The ${resourceName}`,
+          content: {
+            "application/json": {
+              schema: toOperationSchema(
+                resourceName,
+                value?.jsonSchema,
+                options?.response?.schema,
+              ),
             },
           },
         },
-      ],
-    } as TValue;
+      },
+    };
+
+    return value;
   };
+}
+
+/**
+ * toCustomMethodPath is a helper function that returns the path for a custom
+ * method.
+ */
+export function toCustomMethodPath(
+  resourceName: string,
+  options?: CustomMethodOptions,
+): string {
+  return `${
+    toOperationPath(
+      resourceName,
+      options?.collectionIdentifier,
+      options?.parent,
+    )
+  }:${options?.name}`;
 }
 
 /**
@@ -122,21 +109,9 @@ export interface CustomMethodOptions extends OperationOptions {
    * httpMethod is the HTTP method for the custom method. Defaults to "post".
    */
   httpMethod?: string;
-
-  /**
-   * request is the input for the custom method.
-   */
-  request?: OperationRequest;
-
-  /**
-   * response is the output for the custom method.
-   */
-  response?: OperationResponse;
 }
 
 /**
  * ValueCustomMethods is the value of the customMethods operation of the resource.
  */
-export interface ValueCustomMethods extends ValueJSONSchema {
-  customMethods?: Operation[];
-}
+export interface ValueCustomMethods extends ValueJSONSchema, ValuePathsObject {}

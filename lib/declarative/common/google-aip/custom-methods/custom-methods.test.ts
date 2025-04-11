@@ -1,5 +1,6 @@
 import { assertEquals } from "@std/assert";
-import { customMethod, customMethodsOf } from "./custom-methods.ts";
+import { pathsObjectOf } from "#/lib/declarative/common/openapi/openapi.ts";
+import { customMethod } from "./custom-methods.ts";
 
 @customMethod({
   name: "batchCreate",
@@ -12,33 +13,30 @@ class Person {
 }
 
 Deno.test("customMethod decorator factory decorates value", () => {
-  const actual = customMethodsOf(Person);
-  assertEquals(actual, [
-    {
-      path: "/people:batchCreate",
-      httpMethod: "post",
-      description: "Create people",
-      schema: {
-        description: "People to create",
+  const actual = pathsObjectOf(Person);
+  assertEquals(actual, {
+    "/people:batchCreate": {
+      post: {
+        description: "Create people",
         requestBody: {
-          required: true,
           content: {
             "application/json": {
               schema: { $ref: "#/components/schemas/Person" },
             },
           },
+          required: true,
         },
         responses: {
           "200": {
-            description: "Created people",
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/Person" },
               },
             },
+            description: "Created people",
           },
         },
       },
     },
-  ]);
+  });
 });

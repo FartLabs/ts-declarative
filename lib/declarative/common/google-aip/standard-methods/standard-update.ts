@@ -1,11 +1,8 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
-import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
-import type {
-  Operation,
-  OperationOptions,
-} from "#/lib/declarative/common/google-aip/operation.ts";
+import type { ValuePathsObject } from "#/lib/declarative/common/openapi/openapi.ts";
+import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
 import {
   toOperationPath,
   toOperationSchema,
@@ -23,15 +20,6 @@ export const standardUpdate: (
 });
 
 /**
- * standardUpdateOf returns the standard Update operation of the resource.
- */
-export function standardUpdateOf<TClass extends Class>(
-  target: TClass,
-): Operation | undefined {
-  return getPrototypeValue<ValueStandardUpdate>(target)?.standardUpdate;
-}
-
-/**
  * declarativeStandardUpdate returns the standard Update operation of the resource.
  *
  * @see https://google.aip.dev/134
@@ -41,53 +29,79 @@ export function declarativeStandardUpdate<TValue extends ValueStandardUpdate>(
 ): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
-    return Object.assign({}, value, {
-      standardUpdate: {
-        path: `${
-          toOperationPath(
-            resourceName,
-            options?.collectionIdentifier,
-            options?.parent,
-          )
-        }/{name}`,
-        httpMethod: "post",
-        description: options?.description ?? `Updates ${resourceName}`,
-        schema: {
-          ...((options?.request?.strategy ?? "body") === "body"
-            ? {
-              description: options?.request?.description ??
-                `The ${resourceName} to update`,
-              requestBody: {
-                required: true,
-                content: {
-                  "application/json": {
-                    schema: toOperationSchema(
-                      resourceName,
-                      value?.jsonSchema,
-                      options?.request?.schema,
-                    ),
-                  },
-                },
-              },
-            }
-            : {}),
-          parameters: [{ name: "name", in: "path", required: true }],
+    const operationPath = toStandardUpdatePath(
+      resourceName,
+      options?.collectionIdentifier,
+      options?.parent,
+    );
+
+    value ??= {} as TValue;
+    value["paths"] ??= {};
+    value["paths"][operationPath] ??= {};
+    value["paths"][operationPath]["post"] = {
+      description: options?.description ?? `Updates ${resourceName}`,
+      requestBody: {
+        required: true,
+        description: options?.request?.description ??
+          `The ${resourceName} to update`,
+        content: {
+          "application/json": {
+            schema: toOperationSchema(
+              resourceName,
+              value?.jsonSchema,
+              options?.request?.schema,
+            ),
+          },
         },
       },
-    });
+      parameters: [{ name: "name", in: "path", required: true }],
+      responses: {
+        "200": {
+          description: options?.request?.description ??
+            `The updated ${resourceName}`,
+          content: {
+            "application/json": {
+              schema: toOperationSchema(
+                resourceName,
+                value?.jsonSchema,
+                options?.response?.schema,
+              ),
+            },
+          },
+        },
+      },
+    };
+
+    return value;
   };
+}
+
+/**
+ * toStandardUpdatePath returns the path of the standard Update operation of the
+ * resource.
+ */
+export function toStandardUpdatePath(
+  resourceName: string,
+  collectionIdentifier?: string,
+  parent?: string,
+): string {
+  return `${
+    toOperationPath(
+      resourceName,
+      collectionIdentifier,
+      parent,
+    )
+  }/{name}`;
 }
 
 /**
  * StandardUpdateOptions is the options for the standard Update operation of the
  * resource.
  */
-export interface StandardUpdateOptions extends OperationOptions {
-}
+export interface StandardUpdateOptions extends OperationOptions {}
 
 /**
  * ValueStandardUpdate is the value of the standard Update operation of the resource.
  */
-export interface ValueStandardUpdate extends ValueJSONSchema {
-  standardUpdate?: Operation;
-}
+export interface ValueStandardUpdate
+  extends ValueJSONSchema, ValuePathsObject {}

@@ -21,8 +21,6 @@ export const customMethod: (
   },
 });
 
-// TODO: Refactor standard methods to use declarativeCustomMethod as a base.
-
 /**
  * declarativeCustomMethods returns the customMethods operation of the resource.
  *

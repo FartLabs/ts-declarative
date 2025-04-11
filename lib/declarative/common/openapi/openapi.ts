@@ -56,19 +56,40 @@ export function openapiDecoratorFactory(): (
             ...options.specification,
             paths: {
               ...options.specification?.paths,
-              ...(options.resources?.reduce(
-                (paths, resource) => ({
-                  ...paths,
-                  ...pathsObjectOf(resource),
-                }),
-                {},
-              ) ?? []),
+              ...(options.resources
+                ?.map((resource) => {
+                  const pathsObject = pathsObjectOf(resource);
+                  if (pathsObject === undefined) {
+                    throw new Error(
+                      `pathsObject is required for ${resource.name}`,
+                    );
+                  }
+
+                  return pathsObject;
+                })
+                .reduce(reducePathsObject, {}) ??
+                {}),
             },
           },
         }),
       ];
     },
   });
+}
+
+/**
+ * reducePathsObject reduces the paths object of the OpenAPI
+ * specification.
+ */
+export function reducePathsObject(
+  paths: OpenAPIV3_1.PathsObject,
+  pathsObject: OpenAPIV3_1.PathsObject,
+): OpenAPIV3_1.PathsObject {
+  for (const path in pathsObject) {
+    paths[path] = { ...paths[path], ...pathsObject[path] };
+  }
+
+  return paths;
 }
 
 /**

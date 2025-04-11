@@ -9,15 +9,20 @@ import type { ValueTsMorph } from "#/lib/declarative/common/ts-morph/ts-morph.ts
 import { declarativeTsMorph } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
+/**
+ * jsonSchema is a decorator that sets the JSON Schema of the class.
+ */
 export function jsonSchemaOf<TClass extends Class>(target: TClass): any {
   return getPrototypeValue<ValueJSONSchema>(target)?.jsonSchema;
 }
 
 /**
- * ValueJSONSchema is a type that extends ValueTsMorph and adds a jsonSchema
- * property.
+ * ValueJSONSchema is the interface for the JSON Schema of the class.
  */
 export interface ValueJSONSchema extends ValueTsMorph {
+  /**
+   * jsonSchema is the JSON Schema of the class.
+   */
   jsonSchema?: any;
 }
 
@@ -43,6 +48,9 @@ export function jsonSchemaDecoratorFactory(
   });
 }
 
+/**
+ * declarativeJSONSchema is a declarative function from JSON Schema.
+ */
 export function declarativeJSONSchema<TValue extends ValueJSONSchema>(
   maskOrMaskFn?: JSONSchemaMask,
 ): Declarative<TValue> {
@@ -73,6 +81,9 @@ export function defaultJSONSchemaMask(value: any): any {
   };
 }
 
+/**
+ * applyJSONSchemaMask applies the JSON Schema mask to the value recursively.
+ */
 export function applyJSONSchemaMask(
   value: any,
   maskOrMaskFn?: JSONSchemaMask,
@@ -87,12 +98,21 @@ export function applyJSONSchemaMask(
   return deepMerge(value, mask);
 }
 
+/**
+ * JSONSchemaMask is a value used to update a JSON Schema value.
+ */
 export type JSONSchemaMask = any | ((value: any) => any);
 
+/**
+ * compile compiles the tsMorph properties into a JSON schema string.
+ */
 export function compile({ tsMorph }: ValueTsMorph): any {
   return TypeBoxFromSyntax({}, serialize({ tsMorph }));
 }
 
+/**
+ * serialize serializes the tsMorph properties into a JSON schema string.
+ */
 export function serialize({ tsMorph }: ValueTsMorph): string {
   if (tsMorph === undefined || tsMorph?.properties.length === 0) {
     return "{}";

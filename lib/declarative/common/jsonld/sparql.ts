@@ -1,5 +1,8 @@
 import type { Context } from "#/lib/declarative/common/jsonld/context.ts";
 
+/**
+ * expandStrings expands the strings in the context.
+ */
 export function expandStrings(context: Context, strings: string[]): string[] {
   const prefixes = getPrefixesFromContext(context);
   return strings.map((value) => {

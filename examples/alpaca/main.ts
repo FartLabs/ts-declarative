@@ -11,7 +11,7 @@ const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(
 );
 
 @jsonSchema()
-export class Person {
+class Person {
   public constructor(public givenName: string, public familyName: string) {}
 }
 
@@ -20,17 +20,24 @@ const templateString = await Deno.readTextFile(
 );
 const eta = new Eta();
 
+/**
+ * renderTemplate renders the template with the given JSON Schema and Alpaca options.
+ */
 export async function renderTemplate(
   jsonSchemaString: string,
   alpacaOptions = "{}",
-) {
+): Promise<string> {
   return await eta.renderStringAsync(templateString, {
     jsonSchemaString,
     optionsString: alpacaOptions,
   });
 }
 
-export const jsonSchemaPerson = jsonSchemaOf(Person);
+/**
+ * jsonSchemaPerson is the JSON Schema of the Person class.
+ */
+// deno-lint-ignore no-explicit-any
+export const jsonSchemaPerson: any = jsonSchemaOf(Person);
 
 if (import.meta.main) {
   Deno.serve(async () => {

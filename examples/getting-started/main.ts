@@ -11,7 +11,7 @@ const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
 
 @context("https://schema.org/")
 @jsonSchema()
-export class Person {
+class Person {
   public constructor(public name: string) {}
 }
 

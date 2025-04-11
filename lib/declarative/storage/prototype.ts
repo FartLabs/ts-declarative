@@ -8,12 +8,21 @@ import type { DeclarativeStorage } from "./storage.ts";
  */
 export class DeclarativeStoragePrototype<TValue>
   implements DeclarativeStorage<TValue> {
+  /**
+   * constructor for DeclarativeStoragePrototype.
+   */
   public constructor(public target: Class) {}
 
+  /**
+   * set the value on the class prototype.
+   */
   public set(_id: string, value: TValue): void {
     this.target.prototype[valueKey] = value;
   }
 
+  /**
+   * get the value from the class prototype.
+   */
   public get(_id: string, defaultValue?: () => TValue): TValue | undefined {
     return this.target.prototype[valueKey] ?? defaultValue?.();
   }

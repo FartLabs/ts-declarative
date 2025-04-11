@@ -4,6 +4,8 @@ import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
+export type { Route };
+
 /**
  * specificationOf returns the OpenAPI specification of the class.
  */
@@ -133,5 +135,8 @@ export interface ValueOpenAPI {
  * specification.
  */
 export interface ValuePathsObject {
+  /**
+   * paths is the paths object of the OpenAPI specification.
+   */
   paths?: OpenAPIV3_1.PathsObject;
 }

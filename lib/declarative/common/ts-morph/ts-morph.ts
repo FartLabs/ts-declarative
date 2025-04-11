@@ -7,27 +7,61 @@ import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
  * TsMorph is a declarative class type from ts-morph.
  */
 export interface TsMorph {
+  /**
+   * properties is the list of properties of the class.
+   */
   properties: TsMorphProperty[];
 }
 
+/**
+ * TsMorphProperty is a property of the class.
+ */
 export interface TsMorphProperty {
+  /**
+   * name is the name of the property. This is the name of the property in the
+   * class.
+   */
   name: string;
+
+  /**
+   * type is the type of the property. This is the type expression of the
+   * property.
+   */
   type: string;
+
+  /**
+   * paramIndex is the index of the constructor parameter. If the property is not
+   * a constructor parameter, this will be undefined.
+   */
   paramIndex?: number;
+
+  //
   // TODO: Add documentation.
   // TODO: Add which class the inherited properties associate with respectively.
 }
 
+/**
+ * tsMorphOf returns the ts-morph of the class.
+ */
 export function tsMorphOf<TClass extends Class>(
   target: TClass,
 ): TsMorph | undefined {
   return getPrototypeValue<ValueTsMorph>(target)?.tsMorph;
 }
 
+/**
+ * ValueTsMorph is the value for the ts-morph decorator.
+ */
 export interface ValueTsMorph {
+  /**
+   * tsMorph is the ts-morph analysis of the class.
+   */
   tsMorph?: TsMorph;
 }
 
+/**
+ * tsMorph is a decorator for ts-morph.
+ */
 export function tsMorphDecoratorFactory(
   project: Project,
 ): (specifier: string | URL) => (target: Class) => Class {
@@ -39,31 +73,14 @@ export function tsMorphDecoratorFactory(
   });
 }
 
+/**
+ * declarativeTsMorph is a declarative function from ts-morph.
+ */
 export function declarativeTsMorph<TValue extends ValueTsMorph>(
   sourceFile: SourceFile,
 ): Declarative<TValue> {
   return (value, name) => {
     return { ...value, tsMorph: getTsMorph(sourceFile, name) } as TValue;
-  };
-}
-
-export interface ValueType {
-  type?: string[];
-}
-
-export const type: (
-  ...args: Array<string | string[]>
-) => (target: Class) => Class = createDecoratorFactory({
-  initialize: (...type: Array<string | string[]>) => {
-    return [declarativeType(...type)];
-  },
-});
-
-export function declarativeType<TValue extends ValueType>(
-  ...type: Array<string | string[]>
-): Declarative<TValue> {
-  return <TValue extends ValueType>(value: TValue | undefined): TValue => {
-    return { ...value, type: type.flat() } as TValue;
   };
 }
 

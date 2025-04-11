@@ -1,29 +1,5 @@
 import type { Context } from "#/lib/declarative/common/jsonld/context.ts";
 
-/**
- * makeCompliancyQuery makes a SPARQL query that asserts that the given set of
- * properties are included in the given class's domain.
- */
-export function makeCompliancyQuery(
-  classID: string,
-  propertyIDs: string[],
-): string {
-  return `ASK {
-${
-    propertyIDs
-      .flatMap((propertyID) => {
-        return [
-          // TODO: Use rdfs:domain instead of schema:domainIncludes.
-          // TODO: Check type of propertyID matches TypeScript class property type.
-          // TODO: Support subclasses (indirect domainIncludes).
-          `<${propertyID}> <https://schema.org/domainIncludes> <${classID}> .`,
-        ];
-      })
-      .join("\n")
-  }
-}`;
-}
-
 export function expandStrings(context: Context, strings: string[]): string[] {
   const prefixes = getPrefixesFromContext(context);
   return strings.map((value) => {

@@ -17,6 +17,30 @@ export async function generateOazapftsOf<TClass extends Class>(
 /**
  * oazapfts is a decorator that generates a TypeScript client for the OpenAPI
  * specification using Oazapfts.
+ *
+ * @example
+ * ```ts
+ * @standardCreate()
+ * @standardGet()
+ * @jsonSchema()
+ * class Person {
+ *   public constructor(public name: string) {}
+ * }
+ *
+ * @oazapfts({ optimistic: true })
+ * @openapi({
+ *  specification: {
+ *    openapi: "3.0.1",
+ *    info: { title: "App", version: "0.0.1" },
+ *    components: {},
+ *  },
+ *  resources: [Person],
+ * })
+ * class App {}
+ *
+ * const sourceCode = await generateOazapftsOf(App);
+ * await Deno.writeTextFile("client.ts", sourceCode);
+ * ```
  */
 export const oazapfts: (
   options?: OazapftsOptions | undefined,

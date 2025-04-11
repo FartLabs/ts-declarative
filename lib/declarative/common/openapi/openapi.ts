@@ -3,6 +3,7 @@ import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+import { jsonSchemaOf } from "#/lib/declarative/common/json-schema/json-schema.ts";
 
 export type { Route };
 
@@ -52,29 +53,7 @@ export function openapiDecoratorFactory(): (
         throw new Error("base specification is required");
       }
 
-      return [
-        declarativeOpenAPI({
-          specification: {
-            ...options.specification,
-            paths: {
-              ...options.specification?.paths,
-              ...(options.resources
-                ?.map((resource) => {
-                  const pathsObject = pathsObjectOf(resource);
-                  if (pathsObject === undefined) {
-                    throw new Error(
-                      `pathsObject is required for ${resource.name}`,
-                    );
-                  }
-
-                  return pathsObject;
-                })
-                .reduce(reducePathsObject, {}) ??
-                {}),
-            },
-          },
-        }),
-      ];
+      return [declarativeOpenAPI(options)];
     },
   });
 }
@@ -108,10 +87,46 @@ export interface OpenAPIDecoratorOptions extends ValueOpenAPI {
  * declarativeOpenAPI is the declarative function for OpenAPI specification.
  */
 export function declarativeOpenAPI<TValue extends ValueOpenAPI>(
-  value0?: TValue,
+  options?: OpenAPIDecoratorOptions,
 ): Declarative<TValue> {
-  return (value1) => {
-    return { ...value0, ...value1 } as TValue;
+  return (value) => {
+    return {
+      ...value,
+      specification: {
+        ...options?.specification,
+        paths: {
+          ...options?.specification?.paths,
+          ...(options?.resources
+            ?.map((resource) => {
+              const pathsObject = pathsObjectOf(resource);
+              if (pathsObject === undefined) {
+                throw new Error(`pathsObject is required for ${resource.name}`);
+              }
+
+              return pathsObject;
+            })
+            .reduce(reducePathsObject, {}) ?? {}),
+        },
+        components: {
+          ...options?.specification?.components,
+          schemas: {
+            ...options?.specification?.components?.schemas,
+            ...Object.fromEntries(
+              options?.resources?.map((resource) => {
+                const jsonSchema = jsonSchemaOf(resource);
+                if (jsonSchema === undefined) {
+                  throw new Error(
+                    `jsonSchema is required for ${resource.name}`,
+                  );
+                }
+
+                return [resource.name, jsonSchema];
+              }) ?? [],
+            ),
+          },
+        },
+      },
+    } as TValue;
   };
 }
 

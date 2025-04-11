@@ -1,12 +1,16 @@
 import { assertEquals } from "@std/assert/equals";
+import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-schema/json-schema-file.ts";
 import {
   standardCreate,
   standardGet,
 } from "#/lib/declarative/common/google-aip/mod.ts";
 import { openapi, specificationOf } from "./openapi.ts";
 
+const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
+
 @standardCreate()
 @standardGet()
+@jsonSchema()
 class Person {
   public constructor(public name: string) {}
 }

@@ -1,5 +1,6 @@
 import { assertEquals } from "@std/assert";
-import { standardDelete, standardDeleteOf } from "./standard-delete.ts";
+import { pathsObjectOf } from "#/lib/declarative/common/openapi/openapi.ts";
+import { standardDelete } from "./standard-delete.ts";
 
 @standardDelete()
 class Person {
@@ -7,13 +8,24 @@ class Person {
 }
 
 Deno.test("standardDelete decorator factory decorates value", () => {
-  const actual = standardDeleteOf(Person);
+  const actual = pathsObjectOf(Person);
   assertEquals(actual, {
-    path: "/people/{name}",
-    httpMethod: "delete",
-    description: "Deletes Person",
-    schema: {
-      parameters: [{ name: "name", in: "path", required: true }],
+    "/people/{name}": {
+      delete: {
+        description: "Deletes Person",
+        parameters: [
+          {
+            in: "path",
+            name: "name",
+            required: true,
+          },
+        ],
+        responses: {
+          "200": {
+            description: "The deleted Person",
+          },
+        },
+      },
     },
   });
 });

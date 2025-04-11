@@ -1,12 +1,9 @@
 import pluralize from "@wei/pluralize";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
-import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
-import type {
-  Operation,
-  OperationOptions,
-} from "#/lib/declarative/common/google-aip/operation.ts";
+import type { ValuePathsObject } from "#/lib/declarative/common/openapi/openapi.ts";
+import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
 import {
   toOperationPath,
   toOperationSchema,
@@ -24,15 +21,6 @@ export const standardList: (
 });
 
 /**
- * standardListOf returns the standard List operation of the resource.
- */
-export function standardListOf<TClass extends Class>(
-  target: TClass,
-): Operation | undefined {
-  return getPrototypeValue<ValueStandardList>(target)?.standardList;
-}
-
-/**
  * declarativeStandardList returns the standard List operation of the resource.
  *
  * @see https://google.aip.dev/132
@@ -41,47 +29,60 @@ export function declarativeStandardList<TValue extends ValueStandardList>(
   options?: StandardListOptions,
 ): Declarative<TValue> {
   return (value, name) => {
-    const resourceName = options?.resourceName ?? name;
     if (options?.pagination !== undefined) {
       throw new Error("Pagination is not supported yet.");
     }
 
-    return Object.assign({}, value, {
-      standardList: {
-        path: toOperationPath(
-          name,
-          options?.collectionIdentifier,
-          options?.parent,
-        ),
-        httpMethod: "get",
-        description: options?.description ?? `Lists ${pluralize(resourceName)}`,
-        schema: {
-          parameters: [
-            { name: "page_size", in: "query" },
-            { name: "page_token", in: "query" },
-          ],
-          responses: {
-            "200": {
-              description: options?.response?.description ??
-                `List of ${pluralize(resourceName)}`,
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "array",
-                    items: toOperationSchema(
-                      resourceName,
-                      value?.jsonSchema,
-                      options?.response?.schema,
-                    ),
-                  },
-                },
+    const resourceName = options?.resourceName ?? name;
+    const pluralizedResourceName = pluralize(resourceName);
+    const operationPath = toStandardListPath(
+      resourceName,
+      options?.collectionIdentifier,
+      options?.parent,
+    );
+
+    value ??= {} as TValue;
+    value["paths"] ??= {};
+    value["paths"][operationPath] ??= {};
+    value["paths"][operationPath]["get"] = {
+      description: options?.description ?? `Lists ${pluralizedResourceName}`,
+      parameters: [
+        { name: "page_size", in: "query" },
+        { name: "page_token", in: "query" },
+      ],
+      responses: {
+        "200": {
+          description: options?.response?.description ??
+            `List of ${pluralizedResourceName}`,
+          content: {
+            "application/json": {
+              schema: {
+                type: "array",
+                items: toOperationSchema(
+                  resourceName,
+                  value?.jsonSchema,
+                  options?.response?.schema,
+                ),
               },
             },
           },
         },
       },
-    });
+    };
+
+    return value;
   };
+}
+
+/**
+ * toStandardListPath returns the standard List operation path of the resource.
+ */
+export function toStandardListPath(
+  resourceName: string,
+  collectionIdentifier?: string,
+  parent?: string,
+): string {
+  return toOperationPath(resourceName, collectionIdentifier, parent);
 }
 
 /**
@@ -106,6 +107,4 @@ export interface StandardListOptions extends OperationOptions {
 /**
  * ValueStandardList is the value of the standard List operation of the resource.
  */
-export interface ValueStandardList extends ValueJSONSchema {
-  standardList?: Operation;
-}
+export interface ValueStandardList extends ValueJSONSchema, ValuePathsObject {}

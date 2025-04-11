@@ -1,5 +1,6 @@
 import { assertEquals } from "@std/assert";
-import { standardList, standardListOf } from "./standard-list.ts";
+import { pathsObjectOf } from "#/lib/declarative/common/openapi/openapi.ts";
+import { standardList } from "./standard-list.ts";
 
 @standardList()
 class Person {
@@ -7,26 +8,26 @@ class Person {
 }
 
 Deno.test("standardList decorator factory decorates value", () => {
-  const actual = standardListOf(Person);
+  const actual = pathsObjectOf(Person);
   assertEquals(actual, {
-    path: "/people",
-    httpMethod: "get",
-    description: "Lists People",
-    schema: {
-      parameters: [
-        { in: "query", name: "page_size" },
-        { in: "query", name: "page_token" },
-      ],
-      responses: {
-        "200": {
-          description: "List of People",
-          content: {
-            "application/json": {
-              schema: {
-                type: "array",
-                items: { $ref: "#/components/schemas/Person" },
+    "/people": {
+      get: {
+        description: "Lists People",
+        parameters: [
+          { in: "query", name: "page_size" },
+          { in: "query", name: "page_token" },
+        ],
+        responses: {
+          "200": {
+            content: {
+              "application/json": {
+                schema: {
+                  items: { $ref: "#/components/schemas/Person" },
+                  type: "array",
+                },
               },
             },
+            description: "List of People",
           },
         },
       },

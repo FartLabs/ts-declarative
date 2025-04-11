@@ -13,10 +13,18 @@ export function jsonSchemaOf<TClass extends Class>(target: TClass): any {
   return getPrototypeValue<ValueJSONSchema>(target)?.jsonSchema;
 }
 
+/**
+ * ValueJSONSchema is a type that extends ValueTsMorph and adds a jsonSchema
+ * property.
+ */
 export interface ValueJSONSchema extends ValueTsMorph {
   jsonSchema?: any;
 }
 
+/**
+ * jsonSchemaDecoratorFactory creates a decorator factory that decorates a value
+ * with a JSON Schema.
+ */
 export function jsonSchemaDecoratorFactory(
   project: Project,
   maskOrMaskFn1?: JSONSchemaMask,
@@ -43,13 +51,18 @@ export function declarativeJSONSchema<TValue extends ValueJSONSchema>(
       return;
     }
 
-    return Object.assign(value, {
+    return {
+      ...value,
       jsonSchema: applyJSONSchemaMask(compile(value), maskOrMaskFn),
-    });
+    };
   };
 }
 
-export function opinionatedJSONSchemaMask(value: any): any {
+/**
+ * defaultJSONSchemaMask is our opinionated JSON Schema mask. It adds a title to each
+ * property.
+ */
+export function defaultJSONSchemaMask(value: any): any {
   return {
     properties: Object.fromEntries(
       Object.entries(value.properties).map(([key, _value]) => [

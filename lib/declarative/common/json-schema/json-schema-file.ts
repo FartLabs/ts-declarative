@@ -5,6 +5,9 @@ import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { JSONSchemaMask } from "./json-schema.ts";
 import { declarativeJSONSchema } from "./json-schema.ts";
 
+/**
+ * jsonSchemaDecoratorFactoryOfFile is a decorator factory for JSON Schema.
+ */
 export async function jsonSchemaDecoratorFactoryOfFile(
   specifier: string | URL,
   maskOrMaskFn1?: JSONSchemaMask,

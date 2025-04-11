@@ -3,11 +3,22 @@
 import type { Class, Declarative, DeclarativeOptions } from "./declarative.ts";
 import { declareClass } from "./declarative.ts";
 
+/**
+ * DecoratorFactoryOptions is the options for the decorator factory.
+ */
 export interface DecoratorFactoryOptions<TValue, TArgs extends any[]>
   extends Omit<DeclarativeOptions<Class, TValue>, "target"> {
+  /**
+   * initialize is a function that returns an array of declarative functions.
+   * The arguments are referenced on initialization of the decorator.
+   */
   initialize?: (...args: TArgs) => Declarative<TValue>[];
 }
 
+/**
+ * createDecoratorFactory creates a decorator factory that returns a decorator
+ * function.
+ */
 export function createDecoratorFactory<TValue, TArgs extends any[]>(
   options: DecoratorFactoryOptions<TValue, TArgs>,
 ): (...args: TArgs) => (target: Class) => Class {

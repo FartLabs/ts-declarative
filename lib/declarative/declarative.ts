@@ -3,13 +3,35 @@
 import type { DeclarativeStorage } from "./storage/storage.ts";
 import { DeclarativeStoragePrototype } from "./storage/prototype.ts";
 
+/**
+ * DeclarativeOptions is the options for the declarative function.
+ */
 export interface DeclarativeOptions<TClass extends Class, TValue> {
+  /**
+   * target is the class to apply the declarative function to.
+   */
   target: TClass;
+
+  /**
+   * prefix is the prefix to use for the ID.
+   */
   prefix?: string;
+
+  /**
+   * storage is the declarative storage for the class.
+   */
   storage?: DeclarativeStorage<TValue>;
+
+  /**
+   * defaultValue is a function that returns the default value for the
+   * declarative function.
+   */
   defaultValue?: () => TValue;
 }
 
+/**
+ * declareClass applies a declarative function to a class.
+ */
 export function declareClass<TClass extends Class, TValue>(
   optionsOrClass: TClass | DeclarativeOptions<TClass, TValue>,
   ...fns: Declarative<TValue>[]
@@ -37,6 +59,9 @@ export function declareClass<TClass extends Class, TValue>(
   return target;
 }
 
+/**
+ * getOptions returns the options for the class decorator.
+ */
 export function getOptions<TClass extends Class, TValue>(
   optionsOrClass: TClass | DeclarativeOptions<TClass, TValue>,
 ): DeclarativeOptions<TClass, TValue> {
@@ -47,6 +72,10 @@ export function getOptions<TClass extends Class, TValue>(
   return options;
 }
 
+/**
+ * declarativeSequence returns a declarative function that applies a sequence of
+ * declaratives.
+ */
 export function declarativeSequence<TValue>(
   ...declaratives: Declarative<TValue>[]
 ): Declarative<TValue> {
@@ -58,11 +87,18 @@ export function declarativeSequence<TValue>(
   };
 }
 
+/**
+ * Declarative is a type that represents a declarative function.
+ * It takes a value and a of the class name and returns a value.
+ */
 export type Declarative<TValue> = (
   value: TValue | undefined,
   name: string,
 ) => TValue | undefined;
 
+/**
+ * Class is a type that represents a runtime class.
+ */
 export type Class = new (...args: any[]) => any;
 
 /**

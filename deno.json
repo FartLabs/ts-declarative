@@ -40,7 +40,7 @@
     "test": "deno test --allow-all",
     "test:update": "deno task test -- --update",
     "publish:dry": "deno publish --dry-run --allow-dirty",
-    "lint": "deno lint && deno doc --lint **/*.ts"
+    "lint": "deno lint && deno doc --lint  **/*.ts"
   },
   "fmt": {
     "exclude": ["./examples/alpaca/index.eta.html"]

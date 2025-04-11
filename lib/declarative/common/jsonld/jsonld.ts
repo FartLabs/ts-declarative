@@ -6,14 +6,24 @@ import { declarativeType } from "./type.ts";
 import type { ValueContext } from "./context.ts";
 import { declarativeContext } from "./context.ts";
 
+/**
+ * jsonldOf returns the JSON-LD of the class.
+ */
 export function jsonldOf<TClass extends Class>(
   target: TClass,
 ): ValueJSONLd | undefined {
   return getPrototypeValue<ValueJSONLd>(target);
 }
 
+/**
+ * ValueJSONLd is the value for the JSON-LD decorator.
+ */
 export interface ValueJSONLd extends ValueType, ValueContext {}
 
+/**
+ * jsonld is the decorator for JSON-LD.
+ * This is used to set the JSON-LD of the class.
+ */
 export const jsonld: (value: ValueJSONLd) => (target: Class) => Class =
   createDecoratorFactory({
     initialize: (value: ValueJSONLd): Declarative<ValueJSONLd>[] => {
@@ -21,6 +31,9 @@ export const jsonld: (value: ValueJSONLd) => (target: Class) => Class =
     },
   });
 
+/**
+ * docOf returns the JSON-LD document of the instance.
+ */
 export function docOf<T>(instance: T): Record<string, unknown> {
   const { constructor } = instance as { constructor: Class };
   const value = getPrototypeValue<ValueJSONLd>(constructor);

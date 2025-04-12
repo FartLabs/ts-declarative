@@ -9,8 +9,7 @@
     "./common/jsonld": "./lib/declarative/common/jsonld/mod.ts",
     "./common/openapi": "./lib/declarative/common/openapi/mod.ts",
     "./common/google-aip": "./lib/declarative/common/google-aip/mod.ts",
-    "./common/google-aip/standard-methods": "./lib/declarative/common/google-aip/standard-methods/mod.ts",
-    "./common/google-aip/custom-methods": "./lib/declarative/common/google-aip/custom-methods/mod.ts"
+    "./common/google-aip/methods": "./lib/declarative/common/google-aip/methods/mod.ts"
   },
   "imports": {
     "#/": "./",

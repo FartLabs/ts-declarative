@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { pathsObjectOf } from "#/lib/declarative/common/openapi/openapi.ts";
-import { customMethod } from "./custom-methods.ts";
+import { customMethod } from "./custom-method.ts";
 
 @customMethod({
   name: "batchCreate",

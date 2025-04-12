@@ -3,7 +3,7 @@ import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-
 import {
   standardCreate,
   standardGet,
-} from "#/lib/declarative/common/google-aip/mod.ts";
+} from "#/lib/declarative/common/google-aip/methods/mod.ts";
 import { openapi, specificationOf } from "./openapi.ts";
 
 const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);

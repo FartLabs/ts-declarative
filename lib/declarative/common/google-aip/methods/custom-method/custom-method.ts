@@ -17,16 +17,16 @@ export const customMethod: (
   options?: CustomMethodOptions,
 ) => (target: Class) => Class = createDecoratorFactory({
   initialize: (options?: CustomMethodOptions) => {
-    return [declarativeCustomMethods(options)];
+    return [declarativeCustomMethod(options)];
   },
 });
 
 /**
- * declarativeCustomMethods returns the customMethods operation of the resource.
+ * declarativeCustomMethod returns the customMethod operation of the resource.
  *
  * @see https://google.aip.dev/136
  */
-export function declarativeCustomMethods<TValue extends ValueCustomMethods>(
+export function declarativeCustomMethod<TValue extends ValueCustomMethods>(
   options?: CustomMethodOptions,
 ): Declarative<TValue> {
   return (value, name): TValue => {
@@ -94,7 +94,7 @@ export function toCustomMethodPath(
 }
 
 /**
- * CustomMethodOptions is the options for the customMethods operation of the
+ * CustomMethodOptions is the options for the customMethod operation of the
  * resource.
  */
 export interface CustomMethodOptions extends OperationOptions {
@@ -110,6 +110,6 @@ export interface CustomMethodOptions extends OperationOptions {
 }
 
 /**
- * ValueCustomMethods is the value of the customMethods operation of the resource.
+ * ValueCustomMethods is the value of the customMethod operation of the resource.
  */
 export interface ValueCustomMethods extends ValueJSONSchema, ValuePathsObject {}

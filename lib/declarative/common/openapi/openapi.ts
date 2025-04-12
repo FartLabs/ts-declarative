@@ -1,11 +1,11 @@
-import type { Route } from "@std/http/unstable-route";
+import type { Handler, Route } from "@std/http/unstable-route";
 import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import { jsonSchemaOf } from "#/lib/declarative/common/json-schema/json-schema.ts";
 
-export type { Route };
+export type { Handler, Route };
 
 /**
  * specificationOf returns the OpenAPI specification of the class.

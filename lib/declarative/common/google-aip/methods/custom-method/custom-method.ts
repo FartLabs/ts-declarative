@@ -2,7 +2,11 @@ import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
-import type { ValuePathsObject } from "#/lib/declarative/common/openapi/openapi.ts";
+import type {
+  Handler,
+  ValueHttpRoutes,
+  ValuePathsObject,
+} from "#/lib/declarative/common/openapi/openapi.ts";
 import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
 import {
   toOperationPath,
@@ -21,6 +25,8 @@ export const customMethod: (
   },
 });
 
+// TODO: Represent batch methods in terms of custom methods.
+
 /**
  * declarativeCustomMethod returns the customMethod operation of the resource.
  *
@@ -36,13 +42,13 @@ export function declarativeCustomMethod<TValue extends ValueCustomMethods>(
 
     const resourceName = options?.resourceName ?? name;
     const pathname = toCustomMethodPath(resourceName, options);
+    const httpMethod: OpenAPIV3_1.HttpMethods =
+      (options?.httpMethod ?? "post") as OpenAPIV3_1.HttpMethods;
 
     value ??= {} as TValue;
     value["paths"] ??= {};
     value["paths"][pathname] ??= {};
-    value["paths"][pathname][
-      (options?.httpMethod as OpenAPIV3_1.HttpMethods) ?? "post"
-    ] = {
+    value["paths"][pathname][httpMethod] = {
       description: options?.description ?? `Custom ${options?.name}`,
       requestBody: {
         required: true,
@@ -71,6 +77,15 @@ export function declarativeCustomMethod<TValue extends ValueCustomMethods>(
         },
       },
     };
+
+    if (options?.handler !== undefined) {
+      value["routes"] ??= [];
+      value["routes"].push({
+        pattern: new URLPattern({ pathname }),
+        method: httpMethod,
+        handler: options.handler,
+      });
+    }
 
     return value;
   };
@@ -107,9 +122,15 @@ export interface CustomMethodOptions extends OperationOptions {
    * httpMethod is the HTTP method for the custom method. Defaults to "post".
    */
   httpMethod?: string;
+
+  /**
+   * handler is the handler for the custom method.
+   */
+  handler?: Handler;
 }
 
 /**
  * ValueCustomMethods is the value of the customMethod operation of the resource.
  */
-export interface ValueCustomMethods extends ValueJSONSchema, ValuePathsObject {}
+export interface ValueCustomMethods
+  extends ValueJSONSchema, ValuePathsObject, ValueHttpRoutes {}

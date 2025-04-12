@@ -1,16 +1,18 @@
 // @deno-types="@types/jsonld"
 import jsonld from "jsonld";
 import { Ajv } from "ajv";
-import { context, docOf } from "#/lib/declarative/common/jsonld/mod.ts";
+import { createTypeInfoDecoratorFactoryAt } from "#/lib/declarative/common/type-info/type-info.ts";
 import {
-  jsonSchemaDecoratorFactoryOfFile,
+  jsonSchema,
   jsonSchemaOf,
 } from "#/lib/declarative/common/json-schema/mod.ts";
+import { context, docOf } from "#/lib/declarative/common/jsonld/mod.ts";
 
-const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
+const typeInfo = await createTypeInfoDecoratorFactoryAt(import.meta);
 
 @context("https://schema.org/")
 @jsonSchema()
+@typeInfo()
 class Person {
   public constructor(public name: string) {}
 }

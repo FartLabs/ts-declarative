@@ -1,16 +1,14 @@
 import { Eta } from "@eta-dev/eta";
 import {
-  defaultJSONSchemaMask,
+  jsonSchema,
   jsonSchemaOf,
 } from "#/lib/declarative/common/json-schema/json-schema.ts";
-import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-schema/json-schema-file.ts";
+import { createTypeInfoDecoratorFactoryAt } from "#/lib/declarative/common/type-info/type-info.ts";
 
-const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(
-  import.meta.url,
-  defaultJSONSchemaMask,
-);
+const typeInfo = await createTypeInfoDecoratorFactoryAt(import.meta);
 
 @jsonSchema()
+@typeInfo()
 class Person {
   public constructor(public givenName: string, public familyName: string) {}
 }

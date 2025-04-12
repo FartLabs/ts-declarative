@@ -4,12 +4,13 @@
   "version": "0.0.9",
   "exports": {
     ".": "./lib/declarative/mod.ts",
-    "./common/ts-morph": "./lib/declarative/common/ts-morph/mod.ts",
+    "./common/google-aip": "./lib/declarative/common/google-aip/mod.ts",
+    "./common/google-aip/methods": "./lib/declarative/common/google-aip/methods/mod.ts",
     "./common/json-schema": "./lib/declarative/common/json-schema/mod.ts",
     "./common/jsonld": "./lib/declarative/common/jsonld/mod.ts",
     "./common/openapi": "./lib/declarative/common/openapi/mod.ts",
-    "./common/google-aip": "./lib/declarative/common/google-aip/mod.ts",
-    "./common/google-aip/methods": "./lib/declarative/common/google-aip/methods/mod.ts"
+    "./common/openapi/oazapfts": "./lib/declarative/common/openapi/oazapfts/mod.ts",
+    "./common/type-info": "./lib/declarative/common/type-info/mod.ts"
   },
   "imports": {
     "#/": "./",
@@ -38,7 +39,7 @@
     "check": "deno check **/*.ts",
     "outdated": "deno outdated --update --latest",
     "test": "deno test --allow-all --unstable-kv",
-    "test:update": "deno task test --unstable-kv -- --update",
+    "test:update": "deno task test -- --update",
     "publish:dry": "deno publish --dry-run --allow-dirty",
     "lint": "deno lint && deno doc --lint  **/*.ts"
   },

@@ -1,6 +1,6 @@
 import { QueryEngine } from "@comunica/query-sparql-link-traversal";
+import { createTypeInfoDecoratorFactoryAt } from "#/lib/declarative/common/type-info/type-info.ts";
 import { jsonld } from "#/lib/declarative/common/jsonld/jsonld.ts";
-import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-schema/json-schema-file.ts";
 import {
   assertCompliancy,
   makeCompliancyQuery,
@@ -8,10 +8,10 @@ import {
 } from "./compliancy.ts";
 import { assertEquals } from "@std/assert/equals";
 
-const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
+const typeInfo = await createTypeInfoDecoratorFactoryAt(import.meta);
 
 @jsonld({ context: "https://schema.org/" })
-@jsonSchema()
+@typeInfo()
 class Person {
   public constructor(public givenName: string, public familyName: string) {}
 }

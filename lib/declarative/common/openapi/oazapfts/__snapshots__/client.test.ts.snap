@@ -1,6 +1,6 @@
 export const snapshot = {};
 
-snapshot[`oazapfts decorator decorates value 1`] = `
+snapshot[`generateOazapftsClientOf generates client from openapi specification 1`] = `
 '/**
  * App
  * 0.0.1

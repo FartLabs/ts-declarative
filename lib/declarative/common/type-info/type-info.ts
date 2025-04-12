@@ -22,14 +22,24 @@ export function typeInfoOf<TClass extends Class>(
 export async function createTypeInfoDecoratorFactoryAt(
   { url }: ImportMeta,
 ): Promise<(specifier?: string | URL) => (target: Class) => Class> {
-  const project = new Project({ useInMemoryFileSystem: true });
   const specifier = new URL(url);
+  const project = await createProjectAt(specifier);
+  return createTypeInfoDecoratorFactory(project, specifier);
+}
+
+/**
+ * createProjectAt creates a ts-morph project at the given specifier.
+ */
+export async function createProjectAt(
+  specifier: string | URL,
+): Promise<Project> {
+  const project = new Project({ useInMemoryFileSystem: true });
   project.createSourceFile(
     specifier.toString(),
     await Deno.readTextFile(specifier),
   );
 
-  return createTypeInfoDecoratorFactory(project, specifier);
+  return project;
 }
 
 /**

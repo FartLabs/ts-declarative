@@ -10,7 +10,7 @@
     "./common/jsonld": "./lib/declarative/common/jsonld/mod.ts",
     "./common/openapi": "./lib/declarative/common/openapi/mod.ts",
     "./common/openapi/oazapfts": "./lib/declarative/common/openapi/oazapfts/mod.ts",
-    "./common/ts-morph": "./lib/declarative/common/ts-morph/mod.ts"
+    "./common/type-info": "./lib/declarative/common/type-info/mod.ts"
   },
   "imports": {
     "#/": "./",

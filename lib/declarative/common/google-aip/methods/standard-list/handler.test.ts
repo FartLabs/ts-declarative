@@ -3,7 +3,7 @@ import { standardListHandler } from "./handler.ts";
 
 Deno.test("standardListHandler handles request", async () => {
   const kv = await Deno.openKv(":memory:");
-  await kv.set(["test"], { name: "test" });
+  await kv.set(["fake"], { name: "fake" });
 
   const handler = standardListHandler(kv, []);
   const request = new Request("http://localhost", {
@@ -13,6 +13,6 @@ Deno.test("standardListHandler handles request", async () => {
 
   const response = await handler(request);
   assertEquals(response.status, 200);
-  assertEquals(await response.json(), [{ name: "test" }]);
+  assertEquals(await response.json(), [{ name: "fake" }]);
   kv.close();
 });

@@ -4,17 +4,8 @@ import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
 /**
- * TsMorph is a declarative class type from ts-morph.
- */
-export interface TsMorph {
-  /**
-   * properties is the list of properties of the class.
-   */
-  properties: TsMorphProperty[];
-}
-
-/**
- * TsMorphProperty is a property of the class.
+ * TsMorphProperty is the type information of a property in a class analyzed by
+ * ts-morph. This is used to analyze the class and its properties.
  */
 export interface TsMorphProperty {
   /**
@@ -41,77 +32,86 @@ export interface TsMorphProperty {
 }
 
 /**
- * tsMorphOf returns the ts-morph analysis of the class.
+ * tsMorphPropertiesOf returns the ts-morph analysis of the class.
  */
-export function tsMorphOf<TClass extends Class>(
+export function tsMorphPropertiesOf<TClass extends Class>(
   target: TClass,
-): TsMorph | undefined {
-  return getPrototypeValue<ValueTsMorph>(target)?.tsMorph;
+): TsMorphProperty[] | undefined {
+  return getPrototypeValue<ValueTsMorphProperties>(target)?.properties;
 }
 
 /**
- * ValueTsMorph is the value for the ts-morph decorator.
+ * ValueTsMorphProperties is the result of the ts-morph analysis of the class. This
+ * provides information about the class and its properties.
  */
-export interface ValueTsMorph {
+export interface ValueTsMorphProperties {
   /**
-   * tsMorph is the ts-morph analysis of the class.
+   * properties is the list of properties of the class analyzed by ts-morph.
    */
-  tsMorph?: TsMorph;
+  properties?: TsMorphProperty[];
 }
 
 /**
- * tsMorph is a decorator to analyze the class with ts-morph.
+ * tsMorphPropertiesDecoratorFactory is a decorator factory that analyzes the
+ * class with ts-morph. This is used to analyze the class and its properties.
  */
-export function tsMorphDecoratorFactory(
+export function tsMorphPropertiesDecoratorFactory(
   project: Project,
 ): (specifier: string | URL) => (target: Class) => Class {
   return createDecoratorFactory({
     initialize: (specifier: URL | string) => {
       const sourceFile = project.getSourceFileOrThrow(specifier.toString());
-      return [declarativeTsMorph(sourceFile)];
+      return [declarativeTsMorphProperties(sourceFile)];
     },
   });
 }
 
 /**
- * declarativeTsMorph is a declarative function from ts-morph.
+ * declarativeTsMorphProperties is a declarative function that analyzes the class
+ * with ts-morph. This is used to analyze the class and its properties.
  */
-export function declarativeTsMorph<TValue extends ValueTsMorph>(
+export function declarativeTsMorphProperties<
+  TValue extends ValueTsMorphProperties,
+>(
   sourceFile: SourceFile,
 ): Declarative<TValue> {
   return (value, name) => {
-    return { ...value, tsMorph: getTsMorph(sourceFile, name) } as TValue;
+    return {
+      ...value,
+      properties: getTsMorphProperties(sourceFile, name),
+    } as TValue;
   };
 }
 
-function getTsMorph(sourceFile: SourceFile, name: string): TsMorph {
-  const classDeclaration = sourceFile.getClass(name);
-  const propertyDeclarations = classDeclaration?.getProperties() ?? [];
+function getTsMorphProperties(
+  sourceFile: SourceFile,
+  name: string,
+): TsMorphProperty[] {
+  const classDeclaration = sourceFile.getClassOrThrow(name);
+  const propertyDeclarations = classDeclaration.getProperties();
   const constructorParameterDeclarations =
-    classDeclaration?.getConstructors().at(-1)?.getParameters() ?? [];
+    classDeclaration.getConstructors().at(-1)?.getParameters() ?? [];
 
-  return {
-    properties: [
-      ...propertyDeclarations.map((property): TsMorphProperty => {
-        return {
-          name: property.getName(),
-          type: property.getType().getText(),
-        };
-      }),
-      ...constructorParameterDeclarations.reduce<TsMorphProperty[]>(
-        (acc, parameter, i) => {
-          if (parameter.getScope() === "public") {
-            acc.push({
-              name: parameter.getName(),
-              type: parameter.getType().getText(),
-              paramIndex: i,
-            });
-          }
+  return [
+    ...propertyDeclarations.map((property): TsMorphProperty => {
+      return {
+        name: property.getName(),
+        type: property.getType().getText(),
+      };
+    }),
+    ...constructorParameterDeclarations.reduce<TsMorphProperty[]>(
+      (acc, parameter, i) => {
+        if (parameter.getScope() === "public") {
+          acc.push({
+            name: parameter.getName(),
+            type: parameter.getType().getText(),
+            paramIndex: i,
+          });
+        }
 
-          return acc;
-        },
-        [],
-      ),
-    ],
-  };
+        return acc;
+      },
+      [],
+    ),
+  ];
 }

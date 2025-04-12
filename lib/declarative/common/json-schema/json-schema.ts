@@ -5,8 +5,8 @@ import { TypeBoxFromSyntax } from "@sinclair/typemap";
 import type { Project } from "ts-morph";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
-import type { ValueTsMorph } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
-import { declarativeTsMorph } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
+import type { ValueTsMorphProperties } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
+import { declarativeTsMorphProperties } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
 /**
@@ -19,7 +19,7 @@ export function jsonSchemaOf<TClass extends Class>(target: TClass): any {
 /**
  * ValueJSONSchema is the interface for the JSON Schema of the class.
  */
-export interface ValueJSONSchema extends ValueTsMorph {
+export interface ValueJSONSchema extends ValueTsMorphProperties {
   /**
    * jsonSchema is the JSON Schema of the class.
    */
@@ -41,7 +41,7 @@ export function jsonSchemaDecoratorFactory(
     initialize: (specifier, maskOrMaskFn0) => {
       const sourceFile = project.getSourceFileOrThrow(specifier.toString());
       return [
-        declarativeTsMorph(sourceFile),
+        declarativeTsMorphProperties(sourceFile),
         declarativeJSONSchema(maskOrMaskFn0 ?? maskOrMaskFn1),
       ];
     },
@@ -106,20 +106,20 @@ export type JSONSchemaMask = any | ((value: any) => any);
 /**
  * compile compiles the tsMorph properties into a JSON Schema string.
  */
-export function compile({ tsMorph }: ValueTsMorph): any {
-  return TypeBoxFromSyntax({}, serialize({ tsMorph }));
+export function compile({ properties }: ValueTsMorphProperties): any {
+  return TypeBoxFromSyntax({}, serialize({ properties }));
 }
 
 /**
  * serialize serializes the tsMorph properties into a JSON Schema string.
  */
-export function serialize({ tsMorph }: ValueTsMorph): string {
-  if (tsMorph === undefined || tsMorph?.properties.length === 0) {
+export function serialize({ properties }: ValueTsMorphProperties): string {
+  if (properties === undefined || properties.length === 0) {
     return "{}";
   }
 
   return `{ ${
-    tsMorph.properties
+    properties
       .map((property) => `"${property.name}": ${property.type}`)
       .join(", ")
   } }`;

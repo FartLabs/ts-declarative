@@ -2,7 +2,7 @@ import { assert } from "@std/assert/assert";
 import type { QueryEngine } from "@comunica/query-sparql-link-traversal";
 import type { Class } from "#/lib/declarative/declarative.ts";
 import { jsonldOf } from "#/lib/declarative/common/jsonld/jsonld.ts";
-import { tsMorphOf } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
+import { tsMorphPropertiesOf } from "#/lib/declarative/common/ts-morph/ts-morph.ts";
 import { expandStrings } from "./sparql.ts";
 
 /**
@@ -30,11 +30,12 @@ export function makeCompliancyQueryFromClass(target: Class): string {
     throw new Error(`Class ${target.name} is missing a JSON-LD context.`);
   }
 
-  const tsMorph = tsMorphOf(target);
-  if (tsMorph === undefined) {
+  const tsMorphProperties = tsMorphPropertiesOf(target);
+  if (tsMorphProperties === undefined) {
     throw new Error(`Class ${target.name} is missing a ts-morph value.`);
   }
-  const properties = tsMorph.properties.map((property) => property.name);
+
+  const properties = tsMorphProperties.map((property) => property.name);
   const [classIDExpanded, ...propertyIDsExpanded] = expandStrings(context, [
     type,
     ...properties,

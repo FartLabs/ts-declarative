@@ -5,8 +5,9 @@ import {
   standardGet,
 } from "#/lib/declarative/common/google-aip/methods/mod.ts";
 import { openapi } from "#/lib/declarative/common/openapi/openapi.ts";
-import { generateOazapftsOf, oazapfts } from "./oazapfts.ts";
+import { generateOazapftsClientOf } from "./client.ts";
 
+// TODO: Rename to something like jsonSchemaDecoratorFactory(typeInfo);
 const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
 
 @standardCreate()
@@ -16,7 +17,6 @@ class Person {
   public constructor(public name: string) {}
 }
 
-@oazapfts({ optimistic: true })
 @openapi({
   specification: {
     openapi: "3.0.1",
@@ -28,6 +28,6 @@ class Person {
 class App {}
 
 Deno.test("oazapfts decorator decorates value", async (t) => {
-  const sourceCode = await generateOazapftsOf(App);
+  const sourceCode = await generateOazapftsClientOf(App);
   await assertSnapshot(t, sourceCode);
 });

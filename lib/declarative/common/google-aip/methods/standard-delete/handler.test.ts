@@ -6,10 +6,10 @@ Deno.test("standardDeleteHandler handles request", async () => {
   await kv.set(["test"], { name: "test" });
 
   const handler = standardDeleteHandler(kv, []);
-  const url = new URL("http://localhost/test");
+  const request = new Request("http://localhost/test", { method: "DELETE" });
   const response = await handler(
-    new Request(url),
-    new URLPattern({ pathname: "/:name" }).exec(url),
+    request,
+    new URLPattern({ pathname: "/:name" }).exec(request.url),
   );
   assertEquals(response.status, 200);
   assertEquals((await kv.get(["test"]))?.value, null);

@@ -126,6 +126,19 @@ export function declarativeOpenAPI<TValue extends ValueOpenAPI>(
           },
         },
       },
+      routes: [
+        ...(options?.routes ?? []),
+        ...(options?.resources
+          ?.map((resource) => {
+            const routes = routesOf(resource);
+            if (routes === undefined) {
+              return [];
+            }
+
+            return routes;
+          })
+          .flat() ?? []),
+      ],
     } as TValue;
   };
 }

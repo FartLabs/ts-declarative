@@ -3,16 +3,14 @@ import {
   standardCreate,
   standardGet,
 } from "#/lib/declarative/common/google-aip/methods/mod.ts";
-import { jsonSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
-import { createTypeInfoDecoratorFactoryAt } from "#/lib/declarative/common/type-info/type-info.ts";
+import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
 import { openapi, specificationOf } from "./openapi.ts";
 
-const typeInfo = await createTypeInfoDecoratorFactoryAt(import.meta);
+const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
 @standardCreate()
 @standardGet()
-@jsonSchema()
-@typeInfo()
+@autoSchema()
 class Person {
   public constructor(public name: string) {}
 }

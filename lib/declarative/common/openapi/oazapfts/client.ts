@@ -11,8 +11,7 @@ import type { ValueOpenAPI } from "#/lib/declarative/common/openapi/openapi.ts";
  * ```ts
  * @standardCreate()
  * @standardGet()
- * @jsonSchema()
- * @typeInfo()
+ * @autoSchema()
  * class Person {
  *   public constructor(public name: string) {}
  * }

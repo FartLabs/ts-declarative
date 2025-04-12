@@ -18,38 +18,26 @@ export function jsonSchemaOf<TClass extends Class>(target: TClass): any {
  * jsonSchema is a decorator that sets the JSON Schema of the class.
  */
 export const jsonSchema: (
-  maskOrMaskFn?: JSONSchemaMask,
+  mask?: JSONSchemaMask,
 ) => (target: Class) => Class = createDecoratorFactory({
-  initialize: (maskOrMaskFn: JSONSchemaMask = defaultJSONSchemaMask) => {
-    return [declarativeJSONSchema(maskOrMaskFn)];
+  initialize: (mask: JSONSchemaMask = defaultJSONSchemaMask) => {
+    return [declarativeJSONSchema(mask)];
   },
 });
 
 /**
- * ValueJSONSchema is the interface for the JSON Schema of the class.
+ * createJSONSchemaDecoratorFactory creates a decorator factory that decorates
+ * a value with a JSON Schema.
  */
-export interface ValueJSONSchema extends ValueTypeInfo {
-  /**
-   * jsonSchema is the JSON Schema of the class.
-   */
-  jsonSchema?: any;
-}
-
-/**
- * jsonSchemaDecoratorFactory creates a decorator factory that decorates a value
- * with a JSON Schema.
- */
-export function jsonSchemaDecoratorFactory(
-  maskOrMaskFn1?: JSONSchemaMask,
+export function createJSONSchemaDecoratorFactory(
+  mask1?: JSONSchemaMask,
 ): (
   specifier: string | URL,
-  maskOrMaskFn?: JSONSchemaMask,
+  mask?: JSONSchemaMask,
 ) => (target: Class) => Class {
   return createDecoratorFactory({
-    initialize: (maskOrMaskFn0?: JSONSchemaMask) => {
-      return [
-        declarativeJSONSchema(maskOrMaskFn0 ?? maskOrMaskFn1),
-      ];
+    initialize: (mask0?: JSONSchemaMask) => {
+      return [declarativeJSONSchema(mask0 ?? mask1)];
     },
   });
 }
@@ -58,7 +46,7 @@ export function jsonSchemaDecoratorFactory(
  * declarativeJSONSchema is a declarative function from JSON Schema.
  */
 export function declarativeJSONSchema<TValue extends ValueJSONSchema>(
-  maskOrMaskFn?: JSONSchemaMask,
+  mask?: JSONSchemaMask,
 ): Declarative<TValue> {
   return (value) => {
     if (value === undefined) {
@@ -67,7 +55,7 @@ export function declarativeJSONSchema<TValue extends ValueJSONSchema>(
 
     return {
       ...value,
-      jsonSchema: applyJSONSchemaMask(compile(value), maskOrMaskFn),
+      jsonSchema: applyJSONSchemaMask(compile(value), mask),
     };
   };
 }
@@ -92,22 +80,15 @@ export function defaultJSONSchemaMask(value: any): any {
  */
 export function applyJSONSchemaMask(
   value: any,
-  maskOrMaskFn?: JSONSchemaMask,
+  maskOrFn?: JSONSchemaMask,
 ): any {
-  const mask = typeof maskOrMaskFn === "function"
-    ? maskOrMaskFn(value)
-    : maskOrMaskFn;
+  const mask = typeof maskOrFn === "function" ? maskOrFn(value) : maskOrFn;
   if (mask === undefined) {
     return value;
   }
 
   return deepMerge(value, mask);
 }
-
-/**
- * JSONSchemaMask is a value used to update a JSON Schema value.
- */
-export type JSONSchemaMask = any | ((value: any) => any);
 
 /**
  * compile compiles the tsMorph properties into a JSON Schema string.
@@ -131,4 +112,19 @@ export function serialize({ properties }: ValueTypeInfo): string {
       .map((property) => `"${property.name}": ${property.type}`)
       .join(", ")
   } }`;
+}
+
+/**
+ * JSONSchemaMask is a value used to update a JSON Schema value.
+ */
+export type JSONSchemaMask = any | ((value: any) => any);
+
+/**
+ * ValueJSONSchema is the interface for the JSON Schema of the class.
+ */
+export interface ValueJSONSchema extends ValueTypeInfo {
+  /**
+   * jsonSchema is the JSON Schema of the class.
+   */
+  jsonSchema?: any;
 }

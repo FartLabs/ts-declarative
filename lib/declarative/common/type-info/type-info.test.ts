@@ -1,13 +1,13 @@
 import { assertEquals } from "@std/assert";
 import { Project } from "ts-morph";
-import { typeInfoDecoratorFactory, typeInfoOf } from "./type-info.ts";
+import { createTypeInfoDecoratorFactory, typeInfoOf } from "./type-info.ts";
 
 const project = new Project({ useInMemoryFileSystem: true });
 project.createSourceFile(
   import.meta.url,
   await Deno.readTextFile(new URL(import.meta.url)),
 );
-const typeInfo = typeInfoDecoratorFactory(project);
+const typeInfo = createTypeInfoDecoratorFactory(project);
 
 @typeInfo(import.meta.url)
 class Person {

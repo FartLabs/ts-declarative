@@ -1,18 +1,23 @@
 import { assertSnapshot } from "@std/testing/snapshot";
-import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-schema/json-schema-file.ts";
+import { Project } from "ts-morph";
+import { createTypeInfoDecoratorFactory } from "#/lib/declarative/common/type-info/type-info.ts";
+import { jsonSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
+import { openapi } from "#/lib/declarative/common/openapi/openapi.ts";
 import {
   standardCreate,
   standardGet,
 } from "#/lib/declarative/common/google-aip/methods/mod.ts";
-import { openapi } from "#/lib/declarative/common/openapi/openapi.ts";
 import { generateOazapftsClientOf } from "./client.ts";
 
-// TODO: Rename to something like jsonSchemaDecoratorFactory(typeInfo);
-const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(import.meta.url);
+const typeInfo = createTypeInfoDecoratorFactory(
+  new Project(),
+  "./lib/declarative/common/openapi/oazapfts/client.test.ts",
+);
 
 @standardCreate()
 @standardGet()
 @jsonSchema()
+@typeInfo()
 class Person {
   public constructor(public name: string) {}
 }
@@ -27,7 +32,7 @@ class Person {
 })
 class App {}
 
-Deno.test("oazapfts decorator decorates value", async (t) => {
+Deno.test("generateOazapftsClientOf generate client from openapi specification", async (t) => {
   const sourceCode = await generateOazapftsClientOf(App);
   await assertSnapshot(t, sourceCode);
 });

@@ -39,12 +39,13 @@ export function pathsObjectOf<TClass extends Class>(
  */
 export const openapi: (
   options?: OpenAPIDecoratorOptions,
-) => (target: Class) => Class = openapiDecoratorFactory();
+) => (target: Class) => Class = createOpenAPIDecoratorFactory();
 
 /**
- * openapiDecoratorFactory is the factory function for the OpenAPI decorator.
+ * createOpenAPIDecoratorFactory is the factory function for the OpenAPI
+ * decorator.
  */
-export function openapiDecoratorFactory(): (
+export function createOpenAPIDecoratorFactory(): (
   options?: OpenAPIDecoratorOptions | undefined,
 ) => (target: Class) => Class {
   return createDecoratorFactory({

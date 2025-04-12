@@ -1,16 +1,12 @@
 import { assertEquals } from "@std/assert";
 import { Ajv } from "ajv";
-import { Project } from "ts-morph";
-import { jsonSchemaDecoratorFactory, jsonSchemaOf } from "./json-schema.ts";
+import { createTypeInfoDecoratorFactoryAt } from "#/lib/declarative/common/type-info/type-info.ts";
+import { jsonSchema, jsonSchemaOf } from "./json-schema.ts";
 
-const project = new Project({ useInMemoryFileSystem: true });
-project.createSourceFile(
-  import.meta.url,
-  await Deno.readTextFile(new URL(import.meta.url)),
-);
-const jsonSchema = jsonSchemaDecoratorFactory(project);
+const typeInfo = await createTypeInfoDecoratorFactoryAt(import.meta);
 
-@jsonSchema(import.meta.url)
+@jsonSchema()
+@typeInfo()
 class Person {
   public constructor(public name: string) {}
 }
@@ -22,7 +18,8 @@ Deno.test("jsonSchema from decorator factory decorates value", () => {
   assertEquals(personSchema.type, "object");
 });
 
-@jsonSchema(import.meta.url, { properties: { name: { title: "Name" } } })
+@jsonSchema({ properties: { name: { title: "Name" } } })
+@typeInfo()
 class Person2 {
   public constructor(public name: string) {}
 }

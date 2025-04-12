@@ -2,11 +2,9 @@
 
 import { deepMerge } from "@std/collections/deep-merge";
 import { TypeBoxFromSyntax } from "@sinclair/typemap";
-import type { Project } from "ts-morph";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import type { ValueTypeInfo } from "#/lib/declarative/common/type-info/type-info.ts";
-import { declarativeTypeInfo } from "#/lib/declarative/common/type-info/type-info.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 
 /**
@@ -15,6 +13,17 @@ import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 export function jsonSchemaOf<TClass extends Class>(target: TClass): any {
   return getPrototypeValue<ValueJSONSchema>(target)?.jsonSchema;
 }
+
+/**
+ * jsonSchema is a decorator that sets the JSON Schema of the class.
+ */
+export const jsonSchema: (
+  maskOrMaskFn?: JSONSchemaMask,
+) => (target: Class) => Class = createDecoratorFactory({
+  initialize: (maskOrMaskFn: JSONSchemaMask = defaultJSONSchemaMask) => {
+    return [declarativeJSONSchema(maskOrMaskFn)];
+  },
+});
 
 /**
  * ValueJSONSchema is the interface for the JSON Schema of the class.
@@ -31,17 +40,14 @@ export interface ValueJSONSchema extends ValueTypeInfo {
  * with a JSON Schema.
  */
 export function jsonSchemaDecoratorFactory(
-  project: Project,
   maskOrMaskFn1?: JSONSchemaMask,
 ): (
   specifier: string | URL,
   maskOrMaskFn?: JSONSchemaMask,
 ) => (target: Class) => Class {
   return createDecoratorFactory({
-    initialize: (specifier, maskOrMaskFn0) => {
-      const sourceFile = project.getSourceFileOrThrow(specifier.toString());
+    initialize: (maskOrMaskFn0?: JSONSchemaMask) => {
       return [
-        declarativeTypeInfo(sourceFile),
         declarativeJSONSchema(maskOrMaskFn0 ?? maskOrMaskFn1),
       ];
     },

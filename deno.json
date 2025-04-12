@@ -37,8 +37,8 @@
     "example:alpaca": "deno -A examples/alpaca/main.ts",
     "check": "deno check **/*.ts",
     "outdated": "deno outdated --update --latest",
-    "test": "deno test --allow-all",
-    "test:update": "deno task test -- --update",
+    "test": "deno test --allow-all --unstable-kv",
+    "test:update": "deno task test --unstable-kv -- --update",
     "publish:dry": "deno publish --dry-run --allow-dirty",
     "lint": "deno lint && deno doc --lint  **/*.ts"
   },

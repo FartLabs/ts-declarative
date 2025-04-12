@@ -22,7 +22,7 @@ export function specificationOf<TClass extends Class>(
 export function routesOf<TClass extends Class>(
   target: TClass,
 ): Route[] | undefined {
-  return getPrototypeValue<ValueRoutes>(target)?.routes;
+  return getPrototypeValue<ValueHttpRoutes>(target)?.routes;
 }
 
 /**
@@ -133,7 +133,7 @@ export function declarativeOpenAPI<TValue extends ValueOpenAPI>(
 /**
  * ValueOpenAPI is the value associated with an OpenAPI specification.
  */
-export interface ValueOpenAPI extends ValueRoutes {
+export interface ValueOpenAPI extends ValueHttpRoutes {
   /**
    * specification is the top-level object of the OpenAPI specification.
    */
@@ -152,9 +152,9 @@ export interface ValuePathsObject {
 }
 
 /**
- * ValueRoutes is the value of the routes of the OpenAPI specification.
+ * ValueHttpRoutes is the value of the routes of the OpenAPI specification.
  */
-export interface ValueRoutes {
+export interface ValueHttpRoutes {
   /**
    * routes are the HTTP routes of the OpenAPI specification.
    */

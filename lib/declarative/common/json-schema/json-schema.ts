@@ -27,7 +27,8 @@ export interface ValueJSONSchema extends ValueTsMorph {
 }
 
 /**
- * jsonSchemaDecoratorFactory is a decorator factory for JSON Schema.
+ * jsonSchemaDecoratorFactory creates a decorator factory that decorates a value
+ * with a JSON Schema.
  */
 export function jsonSchemaDecoratorFactory(
   project: Project,
@@ -58,16 +59,18 @@ export function declarativeJSONSchema<TValue extends ValueJSONSchema>(
       return;
     }
 
-    return Object.assign(value, {
+    return {
+      ...value,
       jsonSchema: applyJSONSchemaMask(compile(value), maskOrMaskFn),
-    });
+    };
   };
 }
 
 /**
- * opinionatedJSONSchemaMask is a opinionated JSON Schema mask.
+ * defaultJSONSchemaMask is our opinionated JSON Schema mask. It adds a title to each
+ * property.
  */
-export function opinionatedJSONSchemaMask(value: any): any {
+export function defaultJSONSchemaMask(value: any): any {
   return {
     properties: Object.fromEntries(
       Object.entries(value.properties).map(([key, _value]) => [

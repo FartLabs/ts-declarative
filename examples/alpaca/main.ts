@@ -1,13 +1,13 @@
 import { Eta } from "@eta-dev/eta";
 import {
+  defaultJSONSchemaMask,
   jsonSchemaOf,
-  opinionatedJSONSchemaMask,
 } from "#/lib/declarative/common/json-schema/json-schema.ts";
 import { jsonSchemaDecoratorFactoryOfFile } from "#/lib/declarative/common/json-schema/json-schema-file.ts";
 
 const jsonSchema = await jsonSchemaDecoratorFactoryOfFile(
   import.meta.url,
-  opinionatedJSONSchemaMask,
+  defaultJSONSchemaMask,
 );
 
 @jsonSchema()

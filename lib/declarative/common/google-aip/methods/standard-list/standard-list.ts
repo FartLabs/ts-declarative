@@ -35,7 +35,7 @@ export function declarativeStandardList<TValue extends ValueStandardList>(
 
     const resourceName = options?.resourceName ?? name;
     const pluralizedResourceName = pluralize(resourceName);
-    const operationPath = toStandardListPath(
+    const pathname = toStandardListPath(
       resourceName,
       options?.collectionIdentifier,
       options?.parent,
@@ -43,8 +43,8 @@ export function declarativeStandardList<TValue extends ValueStandardList>(
 
     value ??= {} as TValue;
     value["paths"] ??= {};
-    value["paths"][operationPath] ??= {};
-    value["paths"][operationPath]["get"] = {
+    value["paths"][pathname] ??= {};
+    value["paths"][pathname]["get"] = {
       description: options?.description ?? `Lists ${pluralizedResourceName}`,
       parameters: [
         { name: "page_size", in: "query" },

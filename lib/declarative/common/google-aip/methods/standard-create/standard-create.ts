@@ -1,12 +1,16 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
-import type { ValuePathsObject } from "#/lib/declarative/common/openapi/openapi.ts";
+import type {
+  ValueHttpRoutes,
+  ValuePathsObject,
+} from "#/lib/declarative/common/openapi/openapi.ts";
 import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
 import {
   toOperationPath,
   toOperationSchema,
 } from "#/lib/declarative/common/google-aip/operation.ts";
+import { standardCreateHandler } from "./handler.ts";
 
 /**
  * standardCreate is the standard Create operation specification of the resource.
@@ -29,7 +33,7 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
 ): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
-    const operationPath = toStandardCreatePath(
+    const pathname = toStandardCreatePath(
       resourceName,
       options?.collectionIdentifier,
       options?.parent,
@@ -37,8 +41,8 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
 
     value ??= {} as TValue;
     value["paths"] ??= {};
-    value["paths"][operationPath] ??= {};
-    value["paths"][operationPath]["post"] = {
+    value["paths"][pathname] ??= {};
+    value["paths"][pathname]["post"] = {
       description: options?.description ?? `Creates ${resourceName}`,
       requestBody: {
         required: true,
@@ -71,6 +75,20 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
       },
     };
 
+    if (options?.kv !== undefined) {
+      const keyPrefix: Deno.KvKeyPart = toOperationPath(
+        resourceName,
+        options.collectionIdentifier,
+        options.parent,
+      );
+      value["routes"] ??= [];
+      value["routes"].push({
+        pattern: new URLPattern({ pathname }),
+        method: "POST",
+        handler: standardCreateHandler(options.kv, [keyPrefix]),
+      });
+    }
+
     return value;
   };
 }
@@ -91,10 +109,15 @@ export function toStandardCreatePath(
  * StandardCreateOptions is the options for the standard Create operation of the
  * resource.
  */
-export interface StandardCreateOptions extends OperationOptions {}
+export interface StandardCreateOptions extends OperationOptions {
+  /**
+   * kv is the Deno Kv instance to use in the HTTP handler.
+   */
+  kv?: Deno.Kv;
+}
 
 /**
  * ValueStandardCreate is the value of the standard Create operation of the resource.
  */
 export interface ValueStandardCreate
-  extends ValueJSONSchema, ValuePathsObject {}
+  extends ValueJSONSchema, ValuePathsObject, ValueHttpRoutes {}

@@ -30,14 +30,14 @@ export function declarativeStandardGet<TValue extends ValueStandardGet>(
 ): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
-    const operationPath = toStandardGetPath(
+    const pathname = toStandardGetPath(
       resourceName,
       options?.collectionIdentifier,
       options?.parent,
     );
     value ??= {} as TValue;
     value!.paths ??= {} as OpenAPIV3_1.PathsObject;
-    value!.paths[operationPath] ??= {
+    value!.paths[pathname] ??= {
       get: {
         description: options?.description ?? `Gets ${resourceName}`,
         parameters: [

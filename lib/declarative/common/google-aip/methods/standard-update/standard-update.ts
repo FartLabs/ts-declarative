@@ -29,7 +29,7 @@ export function declarativeStandardUpdate<TValue extends ValueStandardUpdate>(
 ): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
-    const operationPath = toStandardUpdatePath(
+    const pathname = toStandardUpdatePath(
       resourceName,
       options?.collectionIdentifier,
       options?.parent,
@@ -37,8 +37,8 @@ export function declarativeStandardUpdate<TValue extends ValueStandardUpdate>(
 
     value ??= {} as TValue;
     value["paths"] ??= {};
-    value["paths"][operationPath] ??= {};
-    value["paths"][operationPath]["post"] = {
+    value["paths"][pathname] ??= {};
+    value["paths"][pathname]["post"] = {
       description: options?.description ?? `Updates ${resourceName}`,
       requestBody: {
         required: true,

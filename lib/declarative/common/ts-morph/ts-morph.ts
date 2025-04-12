@@ -41,7 +41,7 @@ export interface TsMorphProperty {
 }
 
 /**
- * tsMorphOf returns the ts-morph of the class.
+ * tsMorphOf returns the ts-morph analysis of the class.
  */
 export function tsMorphOf<TClass extends Class>(
   target: TClass,
@@ -60,7 +60,7 @@ export interface ValueTsMorph {
 }
 
 /**
- * tsMorph is a decorator for ts-morph.
+ * tsMorph is a decorator to analyze the class with ts-morph.
  */
 export function tsMorphDecoratorFactory(
   project: Project,

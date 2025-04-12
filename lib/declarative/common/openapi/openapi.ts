@@ -1,11 +1,11 @@
-import type { Route } from "@std/http/unstable-route";
+import type { Handler, Route } from "@std/http/unstable-route";
 import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import { jsonSchemaOf } from "#/lib/declarative/common/json-schema/json-schema.ts";
 
-export type { Route };
+export type { Handler, Route };
 
 /**
  * specificationOf returns the OpenAPI specification of the class.
@@ -22,7 +22,7 @@ export function specificationOf<TClass extends Class>(
 export function routesOf<TClass extends Class>(
   target: TClass,
 ): Route[] | undefined {
-  return getPrototypeValue<ValueOpenAPI>(target)?.routes;
+  return getPrototypeValue<ValueHttpRoutes>(target)?.routes;
 }
 
 /**
@@ -126,6 +126,19 @@ export function declarativeOpenAPI<TValue extends ValueOpenAPI>(
           },
         },
       },
+      routes: [
+        ...(options?.routes ?? []),
+        ...(options?.resources
+          ?.map((resource) => {
+            const routes = routesOf(resource);
+            if (routes === undefined) {
+              return [];
+            }
+
+            return routes;
+          })
+          .flat() ?? []),
+      ],
     } as TValue;
   };
 }
@@ -133,16 +146,11 @@ export function declarativeOpenAPI<TValue extends ValueOpenAPI>(
 /**
  * ValueOpenAPI is the value associated with an OpenAPI specification.
  */
-export interface ValueOpenAPI {
+export interface ValueOpenAPI extends ValueHttpRoutes {
   /**
    * specification is the top-level object of the OpenAPI specification.
    */
   specification?: OpenAPIV3_1.Document;
-
-  /**
-   * routes are the HTTP routes of the OpenAPI specification.
-   */
-  routes?: Route[];
 }
 
 /**
@@ -154,4 +162,14 @@ export interface ValuePathsObject {
    * paths is the paths object of the OpenAPI specification.
    */
   paths?: OpenAPIV3_1.PathsObject;
+}
+
+/**
+ * ValueHttpRoutes is the value of the routes of the OpenAPI specification.
+ */
+export interface ValueHttpRoutes {
+  /**
+   * routes are the HTTP routes of the OpenAPI specification.
+   */
+  routes?: Route[];
 }

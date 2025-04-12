@@ -32,7 +32,7 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
 ): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
-    const operationPath = toStandardCreatePath(
+    const pathname = toStandardCreatePath(
       resourceName,
       options?.collectionIdentifier,
       options?.parent,
@@ -40,8 +40,8 @@ export function declarativeStandardCreate<TValue extends ValueStandardCreate>(
 
     value ??= {} as TValue;
     value["paths"] ??= {};
-    value["paths"][operationPath] ??= {};
-    value["paths"][operationPath]["post"] = {
+    value["paths"][pathname] ??= {};
+    value["paths"][pathname]["post"] = {
       description: options?.description ?? `Creates ${resourceName}`,
       requestBody: {
         required: true,

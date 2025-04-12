@@ -26,7 +26,7 @@ export function declarativeStandardDelete<TValue extends ValueStandardDelete>(
 ): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
-    const operationPath = toStandardDeletePath(
+    const pathname = toStandardDeletePath(
       resourceName,
       options?.collectionIdentifier,
       options?.parent,
@@ -34,8 +34,8 @@ export function declarativeStandardDelete<TValue extends ValueStandardDelete>(
 
     value ??= {} as TValue;
     value["paths"] ??= {};
-    value["paths"][operationPath] ??= {};
-    value["paths"][operationPath]["delete"] = {
+    value["paths"][pathname] ??= {};
+    value["paths"][pathname]["delete"] = {
       description: options?.description ?? `Deletes ${resourceName}`,
       parameters: [{ name: "name", in: "path", required: true }],
       responses: {

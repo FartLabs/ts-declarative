@@ -35,12 +35,12 @@ export function declarativeCustomMethod<TValue extends ValueCustomMethods>(
     }
 
     const resourceName = options?.resourceName ?? name;
-    const operationPath = toCustomMethodPath(resourceName, options);
+    const pathname = toCustomMethodPath(resourceName, options);
 
     value ??= {} as TValue;
     value["paths"] ??= {};
-    value["paths"][operationPath] ??= {};
-    value["paths"][operationPath][
+    value["paths"][pathname] ??= {};
+    value["paths"][pathname][
       (options?.httpMethod as OpenAPIV3_1.HttpMethods) ?? "post"
     ] = {
       description: options?.description ?? `Custom ${options?.name}`,

@@ -104,14 +104,14 @@ export function applyJSONSchemaMask(
 export type JSONSchemaMask = any | ((value: any) => any);
 
 /**
- * compile compiles the tsMorph properties into a JSON schema string.
+ * compile compiles the tsMorph properties into a JSON Schema string.
  */
 export function compile({ tsMorph }: ValueTsMorph): any {
   return TypeBoxFromSyntax({}, serialize({ tsMorph }));
 }
 
 /**
- * serialize serializes the tsMorph properties into a JSON schema string.
+ * serialize serializes the tsMorph properties into a JSON Schema string.
  */
 export function serialize({ tsMorph }: ValueTsMorph): string {
   if (tsMorph === undefined || tsMorph?.properties.length === 0) {

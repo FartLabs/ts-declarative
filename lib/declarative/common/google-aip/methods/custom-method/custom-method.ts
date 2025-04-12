@@ -31,7 +31,7 @@ export function declarativeCustomMethod<TValue extends ValueCustomMethods>(
 ): Declarative<TValue> {
   return (value, name): TValue => {
     if (options?.name === undefined) {
-      throw new Error("verb is required");
+      throw new Error("Custom method name is required");
     }
 
     const resourceName = options?.resourceName ?? name;
@@ -99,7 +99,7 @@ export function toCustomMethodPath(
  */
 export interface CustomMethodOptions extends OperationOptions {
   /**
-   * name is the prefix for the custom method. Must be a camelCase verb.
+   * name is the name of the custom method. Must be a camelCase verb.
    */
   name: string;
 

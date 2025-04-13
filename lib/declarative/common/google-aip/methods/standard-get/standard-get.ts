@@ -1,4 +1,4 @@
-import { toSnakeCase } from "@std/text/to-snake-case";
+import { toCamelCase } from "@std/text/to-camel-case";
 import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
@@ -104,7 +104,7 @@ export function toStandardGetPath(
       collectionIdentifier,
       parent,
     )
-  }/{${toSnakeCase(resourceName)}_name}`;
+  }/{${toCamelCase(resourceName)}}`;
 }
 
 /**
@@ -122,7 +122,7 @@ export function toStandardGetPattern(
       collectionIdentifier,
       parent,
     )
-  }/:${toSnakeCase(resourceName)}_name`;
+  }/:${toCamelCase(resourceName)}`;
 }
 
 /**

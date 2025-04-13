@@ -46,7 +46,7 @@ Deno.test("openapi decorator decorates value", () => {
         },
       },
     },
-    "/people/{person_name}": {
+    "/people/{person}": {
       get: {
         description: "Gets Person",
         parameters: [

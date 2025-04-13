@@ -21,10 +21,15 @@ class Person {
 @openapi({ resources: [Person] })
 class App {}
 
-Deno.test("generateOazapftsClientOf generates client from OpenAPI specification", async (t) => {
-  const sourceCode = await generateOazapftsClientOf(App, { optimistic: true });
-  await assertSnapshot(t, sourceCode);
-});
+Deno.test(
+  "generateOazapftsClientOf generates client from OpenAPI specification",
+  async (t) => {
+    const sourceCode = await generateOazapftsClientOf(App, {
+      optimistic: true,
+    });
+    await assertSnapshot(t, sourceCode);
+  },
+);
 
 Deno.test("generateOazapftsClientOf dynamic import", async (_t) => {
   const sourceCode = await generateOazapftsClientOf(App, { optimistic: true });
@@ -36,7 +41,6 @@ Deno.test("generateOazapftsClientOf dynamic import", async (_t) => {
     `data:text/typescript;base64,${btoa(sourceCode)}`
   );
 
-  console.log({ client });
-  assert(Object.hasOwn(client, "getPeopleByPersonName"));
+  assert(Object.hasOwn(client, "getPeopleByPerson"));
   assert(Object.hasOwn(client, "postPeople"));
 });

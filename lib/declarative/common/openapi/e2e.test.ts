@@ -1,6 +1,5 @@
 import { assertEquals } from "@std/assert/equals";
-import { route } from "@std/http/unstable-route";
-import { openapi, routesOf } from "#/lib/declarative/common/openapi/openapi.ts";
+import { openapi, routeOf } from "#/lib/declarative/common/openapi/openapi.ts";
 import {
   standardCreate,
   standardDelete,
@@ -28,10 +27,7 @@ class Person {
 class App {}
 
 Deno.test("e2e routes respect OpenAPI specification", async (t) => {
-  const handler = route(
-    routesOf(App),
-    () => new Response("Not Found", { status: 404 }),
-  );
+  const handler = routeOf(App);
   const server = Deno.serve({ port: 8080 }, (request) => handler(request));
   const ash = new Person("Ash Ketchum");
   const gary = new Person("Gary Oak");

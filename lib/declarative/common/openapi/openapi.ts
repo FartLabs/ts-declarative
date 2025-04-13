@@ -1,4 +1,5 @@
 import type { Handler, Route } from "@std/http/unstable-route";
+import { route } from "@std/http/unstable-route";
 import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
@@ -17,11 +18,23 @@ export function specificationOf<TClass extends Class>(
 }
 
 /**
+ * routeOf compiles the routes into a single HTTP handler.
+ */
+export function routeOf(
+  target: Class,
+  defaultHandler: (
+    request: Request,
+    info?: Deno.ServeHandlerInfo,
+  ) => Response | Promise<Response> = () =>
+    new Response("Not found", { status: 404 }),
+) {
+  return route(routesOf(target), defaultHandler);
+}
+
+/**
  * routesOf returns the HTTP routes of the OpenAPI class.
  */
-export function routesOf<TClass extends Class>(
-  target: TClass,
-): Route[] {
+export function routesOf(target: Class): Route[] {
   return getPrototypeValue<ValueHttpRoutes>(target)?.routes ?? [];
 }
 

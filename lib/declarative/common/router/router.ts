@@ -7,31 +7,36 @@ import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 export type { Route };
 
 /**
- * routeOf compiles the routes into a single HTTP handler.
+ * routerOf compiles the routes into a single callable function.
  */
-export function routeOf(
+export function routerOf(
   target: Class,
   defaultHandler: (
     request: Request,
     info?: Deno.ServeHandlerInfo,
   ) => Response | Promise<Response> = () =>
     new Response("Not found", { status: 404 }),
-) {
+): (
+  request: Request,
+  info?: Deno.ServeHandlerInfo,
+) => Response | Promise<Response> {
   return route(routesOf(target), defaultHandler);
 }
 
 /**
- * routesOf returns the HTTP routes of the OpenAPI class.
+ * routesOf returns the HTTP routes of the class.
  */
 export function routesOf(target: Class): Route[] {
-  return getPrototypeValue<ValueRoutes>(target)?.routes ?? [];
+  return getPrototypeValue<ValueRouterRoutes>(target)?.routes ?? [];
 }
 
 /**
- * httpRoutes is a decorator for HTTP routes.
+ * routerRoutes is a decorator for HTTP routes.
  */
-export const httpRoutes = createDecoratorFactory({
-  initialize: (options?: RoutesDecoratorOptions) => {
+export const routerRoutes: (
+  options?: RouterDecoratorOptions | undefined,
+) => (target: Class) => Class = createDecoratorFactory({
+  initialize: (options?: RouterDecoratorOptions) => {
     return [declarativeRoutes(options)];
   },
 });
@@ -39,8 +44,8 @@ export const httpRoutes = createDecoratorFactory({
 /**
  * declarativeRoutes is a declarative function for HTTP routes.
  */
-export function declarativeRoutes<TValue extends ValueRoutes>(
-  options?: RoutesDecoratorOptions,
+export function declarativeRoutes<TValue extends ValueRouterRoutes>(
+  options?: RouterDecoratorOptions,
 ): Declarative<TValue> {
   return (value) => {
     return {
@@ -62,7 +67,10 @@ export function declarativeRoutes<TValue extends ValueRoutes>(
   };
 }
 
-export interface RoutesDecoratorOptions extends ValueRoutes {
+/**
+ * RouterDecoratorOptions is the options for the router decorator.
+ */
+export interface RouterDecoratorOptions extends ValueRouterRoutes {
   /**
    * resources is a list of resources.
    */
@@ -70,9 +78,9 @@ export interface RoutesDecoratorOptions extends ValueRoutes {
 }
 
 /**
- * ValueRoutes is the value for the HTTP routes.
+ * ValueRouterRoutes is the value for the HTTP routes.
  */
-export interface ValueRoutes {
+export interface ValueRouterRoutes {
   /**
    * routes is a list of HTTP routes.
    */

@@ -1,21 +1,19 @@
 import { assertEquals } from "@std/assert/equals";
-import { routeOf } from "#/lib/declarative/common/http-route/http-route.ts";
-import { openapi } from "#/lib/declarative/common/openapi/openapi.ts";
-import {
-  standardCreate,
-  standardDelete,
-  standardGet,
-  standardUpdate,
-} from "#/lib/declarative/common/google-aip/methods/mod.ts";
+import { routerOf } from "#/lib/declarative/common/router/router.ts";
+import { openapi } from "#/lib/declarative/common/openapi/server.ts";
 import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
+import { standardMethodsWithDenoKv } from "#/lib/declarative/common/google-aip/deno-kv.ts";
 
-const kv = await Deno.openKv(":memory:");
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
-@standardDelete({ kv })
-@standardUpdate({ kv })
-@standardCreate({ kv })
-@standardGet({ kv })
+const kv = await Deno.openKv(":memory:");
+const standardMethod = standardMethodsWithDenoKv(kv);
+
+@standardMethod.create()
+@standardMethod.get()
+@standardMethod.update()
+@standardMethod.delete()
+@standardMethod.list()
 @autoSchema()
 class Person {
   public constructor(public name: string) {}
@@ -28,8 +26,7 @@ class Person {
 class App {}
 
 Deno.test("e2e routes respect OpenAPI specification", async (t) => {
-  const handler = routeOf(App);
-  const server = Deno.serve({ port: 8080 }, (request) => handler(request));
+  const server = Deno.serve({ port: 8080 }, routerOf(App));
   const ash = new Person("Ash Ketchum");
   const gary = new Person("Gary Oak");
 
@@ -46,6 +43,15 @@ Deno.test("e2e routes respect OpenAPI specification", async (t) => {
       (await kv.get<Person>(["/people", ash.name]))?.value?.name,
       ash.name,
     );
+  });
+
+  await t.step("GET /people", async () => {
+    const listPeopleResponse = await fetch("http://localhost:8080/people");
+    assertEquals(listPeopleResponse.status, 200);
+
+    const people = await listPeopleResponse.json();
+    assertEquals(people.length, 1);
+    assertEquals(people[0].name, ash.name);
   });
 
   await t.step("GET /people/{person}", async () => {
@@ -87,8 +93,6 @@ Deno.test("e2e routes respect OpenAPI specification", async (t) => {
     );
     assertEquals((await kv.get<Person>(["/people", gary.name])).value, null);
   });
-
-  // TODO: Add cases for each standard method.
 
   await server.shutdown();
 });

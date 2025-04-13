@@ -1,11 +1,9 @@
-import type { Handler } from "@std/http/unstable-route";
 import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import { jsonSchemaOf } from "#/lib/declarative/common/json-schema/json-schema.ts";
-
-export type { Handler };
+import { pathsObjectOf, reducePathsObject } from "./paths-object.ts";
 
 /**
  * specificationOf returns the OpenAPI specification of the class.
@@ -13,58 +11,35 @@ export type { Handler };
 export function specificationOf<TClass extends Class>(
   target: TClass,
 ): OpenAPIV3_1.Document | undefined {
-  return getPrototypeValue<ValueOpenAPI>(target)?.specification;
+  return getPrototypeValue<ValueOpenAPISpecification>(target)?.specification;
 }
 
 /**
- * pathsObjectOf returns the paths object of the OpenAPI class.
+ * openapiSpec is the decorator for OpenAPI specification.
  */
-export function pathsObjectOf<TClass extends Class>(
-  target: TClass,
-): OpenAPIV3_1.PathsObject | undefined {
-  return getPrototypeValue<ValuePathsObject>(target)?.paths;
-}
+export const openapiSpec: (
+  options?: OpenAPISpecificationDecoratorOptions,
+) => (target: Class) => Class = createOpenAPISpecificationDecoratorFactory();
 
 /**
- * openapi is the decorator for OpenAPI specification.
+ * createOpenAPISpecificationDecoratorFactory is the factory function for the
+ * OpenAPI decorator.
  */
-export const openapi: (
-  options?: OpenAPIDecoratorOptions,
-) => (target: Class) => Class = createOpenAPIDecoratorFactory();
-
-/**
- * createOpenAPIDecoratorFactory is the factory function for the OpenAPI
- * decorator.
- */
-export function createOpenAPIDecoratorFactory(): (
-  options?: OpenAPIDecoratorOptions | undefined,
+export function createOpenAPISpecificationDecoratorFactory(): (
+  options?: OpenAPISpecificationDecoratorOptions | undefined,
 ) => (target: Class) => Class {
   return createDecoratorFactory({
-    initialize: (options?: OpenAPIDecoratorOptions) => {
-      return [declarativeOpenAPI(options)];
+    initialize: (options?: OpenAPISpecificationDecoratorOptions) => {
+      return [declarativeOpenAPISpecification(options)];
     },
   });
 }
 
 /**
- * reducePathsObject reduces the paths object of the OpenAPI
- * specification.
+ * OpenAPISpecificationDecoratorOptions is the options for the OpenAPI
+ * specification decorator.
  */
-export function reducePathsObject(
-  paths: OpenAPIV3_1.PathsObject,
-  pathsObject: OpenAPIV3_1.PathsObject,
-): OpenAPIV3_1.PathsObject {
-  for (const path in pathsObject) {
-    paths[path] = { ...paths[path], ...pathsObject[path] };
-  }
-
-  return paths;
-}
-
-/**
- * OpenAPIDecoratorOptions is the options for the OpenAPI decorator.
- */
-export interface OpenAPIDecoratorOptions {
+export interface OpenAPISpecificationDecoratorOptions {
   /**
    * specification is the base OpenAPI specification.
    */
@@ -77,21 +52,34 @@ export interface OpenAPIDecoratorOptions {
 }
 
 /**
- * declarativeOpenAPI is the declarative function for OpenAPI specification.
+ * defaultOpenAPI is the default OpenAPI version.
  */
-export function declarativeOpenAPI<TValue extends ValueOpenAPI>(
-  options?: OpenAPIDecoratorOptions,
+export const defaultOpenAPI = "3.0.1";
+
+/**
+ * defaultOpenAPIInfoVersion is the default OpenAPI info version.
+ */
+export const defaultOpenAPIInfoVersion = "1.0.0";
+
+/**
+ * declarativeOpenAPISpecification is the declarative function for OpenAPI specification.
+ */
+export function declarativeOpenAPISpecification<
+  TValue extends ValueOpenAPISpecification,
+>(
+  options?: OpenAPISpecificationDecoratorOptions,
 ): Declarative<TValue> {
   return (value, name) => {
     return {
       ...value,
       specification: {
         ...options?.specification,
-        openapi: options?.specification?.openapi ?? "3.0.1",
+        openapi: options?.specification?.openapi ?? defaultOpenAPI,
         info: {
           ...options?.specification?.info,
           title: options?.specification?.info?.title ?? name,
-          version: options?.specification?.info?.version ?? "1.0.0",
+          version: options?.specification?.info?.version ??
+            defaultOpenAPIInfoVersion,
         },
         paths: {
           ...options?.specification?.paths,
@@ -130,22 +118,11 @@ export function declarativeOpenAPI<TValue extends ValueOpenAPI>(
 }
 
 /**
- * ValueOpenAPI is the value associated with an OpenAPI specification.
+ * ValueOpenAPISpecification is the value associated with an OpenAPI specification.
  */
-export interface ValueOpenAPI {
+export interface ValueOpenAPISpecification {
   /**
    * specification is the top-level object of the OpenAPI specification.
    */
   specification?: OpenAPIV3_1.Document;
-}
-
-/**
- * ValuePathsObject is the value of the paths object of the OpenAPI
- * specification.
- */
-export interface ValuePathsObject {
-  /**
-   * paths is the paths object of the OpenAPI specification.
-   */
-  paths?: OpenAPIV3_1.PathsObject;
 }

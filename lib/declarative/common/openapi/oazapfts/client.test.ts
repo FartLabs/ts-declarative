@@ -1,24 +1,23 @@
 import { assert } from "@std/assert";
 import { assertSnapshot } from "@std/testing/snapshot";
-import { openapi } from "#/lib/declarative/common/openapi/openapi.ts";
-import {
-  standardCreate,
-  standardGet,
-} from "#/lib/declarative/common/google-aip/methods/mod.ts";
-import { generateOazapftsClientOf } from "./client.ts";
+import { openapiSpec } from "#/lib/declarative/common/openapi/specification.ts";
+import { standardMethodsWithDenoKv } from "#/lib/declarative/common/google-aip/deno-kv.ts";
 import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
+import { generateOazapftsClientOf } from "./client.ts";
 
-const kv = await Deno.openKv(":memory:");
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
-@standardCreate({ kv })
-@standardGet({ kv })
+const kv = await Deno.openKv(":memory:");
+const standardMethod = standardMethodsWithDenoKv(kv);
+
+@standardMethod.create()
+@standardMethod.get()
 @autoSchema()
 class Person {
   public constructor(public name: string) {}
 }
 
-@openapi({ resources: [Person] })
+@openapiSpec({ resources: [Person] })
 class App {}
 
 Deno.test(

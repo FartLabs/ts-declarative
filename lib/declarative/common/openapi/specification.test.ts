@@ -4,21 +4,23 @@ import {
   standardGet,
 } from "#/lib/declarative/common/google-aip/methods/mod.ts";
 import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
-import { openapi, specificationOf } from "./openapi.ts";
+import { openapiSpec, specificationOf } from "./specification.ts";
 
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
-@standardCreate()
-@standardGet()
+const kv = await Deno.openKv(":memory:");
+
+@standardCreate({ kv })
+@standardGet({ kv })
 @autoSchema()
 class Person {
   public constructor(public name: string) {}
 }
 
-@openapi({ resources: [Person] })
+@openapiSpec({ resources: [Person] })
 class App {}
 
-Deno.test("openapi decorator decorates value", () => {
+Deno.test("openapiSpec decorator decorates value", () => {
   const specification = specificationOf(App);
   assertEquals(specification?.info.title, "App");
   assertEquals(specification?.paths, {

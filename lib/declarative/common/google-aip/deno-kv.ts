@@ -12,7 +12,7 @@ import type { StandardMethods } from "./standard-methods.ts";
  * that adds Deno.Kv support to the standard Create, Delete, Get, List, and
  * Update operations of the resource for persistent storage.
  */
-export function standardMethodsWithDenoKv(kv?: Deno.Kv): StandardMethods {
+export function standardMethodsWithDenoKv(kv: Deno.Kv): StandardMethods {
   return {
     create: (options) => standardCreate({ kv, ...options }),
     delete: (options) => standardDelete({ kv, ...options }),

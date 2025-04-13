@@ -1,12 +1,11 @@
-import type { Handler, Route } from "@std/http/unstable-route";
-import { route } from "@std/http/unstable-route";
+import type { Handler } from "@std/http/unstable-route";
 import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import { jsonSchemaOf } from "#/lib/declarative/common/json-schema/json-schema.ts";
 
-export type { Handler, Route };
+export type { Handler };
 
 /**
  * specificationOf returns the OpenAPI specification of the class.
@@ -15,27 +14,6 @@ export function specificationOf<TClass extends Class>(
   target: TClass,
 ): OpenAPIV3_1.Document | undefined {
   return getPrototypeValue<ValueOpenAPI>(target)?.specification;
-}
-
-/**
- * routeOf compiles the routes into a single HTTP handler.
- */
-export function routeOf(
-  target: Class,
-  defaultHandler: (
-    request: Request,
-    info?: Deno.ServeHandlerInfo,
-  ) => Response | Promise<Response> = () =>
-    new Response("Not found", { status: 404 }),
-) {
-  return route(routesOf(target), defaultHandler);
-}
-
-/**
- * routesOf returns the HTTP routes of the OpenAPI class.
- */
-export function routesOf(target: Class): Route[] {
-  return getPrototypeValue<ValueHttpRoutes>(target)?.routes ?? [];
 }
 
 /**
@@ -86,16 +64,16 @@ export function reducePathsObject(
 /**
  * OpenAPIDecoratorOptions is the options for the OpenAPI decorator.
  */
-export interface OpenAPIDecoratorOptions extends ValueHttpRoutes {
-  /**
-   * resources are the resources of the OpenAPI specification.
-   */
-  resources?: Class[];
-
+export interface OpenAPIDecoratorOptions {
   /**
    * specification is the base OpenAPI specification.
    */
   specification?: Partial<OpenAPIV3_1.Document>;
+
+  /**
+   * resources are the resources of the OpenAPI specification.
+   */
+  resources?: Class[];
 }
 
 /**
@@ -147,19 +125,6 @@ export function declarativeOpenAPI<TValue extends ValueOpenAPI>(
           },
         },
       },
-      routes: [
-        ...(options?.routes ?? []),
-        ...(options?.resources
-          ?.map((resource) => {
-            const routes = routesOf(resource);
-            if (routes === undefined) {
-              return [];
-            }
-
-            return routes;
-          })
-          .flat() ?? []),
-      ],
     } as TValue;
   };
 }
@@ -167,7 +132,7 @@ export function declarativeOpenAPI<TValue extends ValueOpenAPI>(
 /**
  * ValueOpenAPI is the value associated with an OpenAPI specification.
  */
-export interface ValueOpenAPI extends ValueHttpRoutes {
+export interface ValueOpenAPI {
   /**
    * specification is the top-level object of the OpenAPI specification.
    */
@@ -183,14 +148,4 @@ export interface ValuePathsObject {
    * paths is the paths object of the OpenAPI specification.
    */
   paths?: OpenAPIV3_1.PathsObject;
-}
-
-/**
- * ValueHttpRoutes is the value of the routes of the OpenAPI specification.
- */
-export interface ValueHttpRoutes {
-  /**
-   * routes are the HTTP routes of the OpenAPI specification.
-   */
-  routes?: Route[];
 }

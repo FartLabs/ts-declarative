@@ -1,5 +1,6 @@
 import { assertEquals } from "@std/assert/equals";
-import { openapi, routeOf } from "#/lib/declarative/common/openapi/openapi.ts";
+import { routeOf } from "#/lib/declarative/common/http-route/http-route.ts";
+import { openapi } from "#/lib/declarative/common/openapi/openapi.ts";
 import {
   standardCreate,
   standardDelete,

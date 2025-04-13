@@ -10,7 +10,7 @@ class Person {
 Deno.test("standardUpdate decorator factory decorates value", () => {
   const actual = pathsObjectOf(Person);
   assertEquals(actual, {
-    "/people/{name}": {
+    "/people/{person}": {
       post: {
         description: "Updates Person",
         parameters: [{ in: "path", name: "name", required: true }],

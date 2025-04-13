@@ -5,6 +5,7 @@ import {
   standardCreate,
   standardDelete,
   standardGet,
+  standardUpdate,
 } from "#/lib/declarative/common/google-aip/methods/mod.ts";
 import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
 
@@ -12,6 +13,7 @@ const kv = await Deno.openKv(":memory:");
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
 @standardDelete({ kv })
+@standardUpdate({ kv })
 @standardCreate({ kv })
 @standardGet({ kv })
 @autoSchema()
@@ -28,47 +30,65 @@ class App {}
 Deno.test("e2e routes respect OpenAPI specification", async (t) => {
   const handler = route(
     routesOf(App),
-    () => new Response("Not Found", { status: 404 })
+    () => new Response("Not Found", { status: 404 }),
   );
   const server = Deno.serve({ port: 8080 }, (request) => handler(request));
-  const person = new Person("Ash Ketchum");
+  const ash = new Person("Ash Ketchum");
+  const gary = new Person("Gary Oak");
 
   await t.step("POST /people", async () => {
     const createPersonResponse = await fetch("http://localhost:8080/people", {
       method: "POST",
-      body: JSON.stringify(person),
+      body: JSON.stringify(ash),
     });
     assertEquals(createPersonResponse.status, 200);
 
     const createdPerson = await createPersonResponse.json();
-    assertEquals(createdPerson.name, person.name);
+    assertEquals(createdPerson.name, ash.name);
     assertEquals(
-      (await kv.get<Person>(["/people", person.name]))?.value?.name,
-      person.name
+      (await kv.get<Person>(["/people", ash.name]))?.value?.name,
+      ash.name,
     );
   });
 
   await t.step("GET /people/{person}", async () => {
     const getPersonResponse = await fetch(
-      `http://localhost:8080/people/${person.name}`
+      `http://localhost:8080/people/${ash.name}`,
     );
     assertEquals(getPersonResponse.status, 200);
 
     const fetchedPerson = await getPersonResponse.json();
-    assertEquals(fetchedPerson.name, person.name);
+    assertEquals(fetchedPerson.name, ash.name);
+  });
+
+  await t.step("POST /people/{person}", async () => {
+    const updatePersonResponse = await fetch(
+      `http://localhost:8080/people/${ash.name}`,
+      {
+        method: "POST",
+        body: JSON.stringify(gary),
+      },
+    );
+    assertEquals(updatePersonResponse.status, 200);
+    assertEquals((await updatePersonResponse.json()).name, gary.name);
+    assertEquals((await kv.get<Person>(["/people", ash.name])).value, null);
+    assertEquals(
+      (await kv.get<Person>(["/people", gary.name])).value?.name,
+      gary.name,
+    );
   });
 
   await t.step("DELETE /people/{person}", async () => {
     const deletePersonResponse = await fetch(
-      `http://localhost:8080/people/${person.name}`,
-      { method: "DELETE" }
+      `http://localhost:8080/people/${gary.name}`,
+      { method: "DELETE" },
     );
     assertEquals(deletePersonResponse.status, 200);
     assertEquals(
       await deletePersonResponse.text(),
-      "Resource deleted successfully"
+      "Resource deleted successfully",
     );
-    assertEquals((await kv.get<Person>(["/people", person.name])).value, null);
+    assertEquals((await kv.get<Person>(["/people", gary.name])).value, null);
   });
 
   // TODO: Add cases for each standard method.

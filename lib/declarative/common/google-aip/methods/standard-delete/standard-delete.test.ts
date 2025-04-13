@@ -21,7 +21,7 @@ Deno.test("standardDelete decorator factory decorates value", () => {
           parameters: [
             {
               in: "path",
-              name: "name",
+              name: "person",
               required: true,
             },
           ],

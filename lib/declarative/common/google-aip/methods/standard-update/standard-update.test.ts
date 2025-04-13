@@ -18,7 +18,11 @@ Deno.test("standardUpdate decorator factory decorates value", () => {
       "/people/{person}": {
         post: {
           description: "Updates Person",
-          parameters: [{ in: "path", name: "name", required: true }],
+          parameters: [{
+            in: "path",
+            name: "person",
+            required: true,
+          }],
           requestBody: {
             content: {
               "application/json": {

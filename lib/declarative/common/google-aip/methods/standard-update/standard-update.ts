@@ -75,7 +75,11 @@ export function declarativeStandardUpdateSpecification<
           },
         },
       },
-      parameters: [{ name: "name", in: "path", required: true }],
+      parameters: [{
+        name: toCamelCase(resourceName),
+        in: "path",
+        required: true,
+      }],
       responses: {
         "200": {
           description: options?.request?.description ??

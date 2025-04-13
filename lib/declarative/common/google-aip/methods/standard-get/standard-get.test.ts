@@ -21,7 +21,7 @@ Deno.test("standardGet decorator factory decorates value", () => {
           parameters: [
             {
               in: "path",
-              name: "name",
+              name: "person",
               required: true,
               schema: { type: "string" },
             },

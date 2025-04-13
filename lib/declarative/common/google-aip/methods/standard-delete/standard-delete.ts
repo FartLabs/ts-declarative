@@ -59,7 +59,11 @@ export function declarativeStandardDeleteSpecification<
     value["paths"][pathname] ??= {};
     value["paths"][pathname]["delete"] = {
       description: options?.description ?? `Deletes ${resourceName}`,
-      parameters: [{ name: "name", in: "path", required: true }],
+      parameters: [{
+        name: toCamelCase(resourceName),
+        in: "path",
+        required: true,
+      }],
       responses: {
         "200": {
           description: options?.response?.description ??

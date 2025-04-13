@@ -61,7 +61,7 @@ export function declarativeStandardGet<TValue extends ValueStandardGet>(
         description: options?.description ?? `Gets ${resourceName}`,
         parameters: [
           {
-            name: "name",
+            name: toCamelCase(resourceName),
             in: "path",
             required: true,
             schema: { type: "string" },

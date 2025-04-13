@@ -15,9 +15,10 @@ class Person {
 }
 
 Deno.test("typeInfo decorates value", () => {
-  assertEquals(typeInfoOf(Person)?.properties, [{
-    name: "name",
-    type: "string",
-    paramIndex: 0,
-  }]);
+  assertEquals(
+    typeInfoOf(Person)?.properties,
+    [
+      { name: "name", type: "string", paramIndex: 0 },
+    ],
+  );
 });

@@ -50,10 +50,6 @@ export function createOpenAPIDecoratorFactory(): (
 ) => (target: Class) => Class {
   return createDecoratorFactory({
     initialize: (options?: OpenAPIDecoratorOptions) => {
-      if (options?.specification === undefined) {
-        throw new Error("base specification is required");
-      }
-
       return [declarativeOpenAPI(options)];
     },
   });
@@ -90,11 +86,17 @@ export interface OpenAPIDecoratorOptions extends ValueOpenAPI {
 export function declarativeOpenAPI<TValue extends ValueOpenAPI>(
   options?: OpenAPIDecoratorOptions,
 ): Declarative<TValue> {
-  return (value) => {
+  return (value, name) => {
     return {
       ...value,
       specification: {
         ...options?.specification,
+        openapi: options?.specification?.openapi ?? "3.0.1",
+        info: {
+          ...options?.specification?.info,
+          title: options?.specification?.info?.title ?? name,
+          version: options?.specification?.info?.version ?? "1.0.0",
+        },
         paths: {
           ...options?.specification?.paths,
           ...(options?.resources

@@ -1,9 +1,9 @@
 export const snapshot = {};
 
-snapshot[`generateOazapftsClientOf generates client from openapi specification 1`] = `
+snapshot[`generateOazapftsClientOf generates client from OpenAPI specification 1`] = `
 '/**
  * App
- * 0.0.1
+ * 1.0.0
  * DO NOT MODIFY - This file has been generated using oazapfts.
  * See https://www.npmjs.com/package/oazapfts
  */

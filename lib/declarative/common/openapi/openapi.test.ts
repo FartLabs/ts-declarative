@@ -15,18 +15,12 @@ class Person {
   public constructor(public name: string) {}
 }
 
-@openapi({
-  specification: {
-    openapi: "3.0.1",
-    info: { title: "App", version: "0.0.1" },
-    components: {},
-  },
-  resources: [Person],
-})
+@openapi({ resources: [Person] })
 class App {}
 
 Deno.test("openapi decorator decorates value", () => {
   const specification = specificationOf(App);
+  assertEquals(specification?.info.title, "App");
   assertEquals(specification?.paths, {
     "/people": {
       post: {

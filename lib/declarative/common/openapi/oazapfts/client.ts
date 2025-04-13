@@ -16,14 +16,7 @@ import type { ValueOpenAPI } from "#/lib/declarative/common/openapi/openapi.ts";
  *   public constructor(public name: string) {}
  * }
  *
- * @openapi({
- *  specification: {
- *    openapi: "3.0.1",
- *    info: { title: "App", version: "0.0.1" },
- *    components: {},
- *  },
- *  resources: [Person],
- * })
+ * @openapi({ resources: [Person] })
  * class App {}
  *
  * const sourceCode = await generateOazapftsClientOf(App);

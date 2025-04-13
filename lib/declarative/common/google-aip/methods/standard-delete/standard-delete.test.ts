@@ -10,7 +10,7 @@ class Person {
 Deno.test("standardDelete decorator factory decorates value", () => {
   const actual = pathsObjectOf(Person);
   assertEquals(actual, {
-    "/people/{name}": {
+    "/people/{person}": {
       delete: {
         description: "Deletes Person",
         parameters: [

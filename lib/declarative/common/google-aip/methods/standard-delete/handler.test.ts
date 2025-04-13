@@ -5,7 +5,7 @@ Deno.test("standardDeleteHandler handles request", async () => {
   const kv = await Deno.openKv(":memory:");
   await kv.set(["fake"], { name: "fake" });
 
-  const handler = standardDeleteHandler(kv, []);
+  const handler = standardDeleteHandler(kv, [], "name");
   const request = new Request("http://localhost/fake", { method: "DELETE" });
   const response = await handler(
     request,

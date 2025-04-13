@@ -79,9 +79,15 @@ export function declarativeStandardGet<TValue extends ValueStandardGet>(
       );
       value["routes"] ??= [];
       value["routes"].push({
-        pattern: new URLPattern({ pathname }),
+        pattern: new URLPattern({
+          pathname: toStandardGetPattern(toCamelCase(resourceName)),
+        }),
         method: "GET",
-        handler: standardGetHandler(options.kv, [keyPrefix]),
+        handler: standardGetHandler(
+          options.kv,
+          [keyPrefix],
+          toCamelCase(resourceName),
+        ),
       });
     }
 

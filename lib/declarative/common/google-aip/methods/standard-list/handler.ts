@@ -16,7 +16,7 @@ export function standardListHandler(
       ),
       {
         headers: {
-          "content-type": "application/json",
+          "Content-Type": "application/json",
         },
       },
     );

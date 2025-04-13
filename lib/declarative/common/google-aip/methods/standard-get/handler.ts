@@ -12,7 +12,7 @@ export function standardGetHandler(
       return new Response("Name parameter is missing", {
         status: 400,
         headers: {
-          "content-type": "application/json",
+          "Content-Type": "application/json",
         },
       });
     }
@@ -22,14 +22,14 @@ export function standardGetHandler(
       return new Response(JSON.stringify(result), {
         status: 404,
         headers: {
-          "content-type": "application/json",
+          "Content-Type": "application/json",
         },
       });
     }
 
     return new Response(JSON.stringify(result.value), {
       headers: {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
       },
     });
   };

@@ -12,7 +12,7 @@ export function standardDeleteHandler(
       return new Response("Name parameter is missing", {
         status: 400,
         headers: {
-          "content-type": "application/json",
+          "Content-Type": "application/json",
         },
       });
     }
@@ -20,7 +20,7 @@ export function standardDeleteHandler(
     await kv.delete([...prefix, name]);
     return new Response("Resource deleted successfully", {
       headers: {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
       },
     });
   };

@@ -41,7 +41,7 @@ if (import.meta.main) {
   Deno.serve(async () => {
     return new Response(
       await renderTemplate(JSON.stringify(jsonSchemaPerson)),
-      { headers: { "content-type": "text/html" } },
+      { headers: { "Content-Type": "text/html" } },
     );
   });
 }

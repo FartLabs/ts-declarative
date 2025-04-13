@@ -6,7 +6,7 @@ Deno.test("standardCreateHandler handles request", async () => {
   const handler = standardCreateHandler(kv, []);
   const request = new Request("http://localhost", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name: "fake" }),
   });
 

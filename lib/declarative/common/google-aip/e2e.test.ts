@@ -19,10 +19,7 @@ class Person {
   public constructor(public name: string) {}
 }
 
-@openapi({
-  specification: { servers: [{ url: "http://localhost:8080" }] },
-  resources: [Person],
-})
+@openapi({ resources: [Person] })
 class App {}
 
 Deno.test("e2e routes respect OpenAPI specification", async (t) => {
@@ -31,10 +28,10 @@ Deno.test("e2e routes respect OpenAPI specification", async (t) => {
   const gary = new Person("Gary Oak");
 
   await t.step("POST /people", async () => {
-    const createPersonResponse = await fetch("http://localhost:8080/people", {
-      method: "POST",
-      body: JSON.stringify(ash),
-    });
+    const createPersonResponse = await fetch(
+      "http://localhost:8080/people",
+      { method: "POST", body: JSON.stringify(ash) },
+    );
     assertEquals(createPersonResponse.status, 200);
 
     const createdPerson = await createPersonResponse.json();
@@ -67,10 +64,7 @@ Deno.test("e2e routes respect OpenAPI specification", async (t) => {
   await t.step("POST /people/{person}", async () => {
     const updatePersonResponse = await fetch(
       `http://localhost:8080/people/${ash.name}`,
-      {
-        method: "POST",
-        body: JSON.stringify(gary),
-      },
+      { method: "POST", body: JSON.stringify(gary) },
     );
     assertEquals(updatePersonResponse.status, 200);
     assertEquals((await updatePersonResponse.json()).name, gary.name);

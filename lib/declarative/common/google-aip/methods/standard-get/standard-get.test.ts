@@ -10,7 +10,7 @@ class Person {
 Deno.test("standardGet decorator factory decorates value", () => {
   const actual = pathsObjectOf(Person);
   assertEquals(actual, {
-    "/people/{name}": {
+    "/people/{person_name}": {
       get: {
         description: "Gets Person",
         parameters: [

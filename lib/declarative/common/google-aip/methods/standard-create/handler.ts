@@ -18,6 +18,13 @@ export function standardCreateHandler(
       });
     }
 
+    // TODO: Delete console log.
+    // console.log({
+    //   result,
+    //   body,
+    //   key: [...prefix, body?.name],
+    // });
+
     return new Response(JSON.stringify(body), {
       headers: {
         "content-type": "application/json",

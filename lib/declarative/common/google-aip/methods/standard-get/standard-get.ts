@@ -1,11 +1,16 @@
+import { toSnakeCase } from "@std/text/to-snake-case";
 import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
-import type { ValuePathsObject } from "#/lib/declarative/common/openapi/openapi.ts";
+import type {
+  ValueHttpRoutes,
+  ValuePathsObject,
+} from "#/lib/declarative/common/openapi/openapi.ts";
 import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
 import { toOperationPath } from "#/lib/declarative/common/google-aip/operation.ts";
 import { toOperationSchema } from "#/lib/declarative/common/google-aip/mod.ts";
+import { standardGetHandler } from "./handler.ts";
 
 // TODO: Create batch method batchGet.
 
@@ -66,6 +71,20 @@ export function declarativeStandardGet<TValue extends ValueStandardGet>(
       },
     };
 
+    if (options?.kv !== undefined) {
+      const keyPrefix: Deno.KvKeyPart = toOperationPath(
+        resourceName,
+        options.collectionIdentifier,
+        options.parent,
+      );
+      value["routes"] ??= [];
+      value["routes"].push({
+        pattern: new URLPattern({ pathname }),
+        method: "GET",
+        handler: standardGetHandler(options.kv, [keyPrefix]),
+      });
+    }
+
     return value;
   };
 }
@@ -85,16 +104,40 @@ export function toStandardGetPath(
       collectionIdentifier,
       parent,
     )
-  }/{name}`;
+  }/{${toSnakeCase(resourceName)}_name}`;
+}
+
+/**
+ * toStandardGetPattern returns the URL pattern of the standard Get operation
+ * of the resource.
+ */
+export function toStandardGetPattern(
+  resourceName: string,
+  collectionIdentifier?: string,
+  parent?: string,
+): string {
+  return `${
+    toOperationPath(
+      resourceName,
+      collectionIdentifier,
+      parent,
+    )
+  }/:${toSnakeCase(resourceName)}_name`;
 }
 
 /**
  * StandardGetOptions is the options for the standard Get operation of the
  * resource.
  */
-export interface StandardGetOptions extends OperationOptions {}
+export interface StandardGetOptions extends OperationOptions {
+  /**
+   * kv is the Deno Kv instance to use in the HTTP handler.
+   */
+  kv?: Deno.Kv;
+}
 
 /**
  * ValueStandardGet is the value of the standard Get operation of the resource.
  */
-export interface ValueStandardGet extends ValueJSONSchema, ValuePathsObject {}
+export interface ValueStandardGet
+  extends ValueJSONSchema, ValuePathsObject, ValueHttpRoutes {}

@@ -21,8 +21,8 @@ export function specificationOf<TClass extends Class>(
  */
 export function routesOf<TClass extends Class>(
   target: TClass,
-): Route[] | undefined {
-  return getPrototypeValue<ValueHttpRoutes>(target)?.routes;
+): Route[] {
+  return getPrototypeValue<ValueHttpRoutes>(target)?.routes ?? [];
 }
 
 /**
@@ -73,11 +73,16 @@ export function reducePathsObject(
 /**
  * OpenAPIDecoratorOptions is the options for the OpenAPI decorator.
  */
-export interface OpenAPIDecoratorOptions extends ValueOpenAPI {
+export interface OpenAPIDecoratorOptions extends ValueHttpRoutes {
   /**
    * resources are the resources of the OpenAPI specification.
    */
   resources?: Class[];
+
+  /**
+   * specification is the base OpenAPI specification.
+   */
+  specification?: Partial<OpenAPIV3_1.Document>;
 }
 
 /**

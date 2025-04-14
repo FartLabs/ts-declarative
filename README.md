@@ -4,47 +4,52 @@
 
 ## Background
 
-This tool helps create computer programs in a new way. It focuses on telling the
-computer what to do, not how to do it.
+This library provides a novel approach to building computer programs by
+emphasizing _what_ the program should do rather than _how_ it should do it.
 
-You use semantic annotations in TypeScript (called decorators) to label parts of
-your program. These labels add extra information that both people and computers
-can understand.
+It leverages TypeScript's decorator feature to apply semantic annotations to
+classes and their members. These decorators act as labels that embed extra
+information, making it understandable for both developers and the computer.
 
-This extra information helps the computer build other parts of the program
-automatically. This reduces the amount of manual work needed.
+This additional information enables the library to automate the generation of
+other program components, significantly reducing manual coding efforts.
 
-The goal is to make it easier to create and maintain large, complex programs.
-This tool handles repetitive tasks, letting programmers focus on solving
-problems.
+The primary goal is to simplify the development and maintenance of large,
+complex applications. By handling repetitive tasks, this tool allows programmers
+to concentrate on solving core problems.
 
-It explores a different way to build computer programs, one where the computer
-helps more with the basic work.
+Ultimately, `ts-declarative` explores a paradigm shift in software development,
+where the computer plays a more active role in handling foundational tasks.
 
 ## Technical description
 
-This TypeScript library provides an abstraction layer for annotating TypeScript
-classes using decorators, enabling the derivation of new annotations from
-existing ones. By embracing declarative programming principles, it simplifies
-problem-solving, enhancing code understandability and maintainability. The
-framework empowers developers to create robust and predictable code libraries
-from declarative TypeScript, significantly reducing the manual effort and
-expense typically associated with maintenance.
+This TypeScript library offers an abstraction layer for annotating TypeScript
+classes using decorators. It facilitates the creation of new annotations based
+on existing ones, promoting a declarative programming style that enhances code
+clarity and maintainability. This framework empowers developers to build robust
+and predictable code libraries from declarative TypeScript, substantially
+decreasing the manual effort and costs typically associated with maintenance.
 
-A core feature of this library is its ability to utilize source code as a
-knowledge base through code introspection and decorators, facilitating the
-direct generation of tangible knowledge. This knowledge can be represented as
-"triples" (subject, predicate, object), a fundamental structure in knowledge
-representation. Furthermore, the library supports the derivation of implicit
-knowledge through rule-based reasoning. Data sources can be interfaced via the
-SPARQL protocol. This library can be used to build linked data applications,
-such as those described in
-[Thinking with Knowledge Graphs: Enhancing LLM Reasoning Through Structured Data](https://arxiv.org/html/2412.10654v1).
+A key capability of this library is its use of source code as a knowledge base
+through code introspection and decorators, enabling the direct generation of
+structured knowledge. This knowledge can be represented as "triples" (subject,
+predicate, object), a fundamental concept in knowledge representation.
+Furthermore, the library supports inferring implicit knowledge through
+rule-based reasoning. Data sources can be accessed via the SPARQL protocol.
+Consequently, this library can be employed to develop linked data applications,
+such as those discussed in
+"[Thinking with Knowledge Graphs: Enhancing LLM Reasoning Through Structured Data](https://arxiv.org/html/2412.10654v1)."
+
+At its core, the framework is a library that allows developers to design
+decorators for annotating classes, similar to `reflect-metadata`. A
+"Declarative" is a function that updates this annotation and can be curried for
+flexible application. The linked example demonstrates several decorators
+designed for programming a declarative resource-oriented API server.
 
 ## Example
 
-The following example shows how to use this library to declare a class and its
-annotations.
+The following example illustrates how to use this library to declare a class and
+its annotations.
 
 ```ts
 // @deno-types="@types/jsonld"
@@ -90,15 +95,13 @@ if (import.meta.main) {
 
 Run `deno fmt` to format the code.
 
-Run `deno lint` to lint the code.
+Run `deno task lint` to lint the code.
+
+Run `deno task check` to check the code.
 
 Run `deno task outdated` to update outdated dependencies.
 
 Run `deno task test` to run the tests.
-
-## Example
-
-Run `deno task check` to check the code.
 
 Run `deno task example` to run the example.
 

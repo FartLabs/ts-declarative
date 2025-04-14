@@ -1,8 +1,9 @@
-import { assert } from "@std/assert";
+import { assertEquals } from "@std/assert";
 import { assertSnapshot } from "@std/testing/snapshot";
-import { openapiSpec } from "#/lib/declarative/common/openapi/specification.ts";
+import { openapi } from "#/lib/declarative/common/openapi/server.ts";
 import { standardMethodsWithDenoKv } from "#/lib/declarative/common/google-aip/deno-kv.ts";
 import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
+import { routerOf } from "#/lib/declarative/common/router/router.ts";
 import { createOazapftsClientOf, generateOazapftsClientOf } from "./client.ts";
 
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
@@ -17,7 +18,10 @@ class Person {
   public constructor(public name: string) {}
 }
 
-@openapiSpec({ resources: [Person] })
+@openapi({
+  specification: { servers: [{ url: "http://localhost:8000" }] },
+  resources: [Person],
+})
 class App {}
 
 Deno.test(
@@ -26,12 +30,21 @@ Deno.test(
     const sourceCode = await generateOazapftsClientOf(App, {
       optimistic: true,
     });
+
     await assertSnapshot(t, sourceCode);
   },
 );
 
-Deno.test("generateOazapftsClientOf dynamic import", async (_t) => {
-  const client = await createOazapftsClientOf(App);
-  assert(Object.hasOwn(client, "getPeopleByPerson"));
-  assert(Object.hasOwn(client, "postPeople"));
+Deno.test("e2e createOazapftsClientOf dynamic import", async () => {
+  const server = await Deno.serve({ port: 8000 }, routerOf(App));
+  const client = await createOazapftsClientOf(App, { optimistic: true });
+  const ash = new Person("Ash Ketchum");
+
+  const createdPerson = await client.postPeople(ash);
+  assertEquals(createdPerson.name, ash.name);
+
+  const fetchedPerson = await client.getPeopleByPerson(ash.name);
+  assertEquals(fetchedPerson.name, ash.name);
+
+  await server.shutdown();
 });

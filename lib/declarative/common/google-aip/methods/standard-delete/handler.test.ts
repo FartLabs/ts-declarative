@@ -2,7 +2,7 @@ import { assertEquals } from "@std/assert/equals";
 import { standardDeleteHandler } from "./handler.ts";
 
 Deno.test("standardDeleteHandler handles request", async () => {
-  const kv = await Deno.openKv(":memory:");
+  using kv = await Deno.openKv(":memory:");
   await kv.set(["fake"], { name: "fake" });
 
   const handler = standardDeleteHandler(kv, [], "name");
@@ -13,5 +13,4 @@ Deno.test("standardDeleteHandler handles request", async () => {
   );
   assertEquals(response.status, 200);
   assertEquals((await kv.get(["fake"]))?.value, null);
-  kv.close();
 });

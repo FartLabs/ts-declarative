@@ -2,7 +2,7 @@ import { assertEquals } from "@std/assert/equals";
 import { standardCreateHandler } from "./handler.ts";
 
 Deno.test("standardCreateHandler handles request", async () => {
-  const kv = await Deno.openKv(":memory:");
+  using kv = await Deno.openKv(":memory:");
   const handler = standardCreateHandler(kv, []);
   const request = new Request("http://localhost", {
     method: "POST",
@@ -13,5 +13,4 @@ Deno.test("standardCreateHandler handles request", async () => {
   const response = await handler(request);
   assertEquals(response.status, 200);
   assertEquals(await response.json(), { name: "fake" });
-  kv.close();
 });

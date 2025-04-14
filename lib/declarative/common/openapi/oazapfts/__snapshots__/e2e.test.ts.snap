@@ -21,17 +21,6 @@ export type Person = {
     name: string;
 };
 /**
- * Gets Person
- */
-export function getPeopleByPerson(person: string, opts?: Oazapfts.RequestOpts) {
-    return oazapfts.ok(oazapfts.fetchJson<{
-        status: 200;
-        data: Person;
-    }>(\`/people/\${encodeURIComponent(person)}\`, {
-        ...opts
-    }));
-}
-/**
  * Creates Person
  */
 export function postPeople(person: Person, opts?: Oazapfts.RequestOpts) {
@@ -43,6 +32,17 @@ export function postPeople(person: Person, opts?: Oazapfts.RequestOpts) {
         method: "POST",
         body: person
     })));
+}
+/**
+ * Gets Person
+ */
+export function getPeopleByPerson(person: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: Person;
+    }>(\`/people/\${encodeURIComponent(person)}\`, {
+        ...opts
+    }));
 }
 '
 `;

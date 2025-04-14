@@ -2,18 +2,14 @@ import { assertEquals } from "@std/assert/equals";
 import { routerOf } from "#/lib/declarative/common/router/router.ts";
 import { openapi } from "#/lib/declarative/common/openapi/server.ts";
 import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
-import { standardMethodsWithDenoKv } from "#/lib/declarative/common/google-aip/deno-kv.ts";
+import { createStandardMethodsDecoratorFactory } from "#/lib/declarative/common/google-aip/methods/mod.ts";
 
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
 const kv = await Deno.openKv(":memory:");
-const standardMethod = standardMethodsWithDenoKv(kv);
+const standardMethods = createStandardMethodsDecoratorFactory(kv);
 
-@standardMethod.create()
-@standardMethod.get()
-@standardMethod.update()
-@standardMethod.delete()
-@standardMethod.list()
+@standardMethods()
 @autoSchema()
 class Person {
   public constructor(public name: string) {}

@@ -173,4 +173,6 @@ export interface StandardDeleteRouteOptions extends OperationOptions {
    * kv is the Deno Kv instance to use in the HTTP handler.
    */
   kv?: Deno.Kv;
+
+  // TODO: Add property prefix for Deno.KvKey.
 }

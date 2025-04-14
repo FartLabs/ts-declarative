@@ -20,13 +20,20 @@ import { standardGetHandler } from "./handler.ts";
 export const standardGet: (
   options?: StandardGetOptions,
 ) => (target: Class) => Class = createDecoratorFactory({
-  initialize: (options?: StandardGetOptions) => {
-    return [
-      declarativeStandardGet(options),
-      declarativeStandardGetRoute(options),
-    ];
-  },
+  initialize: initializeStandardGet,
 });
+
+/**
+ * initializeStandardGet returns the standard Get operation of the resource.
+ */
+export function initializeStandardGet(
+  options?: StandardGetOptions,
+): Array<Declarative<ValueStandardGet>> {
+  return [
+    declarativeStandardGetSpecification(options),
+    declarativeStandardGetRoute(options),
+  ];
+}
 
 /**
  * StandardGetOptions is the options for the standard Get operation of the
@@ -42,9 +49,12 @@ export interface ValueStandardGet
   extends ValueJSONSchema, ValuePathsObject, ValueRouterRoutes {}
 
 /**
- * declarativeStandardGet returns the standard Get operation of the resource.
+ * declarativeStandardGetSpecification returns the standard Get operation of
+ * the resource.
  */
-export function declarativeStandardGet<TValue extends ValueStandardGet>(
+export function declarativeStandardGetSpecification<
+  TValue extends ValueStandardGet,
+>(
   options?: StandardGetSpecificationOptions,
 ): Declarative<TValue> {
   return (value, name) => {

@@ -5,10 +5,17 @@
 export function standardCreateHandler(
   kv: Deno.Kv,
   prefix: Deno.KvKey,
+  primaryKey = "name",
 ): (request: Request) => Promise<Response> {
   return async (request) => {
     const body = await request.json();
-    const result = await kv.set([...prefix, body?.name], body);
+    if (body?.[primaryKey] === undefined) {
+      return new Response(`Primary key "${primaryKey}" not found`, {
+        status: 400,
+      });
+    }
+
+    const result = await kv.set([...prefix, body[primaryKey]], body);
     if (!result?.ok) {
       return new Response(JSON.stringify(result), {
         status: 500,

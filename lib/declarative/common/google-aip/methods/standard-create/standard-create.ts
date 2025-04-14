@@ -147,7 +147,11 @@ export function declarativeStandardCreateRoute<
         options?.parent,
       ),
       method: "POST",
-      handler: standardCreateHandler(options.kv, [keyPrefix]),
+      handler: standardCreateHandler(
+        options.kv,
+        [keyPrefix],
+        options?.primaryKey,
+      ),
     });
     return value;
   };
@@ -162,6 +166,11 @@ export interface StandardCreateRouteOptions extends OperationOptions {
    * kv is the Deno Kv instance to use in the HTTP handler.
    */
   kv?: Deno.Kv;
+
+  /**
+   * primaryKey is the primary key of the resource.
+   */
+  primaryKey?: string;
 }
 
 /**

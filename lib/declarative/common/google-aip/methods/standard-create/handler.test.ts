@@ -3,7 +3,7 @@ import { standardCreateHandler } from "./handler.ts";
 
 Deno.test("standardCreateHandler handles request", async () => {
   using kv = await Deno.openKv(":memory:");
-  const handler = standardCreateHandler(kv, []);
+  const handler = standardCreateHandler(kv, [], "name");
   const request = new Request("http://localhost", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

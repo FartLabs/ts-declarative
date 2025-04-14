@@ -10,7 +10,7 @@ import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 /**
  * jsonSchema is a decorator that sets the JSON Schema of the class.
  */
-export function jsonSchemaOf<TClass extends Class>(target: TClass): any {
+export function jsonSchemaOf(target: Class): any {
   return getPrototypeValue<ValueJSONSchema>(target)?.jsonSchema;
 }
 
@@ -89,6 +89,8 @@ export function applyJSONSchemaMask(
 
   return deepMerge(value, mask);
 }
+
+// TODO: Migrate TypeBox logic to auto-schema.
 
 /**
  * compile compiles the tsMorph properties into a JSON Schema string.

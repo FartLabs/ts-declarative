@@ -58,20 +58,18 @@ its annotations.
 ```ts
 // @deno-types="@types/jsonld"
 import jsonld from "jsonld";
-import { Ajv } from "ajv";
-import { context, docOf } from "@fartlabs/declarative/common/jsonld";
-import {
-  jsonSchemaDecoratorFactoryOfFile,
-  jsonSchemaOf,
-} from "@fartlabs/declarative/common/json-schema";
+import { context, docOf } from "#/lib/declarative/common/jsonld/mod.ts";
+import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
+import { validate } from "#/lib/declarative/common/json-schema/ajv/ajv.ts";
+
+const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
 @context("https://schema.org/")
-@jsonSchema()
-export class Person {
+@autoSchema()
+class Person {
   public constructor(public name: string) {}
 }
 
-// deno task example
 if (import.meta.main) {
   const ash = new Person("Ash Ketchum");
   const expandedAsh = await jsonld.expand(docOf(ash));
@@ -84,10 +82,6 @@ if (import.meta.main) {
   //   }
   // ]
 
-  const ajv = new Ajv();
-  const validate = ajv.compile(
-    getPrototypeValue<ValueJSONSchema>(Person)?.jsonSchema,
-  );
   const isValid = validate(ash);
   console.log(isValid);
   // Output:

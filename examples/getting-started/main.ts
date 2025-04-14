@@ -1,18 +1,13 @@
 // @deno-types="@types/jsonld"
 import jsonld from "jsonld";
-import { Ajv } from "ajv";
-import { createTypeInfoDecoratorFactoryAt } from "#/lib/declarative/common/type-info/type-info.ts";
-import {
-  jsonSchema,
-  jsonSchemaOf,
-} from "#/lib/declarative/common/json-schema/mod.ts";
 import { context, docOf } from "#/lib/declarative/common/jsonld/mod.ts";
+import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
+import { validate } from "#/lib/declarative/common/json-schema/ajv/ajv.ts";
 
-const typeInfo = await createTypeInfoDecoratorFactoryAt(import.meta);
+const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
 @context("https://schema.org/")
-@jsonSchema()
-@typeInfo()
+@autoSchema()
 class Person {
   public constructor(public name: string) {}
 }
@@ -30,8 +25,6 @@ if (import.meta.main) {
   //   }
   // ]
 
-  const ajv = new Ajv();
-  const validate = ajv.compile(jsonSchemaOf(Person));
   const isValid = validate(ash);
   console.log(isValid);
   // Output:

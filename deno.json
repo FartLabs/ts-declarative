@@ -7,6 +7,7 @@
     "./common/google-aip": "./lib/declarative/common/google-aip/mod.ts",
     "./common/google-aip/methods": "./lib/declarative/common/google-aip/methods/mod.ts",
     "./common/json-schema": "./lib/declarative/common/json-schema/mod.ts",
+    "./common/json-schema/ajv": "./lib/declarative/common/json-schema/ajv/mod.ts",
     "./common/json-schema/auto-schema": "./lib/declarative/common/json-schema/auto-schema/mod.ts",
     "./common/jsonld": "./lib/declarative/common/jsonld/mod.ts",
     "./common/openapi": "./lib/declarative/common/openapi/mod.ts",

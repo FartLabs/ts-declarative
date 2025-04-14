@@ -1,5 +1,9 @@
 # ts-declarative
 
+[![JSR](https://jsr.io/badges/@fartlabs/declarative)](https://jsr.io/@fartlabs/declarative)
+[![JSR score](https://jsr.io/badges/@fartlabs/declarative/score)](https://jsr.io/@fartlabs/declarative/score)
+[![GitHub Actions](https://github.com/FartLabs/ts-declarative/actions/workflows/publish.yaml/badge.svg)](https://github.com/FartLabs/ts-declarative/actions/workflows/publish.yaml)
+
 🔥 Declarative TypeScript class decoration library.
 
 ## Background
@@ -43,8 +47,8 @@ such as those discussed in
 At its core, the framework is a library that allows developers to design
 decorators for annotating classes, similar to `reflect-metadata`. A
 "Declarative" is a function that updates this annotation and can be curried for
-flexible application. The linked example demonstrates several decorators
-designed for programming a declarative resource-oriented API server.
+flexible application. The example demonstrates several decorators designed for
+programming a declarative resource-oriented API server.
 
 ## Example
 

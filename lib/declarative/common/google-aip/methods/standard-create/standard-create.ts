@@ -18,13 +18,20 @@ import { standardCreateHandler } from "./handler.ts";
 export const standardCreate: (
   options?: StandardCreateOptions,
 ) => (target: Class) => Class = createDecoratorFactory({
-  initialize: (options?: StandardCreateOptions) => {
-    return [
-      declarativeStandardCreateSpecification(options),
-      declarativeStandardCreateRoute(options),
-    ];
-  },
+  initialize: initializeStandardCreate,
 });
+
+/**
+ * initializeStandardCreate returns the standard Create operation of the resource.
+ */
+export function initializeStandardCreate(
+  options?: StandardCreateOptions,
+): Array<Declarative<ValueStandardCreate>> {
+  return [
+    declarativeStandardCreateSpecification(options),
+    declarativeStandardCreateRoute(options),
+  ];
+}
 
 /**
  * StandardCreateOptions is the options for the standard Create operation of the
@@ -45,9 +52,7 @@ export interface ValueStandardCreate
  */
 export function declarativeStandardCreateSpecification<
   TValue extends ValueStandardCreate,
->(
-  options?: StandardCreateSpecificationOptions,
-): Declarative<TValue> {
+>(options?: StandardCreateSpecificationOptions): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
     const pathname = toStandardCreatePath(
@@ -120,9 +125,7 @@ export interface StandardCreateSpecificationOptions extends OperationOptions {}
  */
 export function declarativeStandardCreateRoute<
   TValue extends ValueStandardCreate,
->(
-  options?: StandardCreateRouteOptions,
-): Declarative<TValue> {
+>(options?: StandardCreateRouteOptions): Declarative<TValue> {
   return (value, name) => {
     if (options?.kv === undefined) {
       throw new Error("kv is required");

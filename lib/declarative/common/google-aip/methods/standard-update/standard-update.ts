@@ -19,13 +19,20 @@ import { standardUpdateHandler } from "./handler.ts";
 export const standardUpdate: (
   options?: StandardUpdateOptions,
 ) => (target: Class) => Class = createDecoratorFactory({
-  initialize: (options?: StandardUpdateOptions) => {
-    return [
-      declarativeStandardUpdateSpecification(options),
-      declarativeStandardUpdateRoute(options),
-    ];
-  },
+  initialize: initializeStandardUpdate,
 });
+
+/**
+ * initializeStandardUpdate returns the standard Update operation of the resource.
+ */
+export function initializeStandardUpdate(
+  options?: StandardUpdateOptions,
+): Array<Declarative<ValueStandardUpdate>> {
+  return [
+    declarativeStandardUpdateSpecification(options),
+    declarativeStandardUpdateRoute(options),
+  ];
+}
 
 /**
  * StandardUpdateOptions are the options for the standard Update operation of the

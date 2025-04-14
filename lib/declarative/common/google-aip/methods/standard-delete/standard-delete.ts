@@ -16,13 +16,20 @@ import { standardDeleteHandler } from "./handler.ts";
 export const standardDelete: (
   options?: StandardDeleteOptions,
 ) => (target: Class) => Class = createDecoratorFactory({
-  initialize: (options?: StandardDeleteOptions) => {
-    return [
-      declarativeStandardDeleteSpecification(options),
-      declarativeStandardDeleteRoute(options),
-    ];
-  },
+  initialize: initializeStandardDelete,
 });
+
+/**
+ * initializeStandardDelete returns the standard Delete operation of the resource.
+ */
+export function initializeStandardDelete(
+  options?: StandardDeleteOptions,
+): Array<Declarative<ValueStandardDelete>> {
+  return [
+    declarativeStandardDeleteSpecification(options),
+    declarativeStandardDeleteRoute(options),
+  ];
+}
 
 /**
  * StandardDeleteOptions is the options for the standard Delete operation of
@@ -166,4 +173,6 @@ export interface StandardDeleteRouteOptions extends OperationOptions {
    * kv is the Deno Kv instance to use in the HTTP handler.
    */
   kv?: Deno.Kv;
+
+  // TODO: Add property prefix for Deno.KvKey.
 }

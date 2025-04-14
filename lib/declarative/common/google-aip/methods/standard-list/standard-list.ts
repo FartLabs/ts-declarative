@@ -19,13 +19,20 @@ import { standardListHandler } from "./handler.ts";
 export const standardList: (
   options?: StandardListOptions,
 ) => (target: Class) => Class = createDecoratorFactory({
-  initialize: (options?: StandardListSpecificationOptions) => {
-    return [
-      declarativeStandardListSpecification(options),
-      declarativeStandardListRoute(options),
-    ];
-  },
+  initialize: initializeStandardList,
 });
+
+/**
+ * initializeStandardList returns the standard List operation of the resource.
+ */
+export function initializeStandardList(
+  options?: StandardListOptions,
+): Array<Declarative<ValueStandardList>> {
+  return [
+    declarativeStandardListSpecification(options),
+    declarativeStandardListRoute(options),
+  ];
+}
 
 /**
  * StandardListOptions is the options for the standard List operation of the

@@ -4,29 +4,25 @@ import {
   standardGet,
 } from "#/lib/declarative/common/google-aip/methods/mod.ts";
 import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
-import { openapi, specificationOf } from "./openapi.ts";
+import { openapiSpec, specificationOf } from "./specification.ts";
 
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
-@standardCreate()
-@standardGet()
+const kv = await Deno.openKv(":memory:");
+
+@standardCreate({ kv })
+@standardGet({ kv })
 @autoSchema()
 class Person {
   public constructor(public name: string) {}
 }
 
-@openapi({
-  specification: {
-    openapi: "3.0.1",
-    info: { title: "App", version: "0.0.1" },
-    components: {},
-  },
-  resources: [Person],
-})
+@openapiSpec({ resources: [Person] })
 class App {}
 
-Deno.test("openapi decorator decorates value", () => {
+Deno.test("openapiSpec decorator decorates value", () => {
   const specification = specificationOf(App);
+  assertEquals(specification?.info.title, "App");
   assertEquals(specification?.paths, {
     "/people": {
       post: {
@@ -52,13 +48,13 @@ Deno.test("openapi decorator decorates value", () => {
         },
       },
     },
-    "/people/{name}": {
+    "/people/{person}": {
       get: {
         description: "Gets Person",
         parameters: [
           {
             in: "path",
-            name: "name",
+            name: "person",
             required: true,
             schema: { type: "string" },
           },

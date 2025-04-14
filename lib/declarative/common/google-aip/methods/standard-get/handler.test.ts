@@ -5,7 +5,7 @@ Deno.test("standardGetHandler handles request", async () => {
   const kv = await Deno.openKv(":memory:");
   await kv.set(["fake"], { name: "fake" });
 
-  const handler = standardGetHandler(kv, []);
+  const handler = standardGetHandler(kv, [], "name");
   const request = new Request("http://localhost/fake");
   const response = await handler(
     request,

@@ -13,14 +13,14 @@ export function standardCreateHandler(
       return new Response(JSON.stringify(result), {
         status: 500,
         headers: {
-          "content-type": "application/json",
+          "Content-Type": "application/json",
         },
       });
     }
 
     return new Response(JSON.stringify(body), {
       headers: {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
       },
     });
   };

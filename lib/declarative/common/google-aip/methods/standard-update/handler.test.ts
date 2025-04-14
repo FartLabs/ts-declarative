@@ -3,10 +3,10 @@ import { standardUpdateHandler } from "./handler.ts";
 
 Deno.test("standardUpdateHandler handles request", async () => {
   const kv = await Deno.openKv(":memory:");
-  const handler = standardUpdateHandler(kv, []);
+  const handler = standardUpdateHandler(kv, [], "name");
   const request = new Request("http://localhost/fake", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name: "fake" }),
   });
 

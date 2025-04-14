@@ -5,22 +5,23 @@
 export function standardDeleteHandler(
   kv: Deno.Kv,
   prefix: Deno.KvKey,
+  parameter: string,
 ): (request: Request, params?: URLPatternResult | null) => Promise<Response> {
   return async (_request, params) => {
-    const name = params?.pathname.groups.name;
+    const name = params?.pathname.groups[parameter];
     if (!name) {
-      return new Response("Name parameter is missing", {
+      return new Response("Parameter is missing", {
         status: 400,
         headers: {
-          "content-type": "application/json",
+          "Content-Type": "application/json",
         },
       });
     }
 
-    await kv.delete([...prefix, name]);
+    await kv.delete([...prefix, decodeURIComponent(name)]);
     return new Response("Resource deleted successfully", {
       headers: {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
       },
     });
   };

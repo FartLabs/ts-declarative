@@ -1,28 +1,50 @@
+import { toCamelCase } from "@std/text/to-camel-case";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
-import type { ValuePathsObject } from "#/lib/declarative/common/openapi/openapi.ts";
+import type { ValuePathsObject } from "#/lib/declarative/common/openapi/paths-object.ts";
+import type { ValueRouterRoutes } from "#/lib/declarative/common/router/router.ts";
 import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
 import { toOperationPath } from "#/lib/declarative/common/google-aip/operation.ts";
+import { standardDeleteHandler } from "./handler.ts";
 
 /**
  * standardDelete is the standard Delete operation specification of the resource.
+ *
+ * @see https://google.aip.dev/135
  */
 export const standardDelete: (
   options?: StandardDeleteOptions,
 ) => (target: Class) => Class = createDecoratorFactory({
   initialize: (options?: StandardDeleteOptions) => {
-    return [declarativeStandardDelete(options)];
+    return [
+      declarativeStandardDeleteSpecification(options),
+      declarativeStandardDeleteRoute(options),
+    ];
   },
 });
 
 /**
- * declarativeStandardDelete returns the standard Delete operation of the resource.
- *
- * @see https://google.aip.dev/135
+ * StandardDeleteOptions is the options for the standard Delete operation of
+ * the resource.
  */
-export function declarativeStandardDelete<TValue extends ValueStandardDelete>(
-  options?: StandardDeleteOptions,
+export interface StandardDeleteOptions
+  extends StandardDeleteSpecificationOptions, StandardDeleteRouteOptions {}
+
+/**
+ * ValueStandardDelete is the value of the standard Delete operation of the resource.
+ */
+export interface ValueStandardDelete
+  extends ValueJSONSchema, ValuePathsObject, ValueRouterRoutes {}
+
+/**
+ * declarativeStandardDeleteSpecification returns the standard Delete
+ * operation of the resource.
+ */
+export function declarativeStandardDeleteSpecification<
+  TValue extends ValueStandardDelete,
+>(
+  options?: StandardDeleteSpecificationOptions,
 ): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
@@ -37,7 +59,11 @@ export function declarativeStandardDelete<TValue extends ValueStandardDelete>(
     value["paths"][pathname] ??= {};
     value["paths"][pathname]["delete"] = {
       description: options?.description ?? `Deletes ${resourceName}`,
-      parameters: [{ name: "name", in: "path", required: true }],
+      parameters: [{
+        name: toCamelCase(resourceName),
+        in: "path",
+        required: true,
+      }],
       responses: {
         "200": {
           description: options?.response?.description ??
@@ -65,17 +91,79 @@ export function toStandardDeletePath(
       collectionIdentifier,
       parent,
     )
-  }/{name}`;
+  }/{${toCamelCase(resourceName)}}`;
 }
 
 /**
- * StandardDeleteOptions is the options for the standard Delete operation of the
- * resource.
+ * toStandardDeletePattern returns the URL pattern of the standard Delete operation
+ * of the resource.
  */
-export interface StandardDeleteOptions extends OperationOptions {}
+export function toStandardDeletePattern(
+  resourceName: string,
+  collectionIdentifier?: string,
+  parent?: string,
+): string {
+  return `${
+    toOperationPath(
+      resourceName,
+      collectionIdentifier,
+      parent,
+    )
+  }/:${toCamelCase(resourceName)}`;
+}
 
 /**
- * ValueStandardDelete is the value of the standard Delete operation of the resource.
+ * StandardDeleteSpecificationOptions is the options for the standard Delete
+ * operation of the resource.
  */
-export interface ValueStandardDelete
-  extends ValueJSONSchema, ValuePathsObject {}
+export interface StandardDeleteSpecificationOptions extends OperationOptions {}
+
+/**
+ * declarativeStandardDeleteRoute returns the standard Delete operation
+ * route of the resource.
+ */
+export function declarativeStandardDeleteRoute<
+  TValue extends ValueStandardDelete,
+>(
+  options?: StandardDeleteRouteOptions,
+): Declarative<TValue> {
+  return (value, name) => {
+    if (options?.kv === undefined) {
+      throw new Error("kv is required");
+    }
+
+    const resourceName = options?.resourceName ?? name;
+    value ??= {} as TValue;
+    value["routes"] ??= [];
+    value["routes"].push({
+      pattern: new URLPattern({
+        pathname: toStandardDeletePattern(toCamelCase(resourceName)),
+      }),
+      method: "DELETE",
+      handler: standardDeleteHandler(
+        options.kv,
+        [
+          toOperationPath(
+            resourceName,
+            options.collectionIdentifier,
+            options.parent,
+          ),
+        ],
+        toCamelCase(resourceName),
+      ),
+    });
+
+    return value;
+  };
+}
+
+/**
+ * StandardDeleteRouteOptions is the options for the standard Delete
+ * operation of the resource.
+ */
+export interface StandardDeleteRouteOptions extends OperationOptions {
+  /**
+   * kv is the Deno Kv instance to use in the HTTP handler.
+   */
+  kv?: Deno.Kv;
+}

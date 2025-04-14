@@ -8,7 +8,7 @@ Deno.test("standardListHandler handles request", async () => {
   const handler = standardListHandler(kv, []);
   const request = new Request("http://localhost", {
     method: "GET",
-    headers: { "content-type": "application/json" },
+    headers: { "Content-Type": "application/json" },
   });
 
   const response = await handler(request);

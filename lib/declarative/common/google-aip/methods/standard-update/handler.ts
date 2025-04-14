@@ -5,32 +5,39 @@
 export function standardUpdateHandler(
   kv: Deno.Kv,
   prefix: Deno.KvKey,
+  parameter: string,
 ): (request: Request, params?: URLPatternResult | null) => Promise<Response> {
   return async (request, params) => {
-    const name = params?.pathname.groups.name;
+    const name = params?.pathname.groups[parameter];
     if (!name) {
       return new Response("Name parameter is missing", {
         status: 400,
         headers: {
-          "content-type": "application/json",
+          "Content-Type": "application/json",
         },
       });
     }
 
+    const decodedName = decodeURIComponent(name);
     const body = await request.json();
-    const result = await kv.set([...prefix, name], body);
-    if (!result?.ok) {
+    const op = kv.atomic().set([...prefix, body.name], body);
+    if (decodedName !== body.name) {
+      op.delete([...prefix, decodedName]);
+    }
+
+    const result = await op.commit();
+    if (!result.ok) {
       return new Response(JSON.stringify(result), {
         status: 500,
         headers: {
-          "content-type": "application/json",
+          "Content-Type": "application/json",
         },
       });
     }
 
     return new Response(JSON.stringify(body), {
       headers: {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
       },
     });
   };

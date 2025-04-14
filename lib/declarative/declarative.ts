@@ -82,7 +82,7 @@ export function declarativeSequence<TValue>(
   return (initialValue: TValue | undefined, name: string) => {
     return declaratives.reduce(
       (acc, fn) => fn(acc, name),
-      structuredClone(initialValue),
+      initialValue,
     );
   };
 }

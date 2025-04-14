@@ -1,9 +1,9 @@
 export const snapshot = {};
 
-snapshot[`generateOazapftsClientOf generates client from openapi specification 1`] = `
+snapshot[`generateOazapftsClientOf generates client from OpenAPI specification 1`] = `
 '/**
  * App
- * 0.0.1
+ * 1.0.0
  * DO NOT MODIFY - This file has been generated using oazapfts.
  * See https://www.npmjs.com/package/oazapfts
  */
@@ -21,11 +21,11 @@ export type Person = {
 /**
  * Gets Person
  */
-export function getPeopleByName(name: string, opts?: Oazapfts.RequestOpts) {
+export function getPeopleByPerson(person: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
         data: Person;
-    }>(\`/people/\${encodeURIComponent(name)}\`, {
+    }>(\`/people/\${encodeURIComponent(person)}\`, {
         ...opts
     }));
 }

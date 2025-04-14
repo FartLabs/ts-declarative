@@ -5,31 +5,32 @@
 export function standardGetHandler(
   kv: Deno.Kv,
   prefix: Deno.KvKey,
+  parameter: string,
 ): (request: Request, params?: URLPatternResult | null) => Promise<Response> {
   return async (_request, params) => {
-    const name = params?.pathname.groups.name;
+    const name = params?.pathname.groups[parameter];
     if (!name) {
-      return new Response("Name parameter is missing", {
+      return new Response("Parameter is missing", {
         status: 400,
         headers: {
-          "content-type": "application/json",
+          "Content-Type": "application/json",
         },
       });
     }
 
-    const result = await kv.get([...prefix, name]);
+    const result = await kv.get([...prefix, decodeURIComponent(name)]);
     if (result.value === null) {
       return new Response(JSON.stringify(result), {
         status: 404,
         headers: {
-          "content-type": "application/json",
+          "Content-Type": "application/json",
         },
       });
     }
 
     return new Response(JSON.stringify(result.value), {
       headers: {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
       },
     });
   };

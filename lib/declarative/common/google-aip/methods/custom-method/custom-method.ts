@@ -1,41 +1,47 @@
 import type { OpenAPIV3_1 } from "openapi-types";
+import type { Handler } from "@std/http/unstable-route";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
-import type {
-  Handler,
-  ValueHttpRoutes,
-  ValuePathsObject,
-} from "#/lib/declarative/common/openapi/openapi.ts";
+import type { ValuePathsObject } from "#/lib/declarative/common/openapi/paths-object.ts";
+import type { ValueRouterRoutes } from "#/lib/declarative/common/router/router.ts";
 import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
 import {
   toOperationPath,
   toOperationSchema,
 } from "#/lib/declarative/common/google-aip/operation.ts";
 
+export type { Handler };
+
 /**
  * customMethod is a decorator factory that creates a custom method for the
  * resource.
+ *
+ * @see https://google.aip.dev/136
  */
 export const customMethod: (
   options?: CustomMethodOptions,
 ) => (target: Class) => Class = createDecoratorFactory({
   initialize: (options?: CustomMethodOptions) => {
-    return [declarativeCustomMethod(options)];
+    return [
+      declarativeCustomMethodSpecification(options),
+      declarativeCustomMethodRoute(options),
+    ];
   },
 });
 
 // TODO: Represent batch methods in terms of custom methods.
 
 /**
- * declarativeCustomMethod returns the customMethod operation of the resource.
- *
- * @see https://google.aip.dev/136
+ * declarativeCustomMethodSpecification is a decorator factory that creates a
+ * custom method OpenAPI specification for the resource.
  */
-export function declarativeCustomMethod<TValue extends ValueCustomMethods>(
+export function declarativeCustomMethodSpecification<
+  TValue extends ValueCustomMethods,
+>(
   options?: CustomMethodOptions,
 ): Declarative<TValue> {
-  return (value, name): TValue => {
+  return (value, name) => {
     if (options?.name === undefined) {
       throw new Error("Custom method name is required");
     }
@@ -78,15 +84,36 @@ export function declarativeCustomMethod<TValue extends ValueCustomMethods>(
       },
     };
 
-    if (options?.handler !== undefined) {
-      value["routes"] ??= [];
-      value["routes"].push({
-        pattern: new URLPattern({ pathname }),
-        method: httpMethod,
-        handler: options.handler,
-      });
+    return value;
+  };
+}
+
+/**
+ * declarativeCustomMethodRoute is a decorator factory that creates a custom
+ * method for the resource.
+ */
+export function declarativeCustomMethodRoute<
+  TValue extends ValueCustomMethods,
+>(
+  options?: CustomMethodOptions,
+): Declarative<TValue> {
+  return (value, name) => {
+    if (options?.name === undefined) {
+      throw new Error("Custom method name is required");
     }
 
+    const resourceName = options?.resourceName ?? name;
+    if (options?.handler === undefined) {
+      throw new Error("Custom method handler is required");
+    }
+
+    value ??= {} as TValue;
+    value["routes"] ??= [];
+    value["routes"].push({
+      pattern: toCustomMethodPattern(resourceName, options),
+      method: options?.httpMethod ?? "post",
+      handler: options.handler,
+    });
     return value;
   };
 }
@@ -106,6 +133,19 @@ export function toCustomMethodPath(
       options?.parent,
     )
   }:${options?.name}`;
+}
+
+/**
+ * toCustomMethodPattern is a helper function that returns the pattern for a custom
+ * method.
+ */
+export function toCustomMethodPattern(
+  resourceName: string,
+  options?: CustomMethodOptions,
+): URLPattern {
+  return new URLPattern({
+    pathname: toCustomMethodPath(resourceName, options),
+  });
 }
 
 /**
@@ -133,4 +173,4 @@ export interface CustomMethodOptions extends OperationOptions {
  * ValueCustomMethods is the value of the customMethod operation of the resource.
  */
 export interface ValueCustomMethods
-  extends ValueJSONSchema, ValuePathsObject, ValueHttpRoutes {}
+  extends ValueJSONSchema, ValuePathsObject, ValueRouterRoutes {}

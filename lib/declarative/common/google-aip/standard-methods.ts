@@ -12,11 +12,16 @@ import type {
   standardUpdate,
   StandardUpdateOptions,
 } from "./methods/mod.ts";
-import { initializeStandardCreate } from "#/lib/declarative/common/google-aip/mod.ts";
+import {
+  initializeStandardCreate,
+  initializeStandardDelete,
+} from "#/lib/declarative/common/google-aip/mod.ts";
 
 /**
  * standardMethods is a decorator factory that creates a decorator
- * that adds the desired standard methods to the resource.
+ * that adds the desired Google AIP standard methods to the resource.
+ *
+ * @see https://google.aip.dev/130
  */
 export function standardMethods(options?: {
   create?: StandardCreateOptions | boolean;
@@ -28,6 +33,7 @@ export function standardMethods(options?: {
   return createDecoratorFactory({
     initialize: () => [
       ...initializeStandardMethod(initializeStandardCreate, options?.create),
+      ...initializeStandardMethod(initializeStandardDelete, options?.delete),
       // TODO: initialize all standard methods.
     ],
   });

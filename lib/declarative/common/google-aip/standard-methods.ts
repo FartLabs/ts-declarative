@@ -16,6 +16,7 @@ import {
   initializeStandardCreate,
   initializeStandardDelete,
   initializeStandardGet,
+  initializeStandardList,
 } from "#/lib/declarative/common/google-aip/mod.ts";
 
 /**
@@ -36,6 +37,7 @@ export function standardMethods(options?: {
       ...initializeStandardMethod(initializeStandardCreate, options?.create),
       ...initializeStandardMethod(initializeStandardDelete, options?.delete),
       ...initializeStandardMethod(initializeStandardGet, options?.get),
+      ...initializeStandardMethod(initializeStandardList, options?.list),
       // TODO: initialize all standard methods.
     ],
   });

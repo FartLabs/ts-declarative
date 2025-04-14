@@ -37,7 +37,9 @@ Deno.test(
 
 Deno.test("e2e createOazapftsClientOf dynamic import", async () => {
   const server = await Deno.serve({ port: 8000 }, routerOf(App));
-  const client = await createOazapftsClientOf(App, { optimistic: true });
+  const client = await createOazapftsClientOf<
+    "postPeople" | "getPeopleByPerson"
+  >(App, { optimistic: true });
   const ash = new Person("Ash Ketchum");
 
   const createdPerson = await client.postPeople(ash);

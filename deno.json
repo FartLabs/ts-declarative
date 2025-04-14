@@ -36,14 +36,19 @@
     "ts-morph": "npm:ts-morph@^25.0.1"
   },
   "tasks": {
-    "example": "deno -A examples/getting-started/main.ts",
-    "example:alpaca": "deno -A examples/alpaca/main.ts",
-    "check": "deno check **/*.ts",
     "outdated": "deno outdated --update --latest",
     "test": "deno test --allow-all --unstable-kv",
     "test:update": "deno task test -- --update",
+    "lint": "deno lint && deno doc --lint  **/*.ts",
+    "check": "deno check **/*.ts",
     "publish:dry": "deno publish --dry-run --allow-dirty",
-    "lint": "deno lint && deno doc --lint  **/*.ts"
+    "dev": {
+      "description": "Runs all development tasks",
+      "command": "deno fmt",
+      "dependencies": ["check", "test", "lint", "publish:dry"]
+    },
+    "example": "deno -A examples/getting-started/main.ts",
+    "example:alpaca": "deno -A examples/alpaca/main.ts"
   },
   "fmt": {
     "exclude": ["./examples/alpaca/index.eta.html"]

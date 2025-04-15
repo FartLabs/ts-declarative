@@ -1,5 +1,4 @@
 import { toCamelCase } from "@std/text/to-camel-case";
-import type { OpenAPIV3_1 } from "openapi-types";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
@@ -54,9 +53,7 @@ export interface ValueStandardGet
  */
 export function declarativeStandardGetSpecification<
   TValue extends ValueStandardGet,
->(
-  options?: StandardGetSpecificationOptions,
-): Declarative<TValue> {
+>(options?: StandardGetSpecificationOptions): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
     const pathname = toStandardGetPath(
@@ -64,31 +61,30 @@ export function declarativeStandardGetSpecification<
       options?.collectionIdentifier,
       options?.parent,
     );
+
     value ??= {} as TValue;
-    value!.paths ??= {} as OpenAPIV3_1.PathsObject;
-    value!.paths[pathname] ??= {
-      get: {
-        description: options?.description ?? `Gets ${resourceName}`,
-        parameters: [
-          {
-            name: toCamelCase(resourceName),
-            in: "path",
-            required: true,
-            schema: { type: "string" },
-          },
-        ],
-        responses: {
-          "200": {
-            description: options?.response?.description ??
-              `Got ${resourceName}`,
-            content: {
-              "application/json": {
-                schema: toOperationSchema(
-                  resourceName,
-                  value?.jsonSchema,
-                  options?.response?.schema,
-                ),
-              },
+    value["paths"] ??= {};
+    value["paths"][pathname] ??= {};
+    value["paths"][pathname]["get"] = {
+      description: options?.description ?? `Gets ${resourceName}`,
+      parameters: [
+        {
+          name: toCamelCase(resourceName),
+          in: "path",
+          required: true,
+          schema: { type: "string" },
+        },
+      ],
+      responses: {
+        "200": {
+          description: options?.response?.description ?? `Got ${resourceName}`,
+          content: {
+            "application/json": {
+              schema: toOperationSchema(
+                resourceName,
+                value?.jsonSchema,
+                options?.response?.schema,
+              ),
             },
           },
         },

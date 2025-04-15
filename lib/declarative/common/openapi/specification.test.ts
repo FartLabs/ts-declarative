@@ -83,7 +83,7 @@ class Cat {
   public constructor(public name: string) {}
 }
 
-@standardMethods({ get: true })
+@standardMethods()
 @autoSchema()
 class Dog {
   public constructor(public name: string) {}
@@ -93,20 +93,6 @@ class Dog {
 class ZooAPI {}
 
 Deno.test("openapiSpec decorator with multiple resources", async (t) => {
-  // console.log({ cat: pathsObjectOf(Cat) });
-  // console.log({ dog: pathsObjectOf(Dog) });
-
-  // {
-  //   "/dogs/{dog}": {
-  //     get: {
-  //       description: "Gets Dog",
-  //       parameters: [ [Object] ],
-  //       responses: { "200": [Object] }
-  //     }
-  //   }
-  // }
-
-  // TODO: Fix missing Cat Get method.
   const specification = specificationOf(ZooAPI);
   await assertSnapshot(t, specification);
 });

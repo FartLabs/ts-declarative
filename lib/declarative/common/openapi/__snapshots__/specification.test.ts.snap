@@ -110,6 +110,31 @@ snapshot[`openapiSpec decorator with multiple resources 1`] = `
           },
         },
       },
+      get: {
+        description: "Gets Cat",
+        parameters: [
+          {
+            in: "path",
+            name: "cat",
+            required: true,
+            schema: {
+              type: "string",
+            },
+          },
+        ],
+        responses: {
+          "200": {
+            content: {
+              "application/json": {
+                schema: {
+                  "\$ref": "#/components/schemas/Cat",
+                },
+              },
+            },
+            description: "Got Cat",
+          },
+        },
+      },
       post: {
         description: "Updates Cat",
         parameters: [
@@ -144,7 +169,78 @@ snapshot[`openapiSpec decorator with multiple resources 1`] = `
         },
       },
     },
+    "/dogs": {
+      get: {
+        description: "Lists Dogs",
+        parameters: [
+          {
+            in: "query",
+            name: "page_size",
+          },
+          {
+            in: "query",
+            name: "page_token",
+          },
+        ],
+        responses: {
+          "200": {
+            content: {
+              "application/json": {
+                schema: {
+                  items: {
+                    "\$ref": "#/components/schemas/Dog",
+                  },
+                  type: "array",
+                },
+              },
+            },
+            description: "List of Dogs",
+          },
+        },
+      },
+      post: {
+        description: "Creates Dog",
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                "\$ref": "#/components/schemas/Dog",
+              },
+            },
+          },
+          description: "The Dog to create",
+          required: true,
+        },
+        responses: {
+          "200": {
+            content: {
+              "application/json": {
+                schema: {
+                  "\$ref": "#/components/schemas/Dog",
+                },
+              },
+            },
+            description: "The created Dog",
+          },
+        },
+      },
+    },
     "/dogs/{dog}": {
+      delete: {
+        description: "Deletes Dog",
+        parameters: [
+          {
+            in: "path",
+            name: "dog",
+            required: true,
+          },
+        ],
+        responses: {
+          "200": {
+            description: "The deleted Dog",
+          },
+        },
+      },
       get: {
         description: "Gets Dog",
         parameters: [
@@ -167,6 +263,39 @@ snapshot[`openapiSpec decorator with multiple resources 1`] = `
               },
             },
             description: "Got Dog",
+          },
+        },
+      },
+      post: {
+        description: "Updates Dog",
+        parameters: [
+          {
+            in: "path",
+            name: "dog",
+            required: true,
+          },
+        ],
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                "\$ref": "#/components/schemas/Dog",
+              },
+            },
+          },
+          description: "The Dog to update",
+          required: true,
+        },
+        responses: {
+          "200": {
+            content: {
+              "application/json": {
+                schema: {
+                  "\$ref": "#/components/schemas/Dog",
+                },
+              },
+            },
+            description: "The updated Dog",
           },
         },
       },

@@ -15,6 +15,6 @@ Deno.test("validate validates a valid class instance", () => {
 });
 
 Deno.test("validate validates an invalid class instance", () => {
-  const ash = new Person(0 as unknown as string);
-  assert(!validate(ash));
+  const invalidPerson = new Person(0 as unknown as string);
+  assert(!validate(invalidPerson));
 });

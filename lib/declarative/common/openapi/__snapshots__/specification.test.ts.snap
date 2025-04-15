@@ -1,0 +1,176 @@
+export const snapshot = {};
+
+snapshot[`openapiSpec decorator with multiple resources 1`] = `
+{
+  components: {
+    schemas: {
+      Cat: {
+        [Symbol(TypeBox.Kind)]: "Object",
+        properties: {
+          name: {
+            [Symbol(TypeBox.Kind)]: "String",
+            type: "string",
+          },
+        },
+        required: [
+          "name",
+        ],
+        type: "object",
+      },
+      Dog: {
+        [Symbol(TypeBox.Kind)]: "Object",
+        properties: {
+          name: {
+            [Symbol(TypeBox.Kind)]: "String",
+            type: "string",
+          },
+        },
+        required: [
+          "name",
+        ],
+        type: "object",
+      },
+    },
+  },
+  info: {
+    title: "ZooAPI",
+    version: "1.0.0",
+  },
+  openapi: "3.0.1",
+  paths: {
+    "/cats": {
+      get: {
+        description: "Lists Cats",
+        parameters: [
+          {
+            in: "query",
+            name: "page_size",
+          },
+          {
+            in: "query",
+            name: "page_token",
+          },
+        ],
+        responses: {
+          "200": {
+            content: {
+              "application/json": {
+                schema: {
+                  items: {
+                    "\$ref": "#/components/schemas/Cat",
+                  },
+                  type: "array",
+                },
+              },
+            },
+            description: "List of Cats",
+          },
+        },
+      },
+      post: {
+        description: "Creates Cat",
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                "\$ref": "#/components/schemas/Cat",
+              },
+            },
+          },
+          description: "The Cat to create",
+          required: true,
+        },
+        responses: {
+          "200": {
+            content: {
+              "application/json": {
+                schema: {
+                  "\$ref": "#/components/schemas/Cat",
+                },
+              },
+            },
+            description: "The created Cat",
+          },
+        },
+      },
+    },
+    "/cats/{cat}": {
+      delete: {
+        description: "Deletes Cat",
+        parameters: [
+          {
+            in: "path",
+            name: "cat",
+            required: true,
+          },
+        ],
+        responses: {
+          "200": {
+            description: "The deleted Cat",
+          },
+        },
+      },
+      post: {
+        description: "Updates Cat",
+        parameters: [
+          {
+            in: "path",
+            name: "cat",
+            required: true,
+          },
+        ],
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                "\$ref": "#/components/schemas/Cat",
+              },
+            },
+          },
+          description: "The Cat to update",
+          required: true,
+        },
+        responses: {
+          "200": {
+            content: {
+              "application/json": {
+                schema: {
+                  "\$ref": "#/components/schemas/Cat",
+                },
+              },
+            },
+            description: "The updated Cat",
+          },
+        },
+      },
+    },
+    "/dogs/{dog}": {
+      get: {
+        description: "Gets Dog",
+        parameters: [
+          {
+            in: "path",
+            name: "dog",
+            required: true,
+            schema: {
+              type: "string",
+            },
+          },
+        ],
+        responses: {
+          "200": {
+            content: {
+              "application/json": {
+                schema: {
+                  "\$ref": "#/components/schemas/Dog",
+                },
+              },
+            },
+            description: "Got Dog",
+          },
+        },
+      },
+    },
+  },
+}
+`;

@@ -1,5 +1,7 @@
 import { assertEquals } from "@std/assert/equals";
+import { assertSnapshot } from "@std/testing/snapshot";
 import {
+  createStandardMethodsDecoratorFactory,
   standardCreate,
   standardGet,
 } from "#/lib/declarative/common/google-aip/methods/mod.ts";
@@ -9,6 +11,7 @@ import { openapiSpec, specificationOf } from "./specification.ts";
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
 const kv = await Deno.openKv(":memory:");
+const standardMethods = createStandardMethodsDecoratorFactory(kv);
 
 @standardCreate({ kv })
 @standardGet({ kv })
@@ -18,11 +21,11 @@ class Person {
 }
 
 @openapiSpec({ resources: [Person] })
-class App {}
+class PersonAPI {}
 
 Deno.test("openapiSpec decorator decorates value", () => {
-  const specification = specificationOf(App);
-  assertEquals(specification?.info.title, "App");
+  const specification = specificationOf(PersonAPI);
+  assertEquals(specification?.info.title, "PersonAPI");
   assertEquals(specification?.paths, {
     "/people": {
       post: {
@@ -72,4 +75,38 @@ Deno.test("openapiSpec decorator decorates value", () => {
       },
     },
   });
+});
+
+@standardMethods()
+@autoSchema()
+class Cat {
+  public constructor(public name: string) {}
+}
+
+@standardMethods({ get: true })
+@autoSchema()
+class Dog {
+  public constructor(public name: string) {}
+}
+
+@openapiSpec({ resources: [Cat, Dog] })
+class ZooAPI {}
+
+Deno.test("openapiSpec decorator with multiple resources", async (t) => {
+  // console.log({ cat: pathsObjectOf(Cat) });
+  // console.log({ dog: pathsObjectOf(Dog) });
+
+  // {
+  //   "/dogs/{dog}": {
+  //     get: {
+  //       description: "Gets Dog",
+  //       parameters: [ [Object] ],
+  //       responses: { "200": [Object] }
+  //     }
+  //   }
+  // }
+
+  // TODO: Fix missing Cat Get method.
+  const specification = specificationOf(ZooAPI);
+  await assertSnapshot(t, specification);
 });

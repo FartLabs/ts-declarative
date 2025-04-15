@@ -67,25 +67,27 @@ export function createStandardMethodsDecoratorFactory(
       get: true,
       list: true,
       update: true,
-    }) => [
-      ...initializeStandardMethod(
-        kv,
-        initializeStandardCreate,
-        options?.create,
-      ),
-      ...initializeStandardMethod(
-        kv,
-        initializeStandardDelete,
-        options?.delete,
-      ),
-      ...initializeStandardMethod(kv, initializeStandardGet, options?.get),
-      ...initializeStandardMethod(kv, initializeStandardList, options?.list),
-      ...initializeStandardMethod(
-        kv,
-        initializeStandardUpdate,
-        options?.update,
-      ),
-    ],
+    }) => {
+      return [
+        ...initializeStandardMethod(
+          kv,
+          initializeStandardCreate,
+          options?.create,
+        ),
+        ...initializeStandardMethod(
+          kv,
+          initializeStandardDelete,
+          options?.delete,
+        ),
+        ...initializeStandardMethod(kv, initializeStandardGet, options?.get),
+        ...initializeStandardMethod(kv, initializeStandardList, options?.list),
+        ...initializeStandardMethod(
+          kv,
+          initializeStandardUpdate,
+          options?.update,
+        ),
+      ];
+    },
   });
 }
 
@@ -124,7 +126,7 @@ function initializeStandardMethod<T>(
   kv: Deno.Kv,
   // deno-lint-ignore no-explicit-any
   initialize: (options?: T) => Array<Declarative<any>>,
-  options?: T | boolean | undefined,
+  options: T | boolean | undefined,
 ) {
   return options
     ? initialize({ kv, ...(typeof options === "object" ? options : {}) } as T)

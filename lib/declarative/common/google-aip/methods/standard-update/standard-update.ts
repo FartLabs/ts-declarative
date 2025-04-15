@@ -52,9 +52,7 @@ export interface ValueStandardUpdate
  */
 export function declarativeStandardUpdateSpecification<
   TValue extends ValueStandardUpdate,
->(
-  options?: StandardUpdateSpecificationOptions,
-): Declarative<TValue> {
+>(options?: StandardUpdateSpecificationOptions): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
     const pathname = toStandardUpdatePath(
@@ -82,11 +80,13 @@ export function declarativeStandardUpdateSpecification<
           },
         },
       },
-      parameters: [{
-        name: toCamelCase(resourceName),
-        in: "path",
-        required: true,
-      }],
+      parameters: [
+        {
+          name: toCamelCase(resourceName),
+          in: "path",
+          required: true,
+        },
+      ],
       responses: {
         "200": {
           description: options?.request?.description ??
@@ -184,6 +184,8 @@ export function declarativeStandardUpdateRoute<
         options.kv,
         [keyPrefix],
         toCamelCase(resourceName),
+        options?.primaryKey,
+        options?.validator,
       ),
     });
 
@@ -200,4 +202,15 @@ export interface StandardUpdateRouteOptions extends OperationOptions {
    * kv is the Deno Kv instance to use in the HTTP handler.
    */
   kv?: Deno.Kv;
+
+  /**
+   * validation is whether the request should be validated.
+   */
+  // deno-lint-ignore no-explicit-any
+  validator?: (data: any) => boolean;
+
+  /**
+   * primaryKey is the primary key of the resource.
+   */
+  primaryKey?: string;
 }

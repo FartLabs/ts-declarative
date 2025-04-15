@@ -6,6 +6,8 @@ export function standardCreateHandler(
   kv: Deno.Kv,
   prefix: Deno.KvKey,
   primaryKey = "name",
+  // deno-lint-ignore no-explicit-any
+  validator?: (data: any) => boolean,
 ): (request: Request) => Promise<Response> {
   return async (request) => {
     const body = await request.json();
@@ -13,6 +15,15 @@ export function standardCreateHandler(
       return new Response(`Primary key "${primaryKey}" not found`, {
         status: 400,
       });
+    }
+
+    if (validator !== undefined) {
+      const isValid = validator(body);
+      if (!isValid) {
+        return new Response("Request body is not valid", {
+          status: 400,
+        });
+      }
     }
 
     const result = await kv.set([...prefix, body[primaryKey]], body);

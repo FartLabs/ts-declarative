@@ -8,6 +8,7 @@ import {
   toOperationPath,
   toOperationSchema,
 } from "#/lib/declarative/common/google-aip/operation.ts";
+import { createValidator } from "#/lib/declarative/common/json-schema/ajv/ajv.ts";
 import { standardCreateHandler } from "./handler.ts";
 
 /**
@@ -137,6 +138,9 @@ export function declarativeStandardCreateRoute<
       options?.collectionIdentifier,
       options?.parent,
     );
+    const validator = value?.jsonSchema !== undefined
+      ? createValidator(value?.jsonSchema)
+      : undefined;
 
     value ??= {} as TValue;
     value["routes"] ??= [];
@@ -151,6 +155,7 @@ export function declarativeStandardCreateRoute<
         options.kv,
         [keyPrefix],
         options?.primaryKey,
+        validator,
       ),
     });
     return value;
@@ -166,6 +171,12 @@ export interface StandardCreateRouteOptions extends OperationOptions {
    * kv is the Deno Kv instance to use in the HTTP handler.
    */
   kv?: Deno.Kv;
+
+  /**
+   * validation is whether the request should be validated.
+   */
+  // deno-lint-ignore no-explicit-any
+  validator?: (data: any) => boolean;
 
   /**
    * primaryKey is the primary key of the resource.

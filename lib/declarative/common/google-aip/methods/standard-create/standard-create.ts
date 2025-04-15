@@ -1,4 +1,5 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
+import { mergeValue } from "#/lib/declarative/merge-value.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
 import type { ValuePathsObject } from "#/lib/declarative/common/openapi/paths-object.ts";
@@ -62,43 +63,44 @@ export function declarativeStandardCreateSpecification<
       options?.parent,
     );
 
-    value ??= {} as TValue;
-    value["paths"] ??= {};
-    value["paths"][pathname] ??= {};
-    value["paths"][pathname]["post"] = {
-      description: options?.description ?? `Creates ${resourceName}`,
-      requestBody: {
-        required: true,
-        description: options?.request?.description ??
-          `The ${resourceName} to create`,
-        content: {
-          "application/json": {
-            schema: toOperationSchema(
-              resourceName,
-              value?.jsonSchema,
-              options?.request?.schema,
-            ),
-          },
-        },
-      },
-      responses: {
-        "200": {
-          description: options?.response?.description ??
-            `The created ${resourceName}`,
-          content: {
-            "application/json": {
-              schema: toOperationSchema(
-                resourceName,
-                value?.jsonSchema,
-                options?.response?.schema,
-              ),
+    return mergeValue(value, {
+      paths: {
+        [pathname]: {
+          post: {
+            description: options?.description ?? `Creates ${resourceName}`,
+            requestBody: {
+              required: true,
+              description: options?.request?.description ??
+                `The ${resourceName} to create`,
+              content: {
+                "application/json": {
+                  schema: toOperationSchema(
+                    resourceName,
+                    value?.jsonSchema,
+                    options?.request?.schema,
+                  ),
+                },
+              },
+            },
+            responses: {
+              "200": {
+                description: options?.response?.description ??
+                  `The created ${resourceName}`,
+                content: {
+                  "application/json": {
+                    schema: toOperationSchema(
+                      resourceName,
+                      value?.jsonSchema,
+                      options?.response?.schema,
+                    ),
+                  },
+                },
+              },
             },
           },
         },
       },
-    };
-
-    return value;
+    });
   };
 }
 
@@ -142,23 +144,24 @@ export function declarativeStandardCreateRoute<
       ? createValidator(value?.jsonSchema)
       : undefined;
 
-    value ??= {} as TValue;
-    value["routes"] ??= [];
-    value["routes"].push({
-      pattern: toStandardCreatePattern(
-        resourceName,
-        options?.collectionIdentifier,
-        options?.parent,
-      ),
-      method: "POST",
-      handler: standardCreateHandler(
-        options.kv,
-        [keyPrefix],
-        options?.primaryKey,
-        validator,
-      ),
+    return mergeValue(value, {
+      routes: [
+        {
+          pattern: toStandardCreatePattern(
+            resourceName,
+            options?.collectionIdentifier,
+            options?.parent,
+          ),
+          method: "POST",
+          handler: standardCreateHandler(
+            options.kv,
+            [keyPrefix],
+            options?.primaryKey,
+            validator,
+          ),
+        },
+      ],
     });
-    return value;
   };
 }
 

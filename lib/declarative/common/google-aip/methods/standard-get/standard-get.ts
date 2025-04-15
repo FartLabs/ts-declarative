@@ -1,4 +1,5 @@
 import { toCamelCase } from "@std/text/to-camel-case";
+import { deepMerge } from "@std/collections/deep-merge";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
@@ -62,36 +63,38 @@ export function declarativeStandardGetSpecification<
       options?.parent,
     );
 
-    value ??= {} as TValue;
-    value["paths"] ??= {};
-    value["paths"][pathname] ??= {};
-    value["paths"][pathname]["get"] = {
-      description: options?.description ?? `Gets ${resourceName}`,
-      parameters: [
-        {
-          name: toCamelCase(resourceName),
-          in: "path",
-          required: true,
-          schema: { type: "string" },
-        },
-      ],
-      responses: {
-        "200": {
-          description: options?.response?.description ?? `Got ${resourceName}`,
-          content: {
-            "application/json": {
-              schema: toOperationSchema(
-                resourceName,
-                value?.jsonSchema,
-                options?.response?.schema,
-              ),
+    return deepMerge((value ?? {}) as Readonly<Record<PropertyKey, unknown>>, {
+      paths: {
+        [pathname]: {
+          get: {
+            description: options?.description ?? `Gets ${resourceName}`,
+            parameters: [
+              {
+                name: toCamelCase(resourceName),
+                in: "path",
+                required: true,
+                schema: { type: "string" },
+              },
+            ],
+            responses: {
+              "200": {
+                description: options?.response?.description ??
+                  `Got ${resourceName}`,
+                content: {
+                  "application/json": {
+                    schema: toOperationSchema(
+                      resourceName,
+                      value?.jsonSchema,
+                      options?.response?.schema,
+                    ),
+                  },
+                },
+              },
             },
           },
         },
       },
-    };
-
-    return value;
+    }) as unknown as TValue;
   };
 }
 
@@ -111,24 +114,6 @@ export function toStandardGetPath(
       parent,
     )
   }/{${toCamelCase(resourceName)}}`;
-}
-
-/**
- * toStandardGetPattern returns the URL pattern of the standard Get operation
- * of the resource.
- */
-export function toStandardGetPattern(
-  resourceName: string,
-  collectionIdentifier?: string,
-  parent?: string,
-): string {
-  return `${
-    toOperationPath(
-      resourceName,
-      collectionIdentifier,
-      parent,
-    )
-  }/:${toCamelCase(resourceName)}`;
 }
 
 /**
@@ -156,22 +141,44 @@ export function declarativeStandardGetRoute<TValue extends ValueStandardGet>(
       options.parent,
     );
 
-    value ??= {} as TValue;
-    value["routes"] ??= [];
-    value["routes"].push({
-      pattern: new URLPattern({
-        pathname: toStandardGetPattern(toCamelCase(resourceName)),
-      }),
-      method: "GET",
-      handler: standardGetHandler(
-        options.kv,
-        [keyPrefix],
-        toCamelCase(resourceName),
-      ),
-    });
-
-    return value;
+    return deepMerge((value ?? {}) as Readonly<Record<PropertyKey, unknown>>, {
+      routes: [
+        {
+          pattern: toStandardGetPattern(
+            resourceName,
+            options.collectionIdentifier,
+            options.parent,
+          ),
+          method: "GET",
+          handler: standardGetHandler(
+            options.kv,
+            [keyPrefix],
+            toCamelCase(resourceName),
+          ),
+        },
+      ],
+    }) as unknown as TValue;
   };
+}
+
+/**
+ * toStandardGetPattern returns the URL pattern of the standard Get operation
+ * of the resource.
+ */
+export function toStandardGetPattern(
+  resourceName: string,
+  collectionIdentifier?: string,
+  parent?: string,
+): URLPattern {
+  return new URLPattern({
+    pathname: `${
+      toOperationPath(
+        resourceName,
+        collectionIdentifier,
+        parent,
+      )
+    }/:${toCamelCase(resourceName)}`,
+  });
 }
 
 /**

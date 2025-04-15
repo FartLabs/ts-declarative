@@ -1,5 +1,6 @@
 import { toCamelCase } from "@std/text/to-camel-case";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
+import { mergeValue } from "#/lib/declarative/merge-value.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
 import type { ValuePathsObject } from "#/lib/declarative/common/openapi/paths-object.ts";
@@ -61,50 +62,51 @@ export function declarativeStandardUpdateSpecification<
       options?.parent,
     );
 
-    value ??= {} as TValue;
-    value["paths"] ??= {};
-    value["paths"][pathname] ??= {};
-    value["paths"][pathname]["post"] = {
-      description: options?.description ?? `Updates ${resourceName}`,
-      requestBody: {
-        required: true,
-        description: options?.request?.description ??
-          `The ${resourceName} to update`,
-        content: {
-          "application/json": {
-            schema: toOperationSchema(
-              resourceName,
-              value?.jsonSchema,
-              options?.request?.schema,
-            ),
-          },
-        },
-      },
-      parameters: [
-        {
-          name: toCamelCase(resourceName),
-          in: "path",
-          required: true,
-        },
-      ],
-      responses: {
-        "200": {
-          description: options?.request?.description ??
-            `The updated ${resourceName}`,
-          content: {
-            "application/json": {
-              schema: toOperationSchema(
-                resourceName,
-                value?.jsonSchema,
-                options?.response?.schema,
-              ),
+    return mergeValue(value, {
+      paths: {
+        [pathname]: {
+          post: {
+            description: options?.description ?? `Updates ${resourceName}`,
+            requestBody: {
+              required: true,
+              description: options?.request?.description ??
+                `The ${resourceName} to update`,
+              content: {
+                "application/json": {
+                  schema: toOperationSchema(
+                    resourceName,
+                    value?.jsonSchema,
+                    options?.request?.schema,
+                  ),
+                },
+              },
+            },
+            parameters: [
+              {
+                name: toCamelCase(resourceName),
+                in: "path",
+                required: true,
+              },
+            ],
+            responses: {
+              "200": {
+                description: options?.request?.description ??
+                  `The updated ${resourceName}`,
+                content: {
+                  "application/json": {
+                    schema: toOperationSchema(
+                      resourceName,
+                      value?.jsonSchema,
+                      options?.response?.schema,
+                    ),
+                  },
+                },
+              },
             },
           },
         },
       },
-    };
-
-    return value;
+    });
   };
 }
 
@@ -124,26 +126,6 @@ export function toStandardUpdatePath(
       parent,
     )
   }/{${toCamelCase(resourceName)}}`;
-}
-
-/**
- * toStandardUpdatePattern returns the URL pattern of the standard Update operation
- * of the resource.
- */
-export function toStandardUpdatePattern(
-  resourceName: string,
-  collectionIdentifier?: string,
-  parent?: string,
-): URLPattern {
-  return new URLPattern({
-    pathname: `${
-      toOperationPath(
-        resourceName,
-        collectionIdentifier,
-        parent,
-      )
-    }/:${toCamelCase(resourceName)}`,
-  });
 }
 
 /**
@@ -171,26 +153,46 @@ export function declarativeStandardUpdateRoute<
       options.parent,
     );
 
-    value ??= {} as TValue;
-    value["routes"] ??= [];
-    value["routes"].push({
-      pattern: toStandardUpdatePattern(
-        resourceName,
-        options?.collectionIdentifier,
-        options?.parent,
-      ),
-      method: "POST",
-      handler: standardUpdateHandler(
-        options.kv,
-        [keyPrefix],
-        toCamelCase(resourceName),
-        options?.primaryKey,
-        options?.validator,
-      ),
+    return mergeValue(value, {
+      routes: [
+        {
+          pattern: toStandardUpdatePattern(
+            resourceName,
+            options.collectionIdentifier,
+            options.parent,
+          ),
+          method: "POST",
+          handler: standardUpdateHandler(
+            options.kv,
+            [keyPrefix],
+            toCamelCase(resourceName),
+            options?.primaryKey,
+            options?.validator,
+          ),
+        },
+      ],
     });
-
-    return value;
   };
+}
+
+/**
+ * toStandardUpdatePattern returns the URL pattern of the standard Update operation
+ * of the resource.
+ */
+export function toStandardUpdatePattern(
+  resourceName: string,
+  collectionIdentifier?: string,
+  parent?: string,
+): URLPattern {
+  return new URLPattern({
+    pathname: `${
+      toOperationPath(
+        resourceName,
+        collectionIdentifier,
+        parent,
+      )
+    }/:${toCamelCase(resourceName)}`,
+  });
 }
 
 /**

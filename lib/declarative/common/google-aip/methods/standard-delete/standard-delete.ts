@@ -1,5 +1,6 @@
 import { toCamelCase } from "@std/text/to-camel-case";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
+import { mergeValue } from "#/lib/declarative/merge-value.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
 import type { ValuePathsObject } from "#/lib/declarative/common/openapi/paths-object.ts";
@@ -50,9 +51,7 @@ export interface ValueStandardDelete
  */
 export function declarativeStandardDeleteSpecification<
   TValue extends ValueStandardDelete,
->(
-  options?: StandardDeleteSpecificationOptions,
-): Declarative<TValue> {
+>(options?: StandardDeleteSpecificationOptions): Declarative<TValue> {
   return (value, name) => {
     const resourceName = options?.resourceName ?? name;
     const pathname = toStandardDeletePath(
@@ -61,25 +60,28 @@ export function declarativeStandardDeleteSpecification<
       options?.parent,
     );
 
-    value ??= {} as TValue;
-    value["paths"] ??= {};
-    value["paths"][pathname] ??= {};
-    value["paths"][pathname]["delete"] = {
-      description: options?.description ?? `Deletes ${resourceName}`,
-      parameters: [{
-        name: toCamelCase(resourceName),
-        in: "path",
-        required: true,
-      }],
-      responses: {
-        "200": {
-          description: options?.response?.description ??
-            `The deleted ${resourceName}`,
+    return mergeValue(value, {
+      paths: {
+        [pathname]: {
+          delete: {
+            description: options?.description ?? `Deletes ${resourceName}`,
+            parameters: [
+              {
+                name: toCamelCase(resourceName),
+                in: "path",
+                required: true,
+              },
+            ],
+            responses: {
+              "200": {
+                description: options?.response?.description ??
+                  `The deleted ${resourceName}`,
+              },
+            },
+          },
         },
       },
-    };
-
-    return value;
+    });
   };
 }
 
@@ -102,24 +104,6 @@ export function toStandardDeletePath(
 }
 
 /**
- * toStandardDeletePattern returns the URL pattern of the standard Delete operation
- * of the resource.
- */
-export function toStandardDeletePattern(
-  resourceName: string,
-  collectionIdentifier?: string,
-  parent?: string,
-): string {
-  return `${
-    toOperationPath(
-      resourceName,
-      collectionIdentifier,
-      parent,
-    )
-  }/:${toCamelCase(resourceName)}`;
-}
-
-/**
  * StandardDeleteSpecificationOptions is the options for the standard Delete
  * operation of the resource.
  */
@@ -131,37 +115,57 @@ export interface StandardDeleteSpecificationOptions extends OperationOptions {}
  */
 export function declarativeStandardDeleteRoute<
   TValue extends ValueStandardDelete,
->(
-  options?: StandardDeleteRouteOptions,
-): Declarative<TValue> {
+>(options?: StandardDeleteRouteOptions): Declarative<TValue> {
   return (value, name) => {
     if (options?.kv === undefined) {
       throw new Error("kv is required");
     }
 
     const resourceName = options?.resourceName ?? name;
-    value ??= {} as TValue;
-    value["routes"] ??= [];
-    value["routes"].push({
-      pattern: new URLPattern({
-        pathname: toStandardDeletePattern(toCamelCase(resourceName)),
-      }),
-      method: "DELETE",
-      handler: standardDeleteHandler(
-        options.kv,
-        [
-          toOperationPath(
+    return mergeValue(value, {
+      routes: [
+        {
+          pattern: toStandardDeletePattern(
             resourceName,
             options.collectionIdentifier,
             options.parent,
           ),
-        ],
-        toCamelCase(resourceName),
-      ),
+          method: "DELETE",
+          handler: standardDeleteHandler(
+            options.kv,
+            [
+              toOperationPath(
+                resourceName,
+                options.collectionIdentifier,
+                options.parent,
+              ),
+            ],
+            toCamelCase(resourceName),
+          ),
+        },
+      ],
     });
-
-    return value;
   };
+}
+
+/**
+ * toStandardDeletePattern returns the URL pattern of the standard Delete
+ * operation of the resource.
+ */
+export function toStandardDeletePattern(
+  resourceName: string,
+  collectionIdentifier?: string,
+  parent?: string,
+): URLPattern {
+  return new URLPattern({
+    pathname: `${
+      toOperationPath(
+        resourceName,
+        collectionIdentifier,
+        parent,
+      )
+    }/:${toCamelCase(resourceName)}`,
+  });
 }
 
 /**

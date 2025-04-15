@@ -1,6 +1,7 @@
 import type { OpenAPIV3_1 } from "openapi-types";
 import type { Handler } from "@std/http/unstable-route";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
+import { mergeValue } from "#/lib/declarative/merge-value.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
 import type { ValuePathsObject } from "#/lib/declarative/common/openapi/paths-object.ts";
@@ -38,9 +39,7 @@ export const customMethod: (
  */
 export function declarativeCustomMethodSpecification<
   TValue extends ValueCustomMethods,
->(
-  options?: CustomMethodOptions,
-): Declarative<TValue> {
+>(options?: CustomMethodOptions): Declarative<TValue> {
   return (value, name) => {
     if (options?.name === undefined) {
       throw new Error("Custom method name is required");
@@ -48,43 +47,45 @@ export function declarativeCustomMethodSpecification<
 
     const resourceName = options?.resourceName ?? name;
     const pathname = toCustomMethodPath(resourceName, options);
-    const httpMethod: OpenAPIV3_1.HttpMethods =
-      (options?.httpMethod ?? "post") as OpenAPIV3_1.HttpMethods;
+    const httpMethod: OpenAPIV3_1.HttpMethods = (options?.httpMethod ??
+      "post") as OpenAPIV3_1.HttpMethods;
 
-    value ??= {} as TValue;
-    value["paths"] ??= {};
-    value["paths"][pathname] ??= {};
-    value["paths"][pathname][httpMethod] = {
-      description: options?.description ?? `Custom ${options?.name}`,
-      requestBody: {
-        required: true,
-        content: {
-          "application/json": {
-            schema: toOperationSchema(
-              resourceName,
-              value?.jsonSchema,
-              options?.request?.schema,
-            ),
-          },
-        },
-      },
-      responses: {
-        "200": {
-          description: options?.response?.description ?? `The ${resourceName}`,
-          content: {
-            "application/json": {
-              schema: toOperationSchema(
-                resourceName,
-                value?.jsonSchema,
-                options?.response?.schema,
-              ),
+    return mergeValue(value, {
+      paths: {
+        [pathname]: {
+          [httpMethod]: {
+            description: options?.description ?? `Custom ${options?.name}`,
+            requestBody: {
+              required: true,
+              content: {
+                "application/json": {
+                  schema: toOperationSchema(
+                    resourceName,
+                    value?.jsonSchema,
+                    options?.request?.schema,
+                  ),
+                },
+              },
+            },
+            responses: {
+              "200": {
+                description: options?.response?.description ??
+                  `The ${resourceName}`,
+                content: {
+                  "application/json": {
+                    schema: toOperationSchema(
+                      resourceName,
+                      value?.jsonSchema,
+                      options?.response?.schema,
+                    ),
+                  },
+                },
+              },
             },
           },
         },
       },
-    };
-
-    return value;
+    });
   };
 }
 
@@ -92,9 +93,7 @@ export function declarativeCustomMethodSpecification<
  * declarativeCustomMethodRoute is a decorator factory that creates a custom
  * method for the resource.
  */
-export function declarativeCustomMethodRoute<
-  TValue extends ValueCustomMethods,
->(
+export function declarativeCustomMethodRoute<TValue extends ValueCustomMethods>(
   options?: CustomMethodOptions,
 ): Declarative<TValue> {
   return (value, name) => {
@@ -107,14 +106,15 @@ export function declarativeCustomMethodRoute<
       throw new Error("Custom method handler is required");
     }
 
-    value ??= {} as TValue;
-    value["routes"] ??= [];
-    value["routes"].push({
-      pattern: toCustomMethodPattern(resourceName, options),
-      method: options?.httpMethod ?? "post",
-      handler: options.handler,
+    return mergeValue(value, {
+      routes: [
+        {
+          pattern: toCustomMethodPattern(resourceName, options),
+          method: options?.httpMethod ?? "post",
+          handler: options.handler,
+        },
+      ],
     });
-    return value;
   };
 }
 

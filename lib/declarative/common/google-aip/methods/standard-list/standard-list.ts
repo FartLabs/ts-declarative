@@ -1,5 +1,6 @@
 import pluralize from "@wei/pluralize";
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
+import { mergeValue } from "#/lib/declarative/merge-value.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-schema.ts";
 import type { ValuePathsObject } from "#/lib/declarative/common/openapi/paths-object.ts";
@@ -53,9 +54,7 @@ export interface ValueStandardList
  */
 export function declarativeStandardListSpecification<
   TValue extends ValueStandardList,
->(
-  options?: StandardListSpecificationOptions,
-): Declarative<TValue> {
+>(options?: StandardListSpecificationOptions): Declarative<TValue> {
   return (value, name) => {
     if (options?.pagination !== undefined) {
       throw new Error("Pagination is not supported yet.");
@@ -69,36 +68,38 @@ export function declarativeStandardListSpecification<
       options?.parent,
     );
 
-    value ??= {} as TValue;
-    value["paths"] ??= {};
-    value["paths"][pathname] ??= {};
-    value["paths"][pathname]["get"] = {
-      description: options?.description ?? `Lists ${pluralizedResourceName}`,
-      parameters: [
-        { name: "page_size", in: "query" },
-        { name: "page_token", in: "query" },
-      ],
-      responses: {
-        "200": {
-          description: options?.response?.description ??
-            `List of ${pluralizedResourceName}`,
-          content: {
-            "application/json": {
-              schema: {
-                type: "array",
-                items: toOperationSchema(
-                  resourceName,
-                  value?.jsonSchema,
-                  options?.response?.schema,
-                ),
+    return mergeValue(value, {
+      paths: {
+        [pathname]: {
+          get: {
+            description: options?.description ??
+              `Lists ${pluralizedResourceName}`,
+            parameters: [
+              { name: "page_size", in: "query" },
+              { name: "page_token", in: "query" },
+            ],
+            responses: {
+              "200": {
+                description: options?.response?.description ??
+                  `List of ${pluralizedResourceName}`,
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "array",
+                      items: toOperationSchema(
+                        resourceName,
+                        value?.jsonSchema,
+                        options?.response?.schema,
+                      ),
+                    },
+                  },
+                },
               },
             },
           },
         },
       },
-    };
-
-    return value;
+    });
   };
 }
 
@@ -136,9 +137,9 @@ export interface StandardListSpecificationOptions extends OperationOptions {
  * declarativeStandardListRoute returns the standard List operation of the
  * resource.
  */
-export function declarativeStandardListRoute<
-  TValue extends ValueStandardList,
->(options?: StandardListRouteOptions): Declarative<TValue> {
+export function declarativeStandardListRoute<TValue extends ValueStandardList>(
+  options?: StandardListRouteOptions,
+): Declarative<TValue> {
   return (value, name) => {
     if (options?.kv === undefined) {
       throw new Error("kv is required");
@@ -151,19 +152,19 @@ export function declarativeStandardListRoute<
       options.parent,
     );
 
-    value ??= {} as TValue;
-    value["routes"] ??= [];
-    value["routes"].push({
-      pattern: toStandardListPattern(
-        resourceName,
-        options?.collectionIdentifier,
-        options?.parent,
-      ),
-      method: "GET",
-      handler: standardListHandler(options.kv, [keyPrefix]),
+    return mergeValue(value, {
+      routes: [
+        {
+          pattern: toStandardListPattern(
+            resourceName,
+            options.collectionIdentifier,
+            options.parent,
+          ),
+          method: "GET",
+          handler: standardListHandler(options.kv, [keyPrefix]),
+        },
+      ],
     });
-
-    return value;
   };
 }
 

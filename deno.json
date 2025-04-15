@@ -1,7 +1,7 @@
 {
   "lock": false,
   "name": "@fartlabs/declarative",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "exports": {
     ".": "./lib/declarative/mod.ts",
     "./common/google-aip": "./lib/declarative/common/google-aip/mod.ts",
@@ -12,7 +12,8 @@
     "./common/jsonld": "./lib/declarative/common/jsonld/mod.ts",
     "./common/openapi": "./lib/declarative/common/openapi/mod.ts",
     "./common/openapi/oazapfts": "./lib/declarative/common/openapi/oazapfts/mod.ts",
-    "./common/type-info": "./lib/declarative/common/type-info/mod.ts"
+    "./common/type-info": "./lib/declarative/common/type-info/mod.ts",
+    "./common/router": "./lib/declarative/common/router/mod.ts"
   },
   "imports": {
     "#/": "./",

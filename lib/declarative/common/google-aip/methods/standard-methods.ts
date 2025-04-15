@@ -59,31 +59,54 @@ export function createStandardMethodDecoratorFactory(
  */
 export function createStandardMethodsDecoratorFactory(
   kv: Deno.Kv,
-): (options?: StandardMethodsOptions | undefined) => (target: Class) => Class {
+): (
+  optionsOrParent?: string | StandardMethodsOptions,
+  parent?: string | undefined,
+) => (target: Class) => Class {
   return createDecoratorFactory({
-    initialize: (options: StandardMethodsOptions = {
-      create: true,
-      delete: true,
-      get: true,
-      list: true,
-      update: true,
-    }) => {
+    initialize(
+      optionsOrParent?: StandardMethodsOptions | string,
+      parent?: string,
+    ) {
+      const parentValue = parent ??
+        (typeof optionsOrParent === "string" ? optionsOrParent : undefined);
+      const options = typeof optionsOrParent === "object" ? optionsOrParent : {
+        create: true,
+        delete: true,
+        get: true,
+        list: true,
+        update: true,
+      };
+
       return [
         ...initializeStandardMethod(
-          kv,
           initializeStandardCreate,
+          kv,
+          parentValue,
           options?.create,
         ),
         ...initializeStandardMethod(
-          kv,
           initializeStandardDelete,
+          kv,
+          parentValue,
           options?.delete,
         ),
-        ...initializeStandardMethod(kv, initializeStandardGet, options?.get),
-        ...initializeStandardMethod(kv, initializeStandardList, options?.list),
         ...initializeStandardMethod(
+          initializeStandardGet,
           kv,
+          parentValue,
+          options?.get,
+        ),
+        ...initializeStandardMethod(
+          initializeStandardList,
+          kv,
+          parentValue,
+          options?.list,
+        ),
+        ...initializeStandardMethod(
           initializeStandardUpdate,
+          kv,
+          parentValue,
           options?.update,
         ),
       ];
@@ -123,13 +146,18 @@ export interface StandardMethodsOptions {
 }
 
 function initializeStandardMethod<T>(
-  kv: Deno.Kv,
   // deno-lint-ignore no-explicit-any
   initialize: (options?: T) => Array<Declarative<any>>,
+  kv: Deno.Kv,
+  parent: string | undefined,
   options: T | boolean | undefined,
 ) {
   return options
-    ? initialize({ kv, ...(typeof options === "object" ? options : {}) } as T)
+    ? initialize({
+      kv,
+      parent,
+      ...(typeof options === "object" ? options : {}),
+    } as T)
     : [];
 }
 

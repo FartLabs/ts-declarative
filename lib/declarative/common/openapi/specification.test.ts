@@ -77,13 +77,13 @@ Deno.test("openapiSpec decorator decorates value", () => {
   });
 });
 
-@standardMethods()
+@standardMethods("/api")
 @autoSchema()
 class Cat {
   public constructor(public name: string) {}
 }
 
-@standardMethods()
+@standardMethods("/api")
 @autoSchema()
 class Dog {
   public constructor(public name: string) {}

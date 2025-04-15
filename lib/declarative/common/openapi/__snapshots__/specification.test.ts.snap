@@ -38,7 +38,7 @@ snapshot[`openapiSpec decorator with multiple resources 1`] = `
   },
   openapi: "3.0.1",
   paths: {
-    "/cats": {
+    "/api/cats": {
       get: {
         description: "Lists Cats",
         parameters: [
@@ -94,7 +94,7 @@ snapshot[`openapiSpec decorator with multiple resources 1`] = `
         },
       },
     },
-    "/cats/{cat}": {
+    "/api/cats/{cat}": {
       delete: {
         description: "Deletes Cat",
         parameters: [
@@ -169,7 +169,7 @@ snapshot[`openapiSpec decorator with multiple resources 1`] = `
         },
       },
     },
-    "/dogs": {
+    "/api/dogs": {
       get: {
         description: "Lists Dogs",
         parameters: [
@@ -225,7 +225,7 @@ snapshot[`openapiSpec decorator with multiple resources 1`] = `
         },
       },
     },
-    "/dogs/{dog}": {
+    "/api/dogs/{dog}": {
       delete: {
         description: "Deletes Dog",
         parameters: [

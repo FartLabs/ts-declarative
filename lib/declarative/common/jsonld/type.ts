@@ -26,11 +26,14 @@ export interface ValueType {
  * This is used to set the type of the class.
  */
 export const type: (...args: [string]) => (target: Class) => Class =
-  createDecoratorFactory({
-    initialize: (type: string) => {
-      return [declarativeType(type)];
-    },
-  });
+  createDecoratorFactory({ initialize: initializeType });
+
+/**
+ * initializeType returns the declarative functions for the type decorator.
+ */
+export function initializeType(type: string): Declarative<ValueType>[] {
+  return [declarativeType(type)];
+}
 
 /**
  * declarativeType is a function that returns a declarative function that

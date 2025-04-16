@@ -7,15 +7,6 @@ import type { ValueContext } from "./context.ts";
 import { declarativeContext } from "./context.ts";
 
 /**
- * jsonldOf returns the JSON-LD of the class.
- */
-export function jsonldOf<TClass extends Class>(
-  target: TClass,
-): ValueJSONLd | undefined {
-  return getPrototypeValue<ValueJSONLd>(target);
-}
-
-/**
  * ValueJSONLd is the value for the JSON-LD decorator.
  */
 export interface ValueJSONLd extends ValueType, ValueContext {}
@@ -25,18 +16,32 @@ export interface ValueJSONLd extends ValueType, ValueContext {}
  * This is used to set the JSON-LD of the class.
  */
 export const jsonld: (value: ValueJSONLd) => (target: Class) => Class =
-  createDecoratorFactory({
-    initialize: (value: ValueJSONLd): Declarative<ValueJSONLd>[] => {
-      return [declarativeType(value?.type), declarativeContext(value?.context)];
-    },
-  });
+  createDecoratorFactory({ initialize: initializeJSONLd });
+
+/**
+ * initializeJSONLd is the initializer for the JSON-LD decorator.
+ */
+export function initializeJSONLd(
+  value: ValueJSONLd,
+): Declarative<ValueJSONLd>[] {
+  return [declarativeType(value?.type), declarativeContext(value?.context)];
+}
 
 /**
  * docOf returns the JSON-LD document of the instance.
  */
-export function docOf<T>(instance: T): Record<string, unknown> {
-  const { constructor } = instance as { constructor: Class };
-  const value = getPrototypeValue<ValueJSONLd>(constructor);
+export function docOf(instance: InstanceType<Class>): Record<string, unknown> {
+  return docOfObject(instance.constructor, instance);
+}
+
+/**
+ * docOfObject returns the JSON-LD document of the object.
+ */
+export function docOfObject(
+  target: Class,
+  instance: InstanceType<Class>,
+): Record<string, unknown> {
+  const value = jsonldOf(target);
   const doc: Record<string, unknown> = Object.assign({}, instance);
   if (value === undefined) {
     return doc;
@@ -46,6 +51,15 @@ export function docOf<T>(instance: T): Record<string, unknown> {
     Object.assign(doc, { "@context": value.context });
   }
 
-  Object.assign(doc, { "@type": value.type ?? constructor.name });
+  Object.assign(doc, { "@type": value.type ?? target.name });
   return doc;
+}
+
+/**
+ * jsonldOf returns the JSON-LD of the class.
+ */
+export function jsonldOf<TClass extends Class>(
+  target: TClass,
+): ValueJSONLd | undefined {
+  return getPrototypeValue<ValueJSONLd>(target);
 }

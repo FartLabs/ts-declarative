@@ -33,10 +33,18 @@ export interface ValueContext {
 export const context: (
   context?: Context | undefined,
 ) => (target: Class) => Class = createDecoratorFactory({
-  initialize: (context?: Context) => {
-    return [declarativeContext(context)];
-  },
+  initialize: initializeContext,
 });
+
+/**
+ * initializeContext creates declaratives to set the JSON-LD context of a
+ * class.
+ */
+export function initializeContext(
+  context?: Context,
+): Declarative<ValueContext>[] {
+  return [declarativeContext(context)];
+}
 
 /**
  * declarativeContext sets the context of the class.

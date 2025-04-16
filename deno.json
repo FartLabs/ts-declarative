@@ -52,7 +52,5 @@
     "example": "deno -A examples/getting-started/main.ts",
     "example:alpaca": "deno -A examples/alpaca/main.ts"
   },
-  "fmt": {
-    "exclude": ["./examples/alpaca/index.eta.html"]
-  }
+  "exclude": ["./examples/alpaca/index.eta.html"]
 }

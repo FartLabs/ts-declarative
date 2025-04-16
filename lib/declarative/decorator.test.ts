@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { DeclarativeStorageInMemory } from "./storage/in-memory.ts";
 import { getPrototypeID, getPrototypeValue } from "./declarative.ts";
-import { createDecoratorFactory } from "./decorator.ts";
+import { createDecoratorFactory, declarative } from "./decorator.ts";
 
 interface Fake {
   foo?: string;
@@ -11,7 +11,7 @@ interface Fake {
 
 Deno.test("Declarative decorator factory", () => {
   const storage = new DeclarativeStorageInMemory<Fake>();
-  const declarative = createDecoratorFactory({
+  const example = createDecoratorFactory({
     storage,
     prefix: "example#",
     initialize: () => {
@@ -19,7 +19,7 @@ Deno.test("Declarative decorator factory", () => {
     },
   });
 
-  @declarative()
+  @example()
   class Foo {}
 
   const id = getPrototypeID(Foo);
@@ -66,4 +66,14 @@ Deno.test("Declarative decorator factory chaining", () => {
     bar: "bar",
     baz: "baz",
   });
+});
+
+Deno.test("Declarative decorator factory currying", () => {
+  @declarative([
+    (value) => ({ ...value, foo: "foo" }),
+    (value) => ({ ...value, bar: "bar" }),
+  ])
+  class Foo {}
+
+  assertEquals(getPrototypeValue<Fake>(Foo), { foo: "foo", bar: "bar" });
 });

@@ -4,6 +4,15 @@ import type { Class, Declarative, DeclarativeOptions } from "./declarative.ts";
 import { declareClass } from "./declarative.ts";
 
 /**
+ * declarative is a decorator factory that applies declaratives to a class.
+ */
+export function declarative(
+  ...declaratives: Array<Declarative<any> | Declarative<any>[]>
+): (target: Class) => Class {
+  return createDecoratorFactory({ initialize: () => declaratives.flat() })();
+}
+
+/**
  * DecoratorFactoryOptions is the options for the decorator factory.
  */
 export interface DecoratorFactoryOptions<TValue, TArgs extends any[]>

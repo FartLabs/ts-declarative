@@ -1,5 +1,6 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
+import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
 import type { StandardCreateOptions } from "./standard-create/standard-create.ts";
 import {
   initializeStandardCreate,
@@ -59,106 +60,108 @@ export function createStandardMethodDecoratorFactory(
  */
 export function createStandardMethodsDecoratorFactory(
   kv: Deno.Kv,
-): (
-  optionsOrParent?: string | StandardMethodsOptions,
-  parent?: string | undefined,
-) => (target: Class) => Class {
+): (options?: StandardMethodsOptions | undefined) => (target: Class) => Class {
   return createDecoratorFactory({
-    initialize(
-      optionsOrParent?: StandardMethodsOptions | string,
-      parent?: string,
-    ) {
-      const parentValue = parent ??
-        (typeof optionsOrParent === "string" ? optionsOrParent : undefined);
-      const options = typeof optionsOrParent === "object" ? optionsOrParent : {
-        create: true,
-        delete: true,
-        get: true,
-        list: true,
-        update: true,
-      };
-
+    initialize(options?: StandardMethodsOptions) {
       return [
         ...initializeStandardMethod(
+          options,
+          kv,
           initializeStandardCreate,
-          kv,
-          parentValue,
-          options?.create,
+          "create",
         ),
         ...initializeStandardMethod(
+          options,
+          kv,
           initializeStandardDelete,
-          kv,
-          parentValue,
-          options?.delete,
+          "delete",
         ),
+        ...initializeStandardMethod(options, kv, initializeStandardGet, "get"),
         ...initializeStandardMethod(
-          initializeStandardGet,
+          options,
           kv,
-          parentValue,
-          options?.get,
-        ),
-        ...initializeStandardMethod(
           initializeStandardList,
-          kv,
-          parentValue,
-          options?.list,
+          "list",
         ),
         ...initializeStandardMethod(
-          initializeStandardUpdate,
+          options,
           kv,
-          parentValue,
-          options?.update,
+          initializeStandardUpdate,
+          "update",
         ),
       ];
     },
   });
 }
 
+function initializeStandardMethod<T>(
+  options: StandardMethodsOptions | undefined,
+  kv: Deno.Kv,
+  // deno-lint-ignore no-explicit-any
+  initialize: (options?: T) => Array<Declarative<any>>,
+  method: keyof StandardMethods,
+) {
+  const {
+    parent,
+    resourceName,
+    collectionIdentifier,
+    standardMethods = {
+      create: true,
+      delete: true,
+      get: true,
+      list: true,
+      update: true,
+    },
+  } = options ?? {};
+  return standardMethods?.[method]
+    ? initialize({
+      kv,
+      parent,
+      resourceName,
+      collectionIdentifier,
+      ...((standardMethods[method] ?? {}) as T),
+    })
+    : [];
+}
+
 /**
  * StandardMethodsOptions is the options for the standard methods of the
  * resource.
  */
-export interface StandardMethodsOptions {
+export interface StandardMethodsOptions extends
+  Pick<
+    OperationOptions,
+    "parent" | "resourceName" | "collectionIdentifier"
+  > {
   /**
-   * create is the options for the standard Create method of the resource.
+   * standardMethods are the options for the standard methods of the resource.
    */
-  create?: StandardCreateOptions | boolean;
+  standardMethods?: {
+    /**
+     * create is the options for the standard Create method of the resource.
+     */
+    create?: StandardCreateOptions | boolean;
 
-  /**
-   * delete is the options for the standard Delete method of the resource.
-   */
-  delete?: StandardDeleteOptions | boolean;
+    /**
+     * delete is the options for the standard Delete method of the resource.
+     */
+    delete?: StandardDeleteOptions | boolean;
 
-  /**
-   * get is the options for the standard Get method of the resource.
-   */
-  get?: StandardGetOptions | boolean;
+    /**
+     * get is the options for the standard Get method of the resource.
+     */
+    get?: StandardGetOptions | boolean;
 
-  /**
-   * list is the options for the standard List method of the resource.
-   */
-  list?: StandardListOptions | boolean;
+    /**
+     * list is the options for the standard List method of the resource.
+     */
+    list?: StandardListOptions | boolean;
 
-  /**
-   * update is the options for the standard Update method of the resource.
-   */
-  update?: StandardUpdateOptions | boolean;
-}
-
-function initializeStandardMethod<T>(
-  // deno-lint-ignore no-explicit-any
-  initialize: (options?: T) => Array<Declarative<any>>,
-  kv: Deno.Kv,
-  parent: string | undefined,
-  options: T | boolean | undefined,
-) {
-  return options
-    ? initialize({
-      kv,
-      parent,
-      ...(typeof options === "object" ? options : {}),
-    } as T)
-    : [];
+    /**
+     * update is the options for the standard Update method of the resource.
+     */
+    update?: StandardUpdateOptions | boolean;
+  };
 }
 
 /**

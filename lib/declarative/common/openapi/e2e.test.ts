@@ -77,10 +77,7 @@ Deno.test("e2e routes respect OpenAPI specification", async (t) => {
       { method: "DELETE" },
     );
     assertEquals(deletePersonResponse.status, 200);
-    assertEquals(
-      await deletePersonResponse.text(),
-      "Resource deleted successfully",
-    );
+    assertEquals(await deletePersonResponse.json(), {});
     assertEquals((await kv.get<Person>(["/people", gary.name])).value, null);
   });
 

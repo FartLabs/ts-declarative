@@ -19,7 +19,8 @@ export function standardDeleteHandler(
     }
 
     await kv.delete([...prefix, decodeURIComponent(name)]);
-    return new Response("Resource deleted successfully", {
+    return new Response(JSON.stringify({}), {
+      status: 200,
       headers: {
         "Content-Type": "application/json",
       },

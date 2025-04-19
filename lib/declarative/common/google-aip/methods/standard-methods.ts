@@ -101,25 +101,17 @@ function initializeStandardMethod<T>(
   initialize: (options?: T) => Array<Declarative<any>>,
   method: keyof StandardMethods,
 ) {
-  const {
-    parent,
-    resourceName,
-    collectionIdentifier,
-    standardMethods = {
-      create: true,
-      delete: true,
-      get: true,
-      list: true,
-      update: true,
-    },
-  } = options ?? {};
-  return standardMethods?.[method]
+  const { parent, resourceName, collectionIdentifier, standardMethods } =
+    options ?? {};
+  return standardMethods?.[method] ?? true
     ? initialize({
       kv,
       parent,
       resourceName,
       collectionIdentifier,
-      ...((standardMethods[method] ?? {}) as T),
+      ...((typeof standardMethods?.[method] === "object"
+        ? standardMethods[method]
+        : {}) as T),
     })
     : [];
 }

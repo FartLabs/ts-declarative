@@ -7,6 +7,8 @@
     "./common/google-aip": "./lib/declarative/common/google-aip/mod.ts",
     "./common/google-aip/custom-methods": "./lib/declarative/common/google-aip/custom-methods/mod.ts",
     "./common/google-aip/standard-methods": "./lib/declarative/common/google-aip/standard-methods/mod.ts",
+    "./common/google-aip/standard-methods/common/storage": "./lib/declarative/common/google-aip/standard-methods/common/storage/mod.ts",
+    "./common/google-aip/standard-methods/common/storage/deno-kv": "./lib/declarative/common/google-aip/standard-methods/common/storage/deno-kv/mod.ts",
     "./common/json-schema": "./lib/declarative/common/json-schema/mod.ts",
     "./common/json-schema/ajv": "./lib/declarative/common/json-schema/ajv/mod.ts",
     "./common/json-schema/auto-schema": "./lib/declarative/common/json-schema/auto-schema/mod.ts",

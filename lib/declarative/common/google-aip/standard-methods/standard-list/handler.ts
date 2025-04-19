@@ -4,7 +4,7 @@
  */
 export function standardListHandler(
   kv: Deno.Kv,
-  prefix: Deno.KvKey,
+  prefix: string[],
 ): (request: Request) => Promise<Response> {
   return async (_request) => {
     const result = await Array.fromAsync(kv.list({ prefix }));

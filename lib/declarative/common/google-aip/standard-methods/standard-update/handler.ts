@@ -4,7 +4,7 @@
  */
 export function standardUpdateHandler(
   kv: Deno.Kv,
-  prefix: Deno.KvKey,
+  prefix: string[],
   parameter: string,
   primaryKey = "name",
   // deno-lint-ignore no-explicit-any

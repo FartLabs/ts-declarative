@@ -1,10 +1,12 @@
+import type { StandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/standard-method-storage.ts";
+
 /**
  * standardCreateHandler is the handler for the standard Create operation of the
  * resource.
  */
 export function standardCreateHandler(
-  kv: Deno.Kv,
-  prefix: Deno.KvKey,
+  storage: StandardMethodStorage,
+  prefix: string[],
   primaryKey = "name",
   // deno-lint-ignore no-explicit-any
   validator?: (data: any) => boolean,
@@ -26,16 +28,7 @@ export function standardCreateHandler(
       }
     }
 
-    const result = await kv.set([...prefix, body[primaryKey]], body);
-    if (!result?.ok) {
-      return new Response(JSON.stringify(result), {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    }
-
+    await storage.set([...prefix, body[primaryKey]], body);
     return new Response(JSON.stringify(body), {
       headers: {
         "Content-Type": "application/json",

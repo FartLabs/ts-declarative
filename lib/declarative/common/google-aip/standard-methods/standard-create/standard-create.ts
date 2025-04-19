@@ -10,6 +10,7 @@ import {
   toOperationSchema,
 } from "#/lib/declarative/common/google-aip/operation.ts";
 import { createValidator } from "#/lib/declarative/common/json-schema/ajv/ajv.ts";
+import type { StandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/standard-method-storage.ts";
 import { standardCreateHandler } from "./handler.ts";
 
 /**
@@ -130,12 +131,12 @@ export function declarativeStandardCreateRoute<
   TValue extends ValueStandardCreate,
 >(options?: StandardCreateRouteOptions): Declarative<TValue> {
   return (value, name) => {
-    if (options?.kv === undefined) {
-      throw new Error("kv is required");
+    if (options?.storage === undefined) {
+      throw new Error("storage is required");
     }
 
     const resourceName = options?.resourceName ?? name;
-    const keyPrefix: Deno.KvKeyPart = toOperationPath(
+    const keyPrefix = toOperationPath(
       resourceName,
       options?.collectionIdentifier,
       options?.parent,
@@ -154,7 +155,7 @@ export function declarativeStandardCreateRoute<
           ),
           method: "POST",
           handler: standardCreateHandler(
-            options.kv,
+            options.storage,
             [keyPrefix],
             options?.primaryKey,
             validator,
@@ -171,9 +172,9 @@ export function declarativeStandardCreateRoute<
  */
 export interface StandardCreateRouteOptions extends OperationOptions {
   /**
-   * kv is the persistent storage to use in the HTTP handler.
+   * storage is the persistent storage to use in the HTTP handler.
    */
-  kv?: Deno.Kv;
+  storage?: StandardMethodStorage;
 
   /**
    * validation is whether the request should be validated.

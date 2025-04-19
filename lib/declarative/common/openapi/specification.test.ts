@@ -1,11 +1,12 @@
 import { assertEquals } from "@std/assert/equals";
 import { assertSnapshot } from "@std/testing/snapshot";
+import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
 import {
   createStandardMethodsDecoratorFactory,
   standardCreate,
   standardGet,
 } from "#/lib/declarative/common/google-aip/standard-methods.ts";
-import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
+import { DenoKvStandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/deno-kv/deno-kv.ts";
 import { openapiSpec, specificationOf } from "./specification.ts";
 
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
@@ -13,7 +14,7 @@ const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 const kv = await Deno.openKv(":memory:");
 const standardMethods = createStandardMethodsDecoratorFactory(kv);
 
-@standardCreate({ kv })
+@standardCreate({ storage: new DenoKvStandardMethodStorage(kv) })
 @standardGet({ kv })
 @autoSchema()
 class Person {
@@ -77,13 +78,19 @@ Deno.test("openapiSpec decorator decorates value", () => {
   });
 });
 
-@standardMethods({ parent: "/api" })
+@standardMethods({
+  parent: "/api",
+  standardMethods: { create: { storage: new DenoKvStandardMethodStorage(kv) } },
+})
 @autoSchema()
 class Cat {
   public constructor(public name: string) {}
 }
 
-@standardMethods({ parent: "/api" })
+@standardMethods({
+  parent: "/api",
+  standardMethods: { create: { storage: new DenoKvStandardMethodStorage(kv) } },
+})
 @autoSchema()
 class Dog {
   public constructor(public name: string) {}

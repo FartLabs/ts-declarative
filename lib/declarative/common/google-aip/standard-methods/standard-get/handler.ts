@@ -4,7 +4,7 @@
  */
 export function standardGetHandler(
   kv: Deno.Kv,
-  prefix: Deno.KvKey,
+  prefix: string[],
   parameter: string,
 ): (request: Request, params?: URLPatternResult | null) => Promise<Response> {
   return async (_request, params) => {

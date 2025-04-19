@@ -1,6 +1,7 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
+import { DenoKvStandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/deno-kv/deno-kv.ts";
 import type {
   StandardCreateOptions,
   StandardDeleteOptions,
@@ -33,7 +34,11 @@ export function createStandardMethodDecoratorFactory(
   kv: Deno.Kv,
 ): StandardMethods {
   return {
-    create: (options) => standardCreate({ kv, ...options }),
+    create: (options) =>
+      standardCreate({
+        storage: new DenoKvStandardMethodStorage(kv),
+        ...options,
+      }),
     delete: (options) => standardDelete({ kv, ...options }),
     get: (options) => standardGet({ kv, ...options }),
     list: (options) => standardList({ kv, ...options }),

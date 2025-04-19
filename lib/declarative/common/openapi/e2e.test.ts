@@ -3,13 +3,16 @@ import { routerOf } from "#/lib/declarative/common/router/router.ts";
 import { openapi } from "#/lib/declarative/common/openapi/server.ts";
 import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
 import { createStandardMethodsDecoratorFactory } from "#/lib/declarative/common/google-aip/standard-methods.ts";
+import { DenoKvStandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/deno-kv/deno-kv.ts";
 
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
 const kv = await Deno.openKv(":memory:");
 const standardMethods = createStandardMethodsDecoratorFactory(kv);
 
-@standardMethods()
+@standardMethods({
+  standardMethods: { create: { storage: new DenoKvStandardMethodStorage(kv) } },
+})
 @autoSchema()
 class Person {
   public constructor(public name: string) {}

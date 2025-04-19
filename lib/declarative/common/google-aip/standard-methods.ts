@@ -1,37 +1,27 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
-import type { StandardCreateOptions } from "./standard-create/standard-create.ts";
+import type {
+  StandardCreateOptions,
+  StandardDeleteOptions,
+  StandardGetOptions,
+  StandardListOptions,
+  StandardUpdateOptions,
+} from "./standard-methods/mod.ts";
 import {
   initializeStandardCreate,
-  standardCreate,
-} from "./standard-create/standard-create.ts";
-import type { StandardDeleteOptions } from "./standard-delete/standard-delete.ts";
-import {
   initializeStandardDelete,
-  standardDelete,
-} from "./standard-delete/standard-delete.ts";
-import type { StandardGetOptions } from "./standard-get/standard-get.ts";
-import {
   initializeStandardGet,
-  standardGet,
-} from "./standard-get/standard-get.ts";
-import type { StandardListOptions } from "./standard-list/standard-list.ts";
-import {
   initializeStandardList,
-  standardList,
-} from "./standard-list/standard-list.ts";
-import type { StandardUpdateOptions } from "./standard-update/standard-update.ts";
-import {
   initializeStandardUpdate,
+  standardCreate,
+  standardDelete,
+  standardGet,
+  standardList,
   standardUpdate,
-} from "./standard-update/standard-update.ts";
+} from "./standard-methods/mod.ts";
 
-export * from "./standard-create/mod.ts";
-export * from "./standard-delete/mod.ts";
-export * from "./standard-get/mod.ts";
-export * from "./standard-list/mod.ts";
-export * from "./standard-update/mod.ts";
+export * from "./standard-methods/mod.ts";
 
 /**
  * createStandardMethodDecoratorFactory is a decorator factory that creates

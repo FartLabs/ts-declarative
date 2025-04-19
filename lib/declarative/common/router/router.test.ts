@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert/equals";
-import { standardCreate } from "#/lib/declarative/common/google-aip/methods/standard-create/standard-create.ts";
+import { standardCreate } from "#/lib/declarative/common/google-aip/standard-methods/standard-create/standard-create.ts";
 import { routerRoutes, routesOf } from "./router.ts";
 
 const kv = await Deno.openKv(":memory:");

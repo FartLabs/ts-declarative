@@ -4,7 +4,7 @@ import {
   createStandardMethodsDecoratorFactory,
   standardCreate,
   standardGet,
-} from "#/lib/declarative/common/google-aip/methods/mod.ts";
+} from "#/lib/declarative/common/google-aip/standard-methods.ts";
 import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
 import { openapiSpec, specificationOf } from "./specification.ts";
 

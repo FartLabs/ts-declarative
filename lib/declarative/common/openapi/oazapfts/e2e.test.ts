@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { assertSnapshot } from "@std/testing/snapshot";
 import { openapi } from "#/lib/declarative/common/openapi/server.ts";
-import { createStandardMethodsDecoratorFactory } from "#/lib/declarative/common/google-aip/methods/standard-methods.ts";
+import { createStandardMethodsDecoratorFactory } from "../../google-aip/standard-methods.ts";
 import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
 import { routerOf } from "#/lib/declarative/common/router/router.ts";
 import { createOazapftsClientOf, generateOazapftsClientOf } from "./client.ts";

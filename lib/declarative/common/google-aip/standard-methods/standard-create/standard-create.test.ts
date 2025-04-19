@@ -12,33 +12,30 @@ class Person {
 
 Deno.test("standardCreate decorator factory decorates value", () => {
   assertEquals(routesOf(Person).length, 1);
-  assertEquals(
-    pathsObjectOf(Person),
-    {
-      "/people": {
-        post: {
-          description: "Creates Person",
-          requestBody: {
+  assertEquals(pathsObjectOf(Person), {
+    "/people": {
+      post: {
+        description: "Creates Person",
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/Person" },
+            },
+          },
+          description: "The Person to create",
+          required: true,
+        },
+        responses: {
+          "200": {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/Person" },
               },
             },
-            description: "The Person to create",
-            required: true,
-          },
-          responses: {
-            "200": {
-              content: {
-                "application/json": {
-                  schema: { $ref: "#/components/schemas/Person" },
-                },
-              },
-              description: "The created Person",
-            },
+            description: "The created Person",
           },
         },
       },
     },
-  );
+  });
 });

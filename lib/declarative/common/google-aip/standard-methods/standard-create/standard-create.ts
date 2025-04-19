@@ -171,7 +171,7 @@ export function declarativeStandardCreateRoute<
  */
 export interface StandardCreateRouteOptions extends OperationOptions {
   /**
-   * kv is the Deno Kv instance to use in the HTTP handler.
+   * kv is the persistent storage to use in the HTTP handler.
    */
   kv?: Deno.Kv;
 

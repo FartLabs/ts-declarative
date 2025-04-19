@@ -5,7 +5,8 @@
   "exports": {
     ".": "./lib/declarative/mod.ts",
     "./common/google-aip": "./lib/declarative/common/google-aip/mod.ts",
-    "./common/google-aip/methods": "./lib/declarative/common/google-aip/methods/mod.ts",
+    "./common/google-aip/custom-methods": "./lib/declarative/common/google-aip/custom-methods/mod.ts",
+    "./common/google-aip/standard-methods": "./lib/declarative/common/google-aip/standard-methods/mod.ts",
     "./common/json-schema": "./lib/declarative/common/json-schema/mod.ts",
     "./common/json-schema/ajv": "./lib/declarative/common/json-schema/ajv/mod.ts",
     "./common/json-schema/auto-schema": "./lib/declarative/common/json-schema/auto-schema/mod.ts",

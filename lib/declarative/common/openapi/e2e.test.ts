@@ -2,7 +2,7 @@ import { assertEquals } from "@std/assert/equals";
 import { routerOf } from "#/lib/declarative/common/router/router.ts";
 import { openapi } from "#/lib/declarative/common/openapi/server.ts";
 import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
-import { createStandardMethodsDecoratorFactory } from "#/lib/declarative/common/google-aip/methods/mod.ts";
+import { createStandardMethodsDecoratorFactory } from "#/lib/declarative/common/google-aip/standard-methods.ts";
 
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
@@ -24,10 +24,10 @@ Deno.test("e2e routes respect OpenAPI specification", async (t) => {
   const gary = new Person("Gary Oak");
 
   await t.step("POST /people", async () => {
-    const createPersonResponse = await fetch(
-      "http://localhost:8080/people",
-      { method: "POST", body: JSON.stringify(ash) },
-    );
+    const createPersonResponse = await fetch("http://localhost:8080/people", {
+      method: "POST",
+      body: JSON.stringify(ash),
+    });
     assertEquals(createPersonResponse.status, 200);
 
     const createdPerson = await createPersonResponse.json();

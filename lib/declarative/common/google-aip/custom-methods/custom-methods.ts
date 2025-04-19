@@ -12,8 +12,6 @@ import {
   toOperationSchema,
 } from "#/lib/declarative/common/google-aip/operation.ts";
 
-export type { Handler };
-
 /**
  * customMethod is a decorator factory that creates a custom method for the
  * resource.

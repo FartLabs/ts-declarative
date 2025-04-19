@@ -6,16 +6,16 @@ import {
   standardCreate,
   standardGet,
 } from "#/lib/declarative/common/google-aip/standard-methods.ts";
-import { DenoKvStandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/deno-kv/deno-kv.ts";
+import { DenoKvStandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/deno-kv/deno-kv.ts";
 import { openapiSpec, specificationOf } from "./specification.ts";
 
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
 const kv = await Deno.openKv(":memory:");
-const storage = new DenoKvStandardMethodStorage(kv);
+const store = new DenoKvStandardMethodStore(kv);
 const standardMethods = createStandardMethodsDecoratorFactory(kv);
 
-@standardCreate({ storage })
+@standardCreate({ store })
 @standardGet({ kv })
 @autoSchema()
 class Person {
@@ -82,8 +82,8 @@ Deno.test("openapiSpec decorator decorates value", () => {
 @standardMethods({
   parent: "/api",
   standardMethods: {
-    create: { storage },
-    delete: { storage },
+    create: { store },
+    delete: { store },
   },
 })
 @autoSchema()
@@ -94,8 +94,8 @@ class Cat {
 @standardMethods({
   parent: "/api",
   standardMethods: {
-    create: { storage },
-    delete: { storage },
+    create: { store },
+    delete: { store },
   },
 })
 @autoSchema()

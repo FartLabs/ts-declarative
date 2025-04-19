@@ -1,11 +1,11 @@
-import type { StandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/standard-method-storage.ts";
+import type { StandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/standard-method-store.ts";
 
 /**
  * standardDeleteHandler is the handler for the standard Delete operation of the
  * resource.
  */
 export function standardDeleteHandler(
-  storage: StandardMethodStorage,
+  store: StandardMethodStore,
   prefix: string[],
   parameter: string,
 ): (request: Request, params?: URLPatternResult | null) => Promise<Response> {
@@ -20,7 +20,7 @@ export function standardDeleteHandler(
       });
     }
 
-    await storage.delete([...prefix, decodeURIComponent(name)]);
+    await store.delete([...prefix, decodeURIComponent(name)]);
     return new Response(JSON.stringify({}), {
       status: 200,
       headers: {

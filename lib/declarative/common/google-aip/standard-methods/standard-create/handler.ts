@@ -1,11 +1,11 @@
-import type { StandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/standard-method-storage.ts";
+import type { StandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/standard-method-store.ts";
 
 /**
  * standardCreateHandler is the handler for the standard Create operation of the
  * resource.
  */
 export function standardCreateHandler(
-  storage: StandardMethodStorage,
+  store: StandardMethodStore,
   prefix: string[],
   primaryKey = "name",
   // deno-lint-ignore no-explicit-any
@@ -28,7 +28,7 @@ export function standardCreateHandler(
       }
     }
 
-    await storage.set([...prefix, body[primaryKey]], body);
+    await store.set([...prefix, body[primaryKey]], body);
     return new Response(JSON.stringify(body), {
       headers: {
         "Content-Type": "application/json",

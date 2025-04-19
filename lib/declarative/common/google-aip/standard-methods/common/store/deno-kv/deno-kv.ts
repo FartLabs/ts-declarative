@@ -1,11 +1,11 @@
-import type { StandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/standard-method-storage.ts";
+import type { StandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/standard-method-store.ts";
 
 /**
- * DenoKvStandardMethodStorage is a storage system that uses Deno Kv to store data.
+ * DenoKvStandardMethodStore is a storage system that uses Deno Kv to store data.
  */
-export class DenoKvStandardMethodStorage implements StandardMethodStorage {
+export class DenoKvStandardMethodStore implements StandardMethodStore {
   /**
-   * constructor constructs a new DenoKvStandardMethodStorage.
+   * constructor constructs a new DenoKvStandardMethodStore.
    */
   public constructor(public kv: Deno.Kv) {}
 

@@ -1,11 +1,11 @@
-import type { StandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/standard-method-storage.ts";
+import type { StandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/standard-method-store.ts";
 
 /**
- * MemoryStandardMethodStorage is an in-memory storage system.
+ * MemoryStandardMethodStore is an in-memory storage system.
  */
-export class MemoryStandardMethodStorage implements StandardMethodStorage {
+export class MemoryStandardMethodStore implements StandardMethodStore {
   /**
-   * constructor constructs a new MemoryStandardMethodStorage.
+   * constructor constructs a new MemoryStandardMethodStore.
    */
   public constructor(public data: Map<string, unknown> = new Map()) {}
 

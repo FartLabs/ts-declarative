@@ -1,8 +1,8 @@
 /**
- * StandardMethodStorage is an interface for a storage system that allows
+ * StandardMethodStore is an interface for a storage system that allows
  * setting and getting values in a resource-oriented system.
  */
-export interface StandardMethodStorage {
+export interface StandardMethodStore {
   /**
    * set sets the value on the storage.
    */

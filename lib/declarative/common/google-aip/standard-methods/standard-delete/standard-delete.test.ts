@@ -1,13 +1,12 @@
 import { assertEquals } from "@std/assert";
 import { pathsObjectOf } from "#/lib/declarative/common/openapi/paths-object.ts";
 import { routesOf } from "#/lib/declarative/common/router/router.ts";
-import { DenoKvStandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/deno-kv/deno-kv.ts";
+import { MemoryStandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/memory/memory.ts";
 import { standardDelete } from "./standard-delete.ts";
 
-const kv = await Deno.openKv(":memory:");
-const storage = new DenoKvStandardMethodStorage(kv);
+const store = new MemoryStandardMethodStore();
 
-@standardDelete({ storage })
+@standardDelete({ store })
 class Person {
   public constructor(public name: string) {}
 }

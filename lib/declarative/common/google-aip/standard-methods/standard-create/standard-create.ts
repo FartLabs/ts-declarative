@@ -10,7 +10,7 @@ import {
   toOperationSchema,
 } from "#/lib/declarative/common/google-aip/operation.ts";
 import { createValidator } from "#/lib/declarative/common/json-schema/ajv/ajv.ts";
-import type { StandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/standard-method-storage.ts";
+import type { StandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/standard-method-store.ts";
 import { standardCreateHandler } from "./handler.ts";
 
 /**
@@ -131,7 +131,7 @@ export function declarativeStandardCreateRoute<
   TValue extends ValueStandardCreate,
 >(options?: StandardCreateRouteOptions): Declarative<TValue> {
   return (value, name) => {
-    if (options?.storage === undefined) {
+    if (options?.store === undefined) {
       throw new Error("storage is required");
     }
 
@@ -155,7 +155,7 @@ export function declarativeStandardCreateRoute<
           ),
           method: "POST",
           handler: standardCreateHandler(
-            options.storage,
+            options.store,
             [keyPrefix],
             options?.primaryKey,
             validator,
@@ -172,9 +172,9 @@ export function declarativeStandardCreateRoute<
  */
 export interface StandardCreateRouteOptions extends OperationOptions {
   /**
-   * storage is the persistent storage to use in the HTTP handler.
+   * store is the persistent storage to use in the HTTP handler.
    */
-  storage?: StandardMethodStorage;
+  store?: StandardMethodStore;
 
   /**
    * validation is whether the request should be validated.

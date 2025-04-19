@@ -7,7 +7,7 @@ import type { ValuePathsObject } from "#/lib/declarative/common/openapi/paths-ob
 import type { ValueRouterRoutes } from "#/lib/declarative/common/router/router.ts";
 import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
 import { toOperationPath } from "#/lib/declarative/common/google-aip/operation.ts";
-import type { StandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/standard-method-storage.ts";
+import type { StandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/standard-method-store.ts";
 import { standardDeleteHandler } from "./handler.ts";
 
 /**
@@ -118,7 +118,7 @@ export function declarativeStandardDeleteRoute<
   TValue extends ValueStandardDelete,
 >(options?: StandardDeleteRouteOptions): Declarative<TValue> {
   return (value, name) => {
-    if (options?.storage === undefined) {
+    if (options?.store === undefined) {
       throw new Error("storage is required");
     }
 
@@ -133,7 +133,7 @@ export function declarativeStandardDeleteRoute<
           ),
           method: "DELETE",
           handler: standardDeleteHandler(
-            options.storage,
+            options.store,
             [
               ...(options?.prefix ?? []),
               toOperationPath(
@@ -176,9 +176,9 @@ export function toStandardDeletePattern(
  */
 export interface StandardDeleteRouteOptions extends OperationOptions {
   /**
-   * storage is the persistent storage to use in the HTTP handler.
+   * store is the persistent storage to use in the HTTP handler.
    */
-  storage?: StandardMethodStorage;
+  store?: StandardMethodStore;
 
   /**
    * prefix is the prefix used in the key-value storage.

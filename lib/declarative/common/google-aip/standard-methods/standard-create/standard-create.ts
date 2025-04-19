@@ -156,7 +156,7 @@ export function declarativeStandardCreateRoute<
           method: "POST",
           handler: standardCreateHandler(
             options.store,
-            [keyPrefix],
+            [...(options?.prefix ?? []), keyPrefix],
             options?.primaryKey,
             validator,
           ),
@@ -175,6 +175,11 @@ export interface StandardCreateRouteOptions extends OperationOptions {
    * store is the persistent storage to use in the HTTP handler.
    */
   store?: StandardMethodStore;
+
+  /**
+   * prefix is the prefix used in the key-value storage.
+   */
+  prefix?: string[];
 
   /**
    * validation is whether the request should be validated.

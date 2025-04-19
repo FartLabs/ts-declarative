@@ -1,12 +1,13 @@
 import { assertEquals } from "@std/assert/equals";
+import { MemoryStandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/memory/memory.ts";
 import { standardGetHandler } from "./handler.ts";
 
 Deno.test("standardGetHandler handles request", async () => {
-  using kv = await Deno.openKv(":memory:");
-  await kv.set(["fake"], { name: "fake" });
+  const store = new MemoryStandardMethodStore();
+  await store.set(["fake"], { name: "fake" });
 
-  const handler = standardGetHandler(kv, [], "name");
   const request = new Request("http://localhost/fake");
+  const handler = standardGetHandler(store, [], "name");
   const response = await handler(
     request,
     new URLPattern({ pathname: "/:name" }).exec(request.url),

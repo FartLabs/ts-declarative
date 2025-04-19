@@ -9,11 +9,9 @@ const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
 const kv = await Deno.openKv(":memory:");
 const store = new DenoKvStandardMethodStore(kv);
-const standardMethods = createStandardMethodsDecoratorFactory(kv);
+const standardMethods = createStandardMethodsDecoratorFactory(store);
 
-@standardMethods({
-  standardMethods: { create: { store }, delete: { store } },
-})
+@standardMethods()
 @autoSchema()
 class Person {
   public constructor(public name: string) {}

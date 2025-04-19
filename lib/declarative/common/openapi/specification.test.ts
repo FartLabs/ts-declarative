@@ -6,17 +6,16 @@ import {
   standardCreate,
   standardGet,
 } from "#/lib/declarative/common/google-aip/standard-methods.ts";
-import { DenoKvStandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/deno-kv/deno-kv.ts";
+import { MemoryStandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/memory/memory.ts";
 import { openapiSpec, specificationOf } from "./specification.ts";
 
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
-const kv = await Deno.openKv(":memory:");
-const store = new DenoKvStandardMethodStore(kv);
-const standardMethods = createStandardMethodsDecoratorFactory(kv);
+const store = new MemoryStandardMethodStore();
+const standardMethods = createStandardMethodsDecoratorFactory(store);
 
 @standardCreate({ store })
-@standardGet({ kv })
+@standardGet({ store })
 @autoSchema()
 class Person {
   public constructor(public name: string) {}
@@ -79,25 +78,13 @@ Deno.test("openapiSpec decorator decorates value", () => {
   });
 });
 
-@standardMethods({
-  parent: "/api",
-  standardMethods: {
-    create: { store },
-    delete: { store },
-  },
-})
+@standardMethods({ parent: "/api" })
 @autoSchema()
 class Cat {
   public constructor(public name: string) {}
 }
 
-@standardMethods({
-  parent: "/api",
-  standardMethods: {
-    create: { store },
-    delete: { store },
-  },
-})
+@standardMethods({ parent: "/api" })
 @autoSchema()
 class Dog {
   public constructor(public name: string) {}

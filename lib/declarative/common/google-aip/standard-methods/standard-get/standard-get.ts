@@ -6,8 +6,11 @@ import type { ValueJSONSchema } from "#/lib/declarative/common/json-schema/json-
 import type { ValuePathsObject } from "#/lib/declarative/common/openapi/paths-object.ts";
 import type { ValueRouterRoutes } from "#/lib/declarative/common/router/router.ts";
 import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
-import { toOperationPath } from "#/lib/declarative/common/google-aip/operation.ts";
-import { toOperationSchema } from "#/lib/declarative/common/google-aip/mod.ts";
+import {
+  toOperationPath,
+  toOperationSchema,
+} from "#/lib/declarative/common/google-aip/operation.ts";
+import type { StandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/standard-method-store.ts";
 import { standardGetHandler } from "./handler.ts";
 
 // TODO: Create batch method batchGet.
@@ -130,7 +133,7 @@ export function declarativeStandardGetRoute<TValue extends ValueStandardGet>(
   options?: StandardGetRouteOptions,
 ): Declarative<TValue> {
   return (value, name) => {
-    if (options?.kv === undefined) {
+    if (options?.store === undefined) {
       throw new Error("kv is required");
     }
 
@@ -151,8 +154,8 @@ export function declarativeStandardGetRoute<TValue extends ValueStandardGet>(
           ),
           method: "GET",
           handler: standardGetHandler(
-            options.kv,
-            [keyPrefix],
+            options.store,
+            [...(options.prefix ?? []), keyPrefix],
             toCamelCase(resourceName),
           ),
         },
@@ -187,7 +190,12 @@ export function toStandardGetPattern(
  */
 export interface StandardGetRouteOptions extends OperationOptions {
   /**
-   * kv is the Deno Kv instance to use in the HTTP handler.
+   * store is the persistent storage to use in the HTTP handler.
    */
-  kv?: Deno.Kv;
+  store?: StandardMethodStore;
+
+  /**
+   * prefix is the prefix used in the key-value storage.
+   */
+  prefix?: string[];
 }

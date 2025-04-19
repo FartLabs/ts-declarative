@@ -11,12 +11,10 @@ const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
 const kv = await Deno.openKv(":memory:");
 const store = new DenoKvStandardMethodStore(kv);
-const standardMethods = createStandardMethodsDecoratorFactory(kv);
+const standardMethods = createStandardMethodsDecoratorFactory(store);
 
 @standardMethods({
   standardMethods: {
-    create: { store },
-    get: true,
     delete: false,
     list: false,
     update: false,

@@ -10,6 +10,7 @@ import {
   toOperationPath,
   toOperationSchema,
 } from "#/lib/declarative/common/google-aip/operation.ts";
+import type { StandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/standard-method-store.ts";
 import { standardListHandler } from "./handler.ts";
 
 /**
@@ -141,7 +142,7 @@ export function declarativeStandardListRoute<TValue extends ValueStandardList>(
   options?: StandardListRouteOptions,
 ): Declarative<TValue> {
   return (value, name) => {
-    if (options?.kv === undefined) {
+    if (options?.store === undefined) {
       throw new Error("kv is required");
     }
 
@@ -161,7 +162,10 @@ export function declarativeStandardListRoute<TValue extends ValueStandardList>(
             options.parent,
           ),
           method: "GET",
-          handler: standardListHandler(options.kv, [keyPrefix]),
+          handler: standardListHandler(options.store, [
+            ...(options?.prefix ?? []),
+            keyPrefix,
+          ]),
         },
       ],
     });
@@ -175,9 +179,14 @@ export function declarativeStandardListRoute<TValue extends ValueStandardList>(
 export interface StandardListRouteOptions
   extends StandardListSpecificationOptions {
   /**
-   * kv is the Deno Kv instance to use in the HTTP handler.
+   * store is the persistent storage to use in the HTTP handler.
    */
-  kv?: Deno.Kv;
+  store?: StandardMethodStore;
+
+  /**
+   * prefix is the prefix used in the key-value storage.
+   */
+  prefix?: string[];
 }
 
 /**

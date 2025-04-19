@@ -1,7 +1,7 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
 import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
-import { DenoKvStandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/deno-kv/deno-kv.ts";
+import type { StandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/standard-method-store.ts";
 import type {
   StandardCreateOptions,
   StandardDeleteOptions,
@@ -31,15 +31,14 @@ export * from "./standard-methods/mod.ts";
  * @see https://google.aip.dev/130
  */
 export function createStandardMethodDecoratorFactory(
-  kv: Deno.Kv, // store: StandardMethodStore
+  store: StandardMethodStore,
 ): StandardMethods {
-  const store = new DenoKvStandardMethodStore(kv);
   return {
     create: (options) => standardCreate({ store, ...options }),
     delete: (options) => standardDelete({ store, ...options }),
-    get: (options) => standardGet({ kv, ...options }),
-    list: (options) => standardList({ kv, ...options }),
-    update: (options) => standardUpdate({ kv, ...options }),
+    get: (options) => standardGet({ store, ...options }),
+    list: (options) => standardList({ store, ...options }),
+    update: (options) => standardUpdate({ store, ...options }),
   };
 }
 
@@ -51,33 +50,44 @@ export function createStandardMethodDecoratorFactory(
  * @see https://google.aip.dev/130
  */
 export function createStandardMethodsDecoratorFactory(
-  kv: Deno.Kv,
+  store: StandardMethodStore,
+  prefix: string[] = [],
 ): (options?: StandardMethodsOptions | undefined) => (target: Class) => Class {
   return createDecoratorFactory({
     initialize(options?: StandardMethodsOptions) {
       return [
         ...initializeStandardMethod(
           options,
-          kv,
+          store,
+          prefix,
           initializeStandardCreate,
           "create",
         ),
         ...initializeStandardMethod(
           options,
-          kv,
+          store,
+          prefix,
           initializeStandardDelete,
           "delete",
         ),
-        ...initializeStandardMethod(options, kv, initializeStandardGet, "get"),
         ...initializeStandardMethod(
           options,
-          kv,
+          store,
+          prefix,
+          initializeStandardGet,
+          "get",
+        ),
+        ...initializeStandardMethod(
+          options,
+          store,
+          prefix,
           initializeStandardList,
           "list",
         ),
         ...initializeStandardMethod(
           options,
-          kv,
+          store,
+          prefix,
           initializeStandardUpdate,
           "update",
         ),
@@ -88,7 +98,8 @@ export function createStandardMethodsDecoratorFactory(
 
 function initializeStandardMethod<T>(
   options: StandardMethodsOptions | undefined,
-  kv: Deno.Kv,
+  store: StandardMethodStore,
+  prefix: string[],
   // deno-lint-ignore no-explicit-any
   initialize: (options?: T) => Array<Declarative<any>>,
   method: keyof StandardMethods,
@@ -97,7 +108,8 @@ function initializeStandardMethod<T>(
     options ?? {};
   return standardMethods?.[method] ?? true
     ? initialize({
-      kv,
+      store,
+      prefix,
       parent,
       resourceName,
       collectionIdentifier,

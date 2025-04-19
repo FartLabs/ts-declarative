@@ -1,9 +1,11 @@
+import type { StandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/standard-method-store.ts";
+
 /**
  * standardGetHandler is the handler for the standard Get operation of the
  * resource.
  */
 export function standardGetHandler(
-  kv: Deno.Kv,
+  store: StandardMethodStore,
   prefix: string[],
   parameter: string,
 ): (request: Request, params?: URLPatternResult | null) => Promise<Response> {
@@ -18,9 +20,9 @@ export function standardGetHandler(
       });
     }
 
-    const result = await kv.get([...prefix, decodeURIComponent(name)]);
-    if (result.value === null) {
-      return new Response(JSON.stringify(result), {
+    const value = await store.get([...prefix, decodeURIComponent(name)]);
+    if (value === null) {
+      return new Response("{}", {
         status: 404,
         headers: {
           "Content-Type": "application/json",
@@ -28,7 +30,7 @@ export function standardGetHandler(
       });
     }
 
-    return new Response(JSON.stringify(result.value), {
+    return new Response(JSON.stringify(value), {
       headers: {
         "Content-Type": "application/json",
       },

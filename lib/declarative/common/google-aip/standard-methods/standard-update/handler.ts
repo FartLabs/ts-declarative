@@ -1,9 +1,11 @@
+import type { StandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/standard-method-store.ts";
+
 /**
  * standardUpdateHandler is the handler for the standard Update operation of the
  * resource.
  */
 export function standardUpdateHandler(
-  kv: Deno.Kv,
+  store: StandardMethodStore,
   prefix: string[],
   parameter: string,
   primaryKey = "name",
@@ -38,19 +40,9 @@ export function standardUpdateHandler(
       }
     }
 
-    const op = kv.atomic().set([...prefix, body.name], body);
+    await store.set([...prefix, body.name], body);
     if (decodedName !== body.name) {
-      op.delete([...prefix, decodedName]);
-    }
-
-    const result = await op.commit();
-    if (!result.ok) {
-      return new Response(JSON.stringify(result), {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      await store.delete([...prefix, decodedName]);
     }
 
     return new Response(JSON.stringify(body), {

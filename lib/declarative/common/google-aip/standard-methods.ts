@@ -33,13 +33,10 @@ export * from "./standard-methods/mod.ts";
 export function createStandardMethodDecoratorFactory(
   kv: Deno.Kv,
 ): StandardMethods {
+  const storage = new DenoKvStandardMethodStorage(kv);
   return {
-    create: (options) =>
-      standardCreate({
-        storage: new DenoKvStandardMethodStorage(kv),
-        ...options,
-      }),
-    delete: (options) => standardDelete({ kv, ...options }),
+    create: (options) => standardCreate({ storage, ...options }),
+    delete: (options) => standardDelete({ storage, ...options }),
     get: (options) => standardGet({ kv, ...options }),
     list: (options) => standardList({ kv, ...options }),
     update: (options) => standardUpdate({ kv, ...options }),

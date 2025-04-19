@@ -8,10 +8,11 @@ import { DenoKvStandardMethodStorage } from "#/lib/declarative/common/google-aip
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
 const kv = await Deno.openKv(":memory:");
+const storage = new DenoKvStandardMethodStorage(kv);
 const standardMethods = createStandardMethodsDecoratorFactory(kv);
 
 @standardMethods({
-  standardMethods: { create: { storage: new DenoKvStandardMethodStorage(kv) } },
+  standardMethods: { create: { storage }, delete: { storage } },
 })
 @autoSchema()
 class Person {

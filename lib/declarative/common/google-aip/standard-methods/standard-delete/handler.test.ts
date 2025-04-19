@@ -1,11 +1,13 @@
 import { assertEquals } from "@std/assert/equals";
+import { DenoKvStandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/deno-kv/deno-kv.ts";
 import { standardDeleteHandler } from "./handler.ts";
 
 Deno.test("standardDeleteHandler handles request", async () => {
   using kv = await Deno.openKv(":memory:");
-  await kv.set(["fake"], { name: "fake" });
+  const storage = new DenoKvStandardMethodStorage(kv);
+  await storage.set(["fake"], { name: "fake" });
 
-  const handler = standardDeleteHandler(kv, [], "name");
+  const handler = standardDeleteHandler(storage, [], "name");
   const request = new Request("http://localhost/fake", { method: "DELETE" });
   const response = await handler(
     request,

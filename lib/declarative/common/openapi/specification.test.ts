@@ -12,9 +12,10 @@ import { openapiSpec, specificationOf } from "./specification.ts";
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 
 const kv = await Deno.openKv(":memory:");
+const storage = new DenoKvStandardMethodStorage(kv);
 const standardMethods = createStandardMethodsDecoratorFactory(kv);
 
-@standardCreate({ storage: new DenoKvStandardMethodStorage(kv) })
+@standardCreate({ storage })
 @standardGet({ kv })
 @autoSchema()
 class Person {
@@ -80,7 +81,10 @@ Deno.test("openapiSpec decorator decorates value", () => {
 
 @standardMethods({
   parent: "/api",
-  standardMethods: { create: { storage: new DenoKvStandardMethodStorage(kv) } },
+  standardMethods: {
+    create: { storage },
+    delete: { storage },
+  },
 })
 @autoSchema()
 class Cat {
@@ -89,7 +93,10 @@ class Cat {
 
 @standardMethods({
   parent: "/api",
-  standardMethods: { create: { storage: new DenoKvStandardMethodStorage(kv) } },
+  standardMethods: {
+    create: { storage },
+    delete: { storage },
+  },
 })
 @autoSchema()
 class Dog {

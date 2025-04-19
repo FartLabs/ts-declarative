@@ -7,6 +7,7 @@ import type { ValuePathsObject } from "#/lib/declarative/common/openapi/paths-ob
 import type { ValueRouterRoutes } from "#/lib/declarative/common/router/router.ts";
 import type { OperationOptions } from "#/lib/declarative/common/google-aip/operation.ts";
 import { toOperationPath } from "#/lib/declarative/common/google-aip/operation.ts";
+import type { StandardMethodStorage } from "#/lib/declarative/common/google-aip/standard-methods/common/storage/standard-method-storage.ts";
 import { standardDeleteHandler } from "./handler.ts";
 
 /**
@@ -117,8 +118,8 @@ export function declarativeStandardDeleteRoute<
   TValue extends ValueStandardDelete,
 >(options?: StandardDeleteRouteOptions): Declarative<TValue> {
   return (value, name) => {
-    if (options?.kv === undefined) {
-      throw new Error("kv is required");
+    if (options?.storage === undefined) {
+      throw new Error("storage is required");
     }
 
     const resourceName = options?.resourceName ?? name;
@@ -132,8 +133,9 @@ export function declarativeStandardDeleteRoute<
           ),
           method: "DELETE",
           handler: standardDeleteHandler(
-            options.kv,
+            options.storage,
             [
+              ...(options?.prefix ?? []),
               toOperationPath(
                 resourceName,
                 options.collectionIdentifier,
@@ -174,9 +176,12 @@ export function toStandardDeletePattern(
  */
 export interface StandardDeleteRouteOptions extends OperationOptions {
   /**
-   * kv is the Deno Kv instance to use in the HTTP handler.
+   * storage is the persistent storage to use in the HTTP handler.
    */
-  kv?: Deno.Kv;
+  storage?: StandardMethodStorage;
 
-  // TODO: Add property prefix for Deno.KvKey.
+  /**
+   * prefix is the prefix used in the key-value storage.
+   */
+  prefix?: string[];
 }

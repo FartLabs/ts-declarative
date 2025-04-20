@@ -1,1 +1,1 @@
-export * from "./deno-kv.ts";
+export * from "./store.ts";

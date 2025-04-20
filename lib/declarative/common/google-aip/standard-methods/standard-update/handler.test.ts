@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert/equals";
-import { MemoryStandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/memory/memory.ts";
+import { MemoryStandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/memory/store.ts";
 import { standardUpdateHandler } from "./handler.ts";
 
 Deno.test("standardUpdateHandler handles request", async () => {

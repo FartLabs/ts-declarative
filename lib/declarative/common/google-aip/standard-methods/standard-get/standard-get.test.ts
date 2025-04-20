@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { pathsObjectOf } from "#/lib/declarative/common/openapi/paths-object.ts";
 import { routesOf } from "#/lib/declarative/common/router/router.ts";
-import { MemoryStandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/memory/memory.ts";
+import { MemoryStandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/memory/store.ts";
 import { standardGet } from "./standard-get.ts";
 
 const store = new MemoryStandardMethodStore();

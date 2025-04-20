@@ -3,7 +3,7 @@ import { routerOf } from "#/lib/declarative/common/router/router.ts";
 import { openapi } from "#/lib/declarative/common/openapi/server.ts";
 import { createAutoSchemaDecoratorFactoryAt } from "#/lib/declarative/common/json-schema/auto-schema/auto-schema.ts";
 import { createStandardMethodsDecoratorFactory } from "#/lib/declarative/common/google-aip/standard-methods.ts";
-import { DenoKvStandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/deno-kv/deno-kv.ts";
+import { DenoKvStandardMethodStore } from "../google-aip/standard-methods/common/store/deno-kv/store.ts";
 
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);
 

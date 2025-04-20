@@ -6,7 +6,7 @@ import {
   standardCreate,
   standardGet,
 } from "#/lib/declarative/common/google-aip/standard-methods.ts";
-import { MemoryStandardMethodStore } from "#/lib/declarative/common/google-aip/standard-methods/common/store/memory/memory.ts";
+import { MemoryStandardMethodStore } from "../google-aip/standard-methods/common/store/memory/store.ts";
 import { openapiSpec, specificationOf } from "./specification.ts";
 
 const autoSchema = await createAutoSchemaDecoratorFactoryAt(import.meta);

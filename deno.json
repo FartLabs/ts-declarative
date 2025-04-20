@@ -22,7 +22,7 @@
   "imports": {
     "#/": "./",
     "@comunica/query-sparql-link-traversal": "npm:@comunica/query-sparql-link-traversal@^0.6.1",
-    "@deno/doc": "jsr:@deno/doc@^0.169.0",
+    "@deno/doc": "jsr:@deno/doc@^0.170.0",
     "@deno/graph": "jsr:@deno/graph@^0.89.2",
     "@eta-dev/eta": "jsr:@eta-dev/eta@^3.5.0",
     "@oazapfts/runtime": "npm:@oazapfts/runtime@^1.0.4",

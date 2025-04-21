@@ -1,10 +1,13 @@
 import type { Class, Declarative } from "#/lib/declarative/declarative.ts";
 import { getPrototypeValue } from "#/lib/declarative/declarative.ts";
 import { createDecoratorFactory } from "#/lib/declarative/decorator.ts";
-import type { ValueType } from "./type.ts";
-import { declarativeType } from "./type.ts";
 import type { ValueContext } from "./context.ts";
 import { declarativeContext } from "./context.ts";
+import type { ValueType } from "./type.ts";
+import { declarativeType } from "./type.ts";
+
+export * from "./context.ts";
+export * from "./type.ts";
 
 /**
  * ValueJSONLd is the value for the JSON-LD decorator.

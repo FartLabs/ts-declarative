@@ -55,27 +55,39 @@ export class N3StandardMethodStore implements StandardMethodStore {
       throw new Error("N3StandardMethodStore: context is required");
     }
 
-    const id = key.join("");
-    const quads = this.n3Store.match(id, null, null);
+    const id = this.n3Store._factory.namedNode(key.join(""));
+    const quads = this.n3Store.match(id, null, null, null);
     const doc = await jsonld.compact(
       await jsonld.fromRDF(quads),
       this.options.context as any,
     );
 
-    return doc as T | null;
+    return doc as T;
   }
 
   /**
    * delete deletes the value of a key from n3.
    */
-  public delete(_key: string[]): Promise<void> {
-    throw new Error("Method not implemented.");
+  public async delete(key: string[]): Promise<void> {
+    const id = this.n3Store._factory.namedNode(key.join(""));
+    const readable = this.n3Store.removeMatches(id, null, null, null);
+
+    // Drain the stream.
+    // deno-lint-ignore no-empty
+    for await (const _ of readable) {}
   }
 
   /**
    * list lists the values from n3.
    */
-  public list<T>(): AsyncIterable<T> {
-    throw new Error("Method not implemented.");
+  public async *list<T>(): AsyncIterable<T> {
+    for (const { id } of this.n3Store.getSubjects()) {
+      const resource = await this.get<T>([id]);
+      if (resource === null) {
+        throw new Error(`Resource not found: ${id}`);
+      }
+
+      yield resource;
+    }
   }
 }
